@@ -100,7 +100,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
 
                                 // Chuyển sang màn hình chính (MainActivity)
-                                Intent intent = new Intent(this, MainActivity.class);
+                                Intent intent = new Intent(this, HomeActivity.class);
                                 startActivity(intent);
                                 finish(); // Đóng LoginActivity
                             } else {

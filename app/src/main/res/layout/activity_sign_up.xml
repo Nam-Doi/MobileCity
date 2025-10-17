@@ -61,7 +61,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_person"
+                    android:src="@drawable/ic_user"
                     app:tint="@color/white"
                     android:layout_marginEnd="12dp"/>
 
