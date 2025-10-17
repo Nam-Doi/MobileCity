@@ -14,19 +14,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidApp">
         <activity
-            android:name=".views.fragments.cartActivity"
+            android:name=".views.activities.carts.SelectAddressActivity"
             android:exported="false" />
         <activity
-            android:name=".views.activities.ForgotPasswordActivity"
+            android:name=".views.activities.carts.OrderSuccessActivity"
+            android:exported="false" />
+        <activity
+            android:name=".views.activities.carts.CheckoutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".views.activities.Auths.ForgotPasswordActivity"
             android:exported="false" />
         <activity
             android:name=".views.activities.MainActivity"
             android:exported="true" />
         <activity
-            android:name=".views.activities.SignUpActivity"
+            android:name=".views.activities.Auths.SignUpActivity"
             android:exported="false" />
         <activity
-            android:name=".views.activities.LoginActivity"
+            android:name=".views.activities.carts.cartActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
