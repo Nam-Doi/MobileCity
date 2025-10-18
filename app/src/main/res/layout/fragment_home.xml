@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- Thanh top bar -->
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:orientation="horizontal"
+        android:background="@drawable/bg_gradient_background"
+        android:elevation="4dp"
+        android:gravity="center_vertical">
+
+        <!-- Logo hoặc tiêu đề -->
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_home"
+            android:contentDescription="Logo"
+            android:layout_marginEnd="10dp" />
+
+        <!-- Thanh tìm kiếm -->
+        <EditText
+            android:id="@+id/edtSearch"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:hint="Tìm kiếm sản phẩm..."
+            android:background="@drawable/bg_search_box"
+            android:paddingHorizontal="12dp"
+            android:drawableEnd="@drawable/ic_search"
+            android:drawableTint="@color/primary_blue"
+            android:drawablePadding="8dp"
+            android:textSize="14sp"
+            android:singleLine="true" />
+
+        <!-- Nút menu 3 gạch -->
+        <ImageButton
+            android:id="@+id/menuButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@color/primary_blue"
+            android:src="@drawable/ic_menu"
+            android:contentDescription="Menu"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <!-- Phần nội dung chính của trang -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="Nội dung trang chủ"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
