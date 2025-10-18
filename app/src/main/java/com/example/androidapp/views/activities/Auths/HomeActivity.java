@@ -1,4 +1,4 @@
-package com.example.androidapp.views.activities;
+package com.example.androidapp.views.activities.Auths;
 
 import android.os.Bundle;
 import android.view.MenuInflater;
@@ -8,7 +8,6 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 

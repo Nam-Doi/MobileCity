@@ -132,15 +132,8 @@ public class LoginActivity extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
                             if (user.isEmailVerified()) {
-                                // Email đã xác minh → Cho vào app
-                                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-
-                                // Chuyển sang màn hình chính (MainActivity)
-                                Intent intent = new Intent(this, HomeActivity.class);
-                                startActivity(intent);
-                                finish(); // Đóng LoginActivity
+                                CheckUserRoleActivity(user.getUid());
                             } else {
-                                // Email chưa xác minh
                                 Toast.makeText(this,
                                         "Vui lòng xác minh email trước khi đăng nhập.",
                                         Toast.LENGTH_LONG).show();
@@ -152,6 +145,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
+
     // check role
     private void CheckUserRoleActivity(String userId) {
         db.collection("users").document(userId)
@@ -159,14 +153,13 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         String role = documentSnapshot.getString("role");
-
                         if (role != null) {
                             if (role.equals("admin")) {
                                 Toast.makeText(this, "Xin chào Admin!", Toast.LENGTH_SHORT).show();
                                 startActivity(new Intent(this, AdminActivity.class));
                             } else {
                                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(this, MainActivity.class));
+                                startActivity(new Intent(this, HomeActivity.class));
                             }
                             finish();
                         } else {

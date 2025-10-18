@@ -14,6 +14,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidApp">
         <activity
+            android:name=".views.activities.Auths.HomeActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".views.activities.Auths.AdminActivity"
+            android:exported="false" />
+        <activity
             android:name=".views.activities.carts.SelectAddressActivity"
             android:exported="false" />
         <activity
@@ -33,6 +40,9 @@
             android:exported="false" />
         <activity
             android:name=".views.activities.carts.cartActivity"
+            android:exported="false" />
+        <activity
+            android:name=".views.activities.Auths.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
