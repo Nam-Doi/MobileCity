@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+   <group>
+       <item
+           android:id="@+id/menu_home"
+           android:icon="@drawable/ic_home"
+           android:title="Trang chủ"/>
+
+       <item
+           android:id="@+id/menu_phone"
+           android:icon="@drawable/ic_phone"
+           android:title="Điện thoại" />
+
+       <item
+           android:id="@+id/menu_accessory"
+           android:icon="@drawable/ic_phone_accessories"
+           android:title="Phụ kiện" />
+
+       <item
+           android:id="@+id/menu_other"
+           android:title="Khác" />
+   </group>
+</menu>

@@ -134,12 +134,21 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null && user.isEmailVerified()) {
-                            CheckUserRoleActivity(user.getUid()); // Kiểm tra role
-                        } else {
-                            Toast.makeText(this,
-                                    "Vui lòng xác minh email trước khi đăng nhập.",
-                                    Toast.LENGTH_LONG).show();
+                        if (user != null) {
+                            if (user.isEmailVerified()) {
+                                // Email đã xác minh → Cho vào app
+                                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+
+                                // Chuyển sang màn hình chính (MainActivity)
+                                Intent intent = new Intent(this, HomeActivity.class);
+                                startActivity(intent);
+                                finish(); // Đóng LoginActivity
+                            } else {
+                                // Email chưa xác minh
+                                Toast.makeText(this,
+                                        "Vui lòng xác minh email trước khi đăng nhập.",
+                                        Toast.LENGTH_LONG).show();
+                            }
                         }
                     } else {
                         Toast.makeText(this, "Email hoặc mật khẩu không đúng!",
