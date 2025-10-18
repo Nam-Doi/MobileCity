@@ -11,7 +11,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -22,6 +23,7 @@ import com.example.androidapp.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.w3c.dom.Text;
 
@@ -34,6 +36,8 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private ImageView imgPasswordToggle;
     private boolean isPasswordVisible = false;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
 
     @Override
@@ -78,6 +82,46 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(this, ForgotPasswordActivity.class));
         });
     }
+//    private void loginUser() {
+//        String email = etEmail.getText().toString().trim();
+//        String password = etPassword.getText().toString().trim();
+//
+//        if (!validateInput(email, password)) {
+//            return;
+//        }
+//
+//        // Gọi Firebase Auth để đăng nhập
+//        mAuth.signInWithEmailAndPassword(email, password)
+//                .addOnCompleteListener(this, task -> {
+//                    if (task.isSuccessful()) {
+//                        Log.d(TAG, "signInWithEmail:success");
+//
+//                        FirebaseUser user = mAuth.getCurrentUser();
+//
+//                        if (user != null) {
+//                            if (user.isEmailVerified()) {
+//                                // Email đã xác minh → Cho vào app
+//                                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+//
+//                                // Chuyển sang màn hình chính (MainActivity)
+//                                Intent intent = new Intent(this, MainActivity.class);
+//                                startActivity(intent);
+//                                finish(); // Đóng LoginActivity
+//                            } else {
+//                                // Email chưa xác minh
+//                                Toast.makeText(this,
+//                                        "Vui lòng xác minh email trước khi đăng nhập.",
+//                                        Toast.LENGTH_LONG).show();
+//                            }
+//                        }
+//                    } else {
+//                        Log.w(TAG, "signInWithEmail:failure", task.getException());
+//                        Toast.makeText(this, "Email hoặc mật khẩu không đúng!",
+//                                Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//    }
+
     private void loginUser() {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
@@ -86,14 +130,10 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // Gọi Firebase Auth để đăng nhập
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        Log.d(TAG, "signInWithEmail:success");
-
                         FirebaseUser user = mAuth.getCurrentUser();
-
                         if (user != null) {
                             if (user.isEmailVerified()) {
                                 // Email đã xác minh → Cho vào app
@@ -111,12 +151,41 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         }
                     } else {
-                        Log.w(TAG, "signInWithEmail:failure", task.getException());
                         Toast.makeText(this, "Email hoặc mật khẩu không đúng!",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+    // check role
+    private void CheckUserRoleActivity(String userId) {
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String role = documentSnapshot.getString("role");
+
+                        if (role != null) {
+                            if (role.equals("admin")) {
+                                Toast.makeText(this, "Xin chào Admin!", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(this, AdminActivity.class));
+                            } else {
+                                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(this, MainActivity.class));
+                            }
+                            finish();
+                        } else {
+                            Toast.makeText(this, "Không tìm thấy quyền người dùng!", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(this, "Người dùng không tồn tại trong Firestore!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi khi đọc dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error getting role", e);
+                });
+    }
+
     //hiện pass
     private void setupPasswordToggle() {
         imgPasswordToggle.setOnClickListener(v -> {
