@@ -1,51 +1,48 @@
-package com.example.androidapp.views.fragments;
+package com.example.androidapp.views.activities.carts;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
-import com.example.androidapp.views.activities.carts.CheckoutActivity;
 import com.example.androidapp.views.adapters.CartAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-
-public class CartFragment extends Fragment implements CartAdapter.OnCartChangeListener {
+//inplement method moi co the su dung
+public class cartActivity extends AppCompatActivity implements CartAdapter.OnCartChangeListener {
 
     private RecyclerView recyclerCart;
     private TextView tvTotal;
     private Button btnCheckout;
-    private List<CartItem> cartList;
     private CartAdapter cartAdapter;
+    private List<CartItem> cartList;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        // Nối fragment với layout tương ứng
-        View view = inflater.inflate(R.layout.fragment_cart, container, false);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_cart);
 
-        recyclerCart = view.findViewById(R.id.recyclerCart);
-        tvTotal = view.findViewById(R.id.tvTotal);
-        btnCheckout = view.findViewById(R.id.btnCheckout);
+        initViews();
         loadCartData();
         setupRecyclerView();
         setupListeners();
-        return view;
     }
+
+    private void initViews() {
+        recyclerCart = findViewById(R.id.recyclerCart);
+        tvTotal = findViewById(R.id.tvTotal);
+        btnCheckout = findViewById(R.id.btnCheckout);
+    }
+
     private void loadCartData() {
         cartList = new ArrayList<>();
 
@@ -125,7 +122,7 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
 
     private void setupRecyclerView() {
         cartAdapter = new CartAdapter(cartList, this);
-        recyclerCart.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerCart.setLayoutManager(new LinearLayoutManager(this));
         recyclerCart.setAdapter(cartAdapter);
 
         updateTotalPrice();
@@ -135,7 +132,7 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
         btnCheckout.setOnClickListener(v -> {
             List<CartItem> selectedItems = cartAdapter.getSelectedItems();
             if (selectedItems.isEmpty()) {
-                Toast.makeText(requireContext(), "Vui lòng chọn sản phẩm", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Vui lòng chọn sản phẩm", Toast.LENGTH_SHORT).show();
             } else {
                 proceedToCheckout(selectedItems);
             }
@@ -150,18 +147,19 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
     private void updateTotalPrice() {
         double total = cartAdapter.getTotalPrice();
         tvTotal.setText(String.format("%,.0f ₫", total));
-
+        //cap nhat so luong hang mua oke
         int selectedItemCount = cartAdapter.getSelectedItemCount();
-        btnCheckout.setText("Mua hàng (" + selectedItemCount + ")");
+        btnCheckout.setText("Mua hàng(" + selectedItemCount + ")");
     }
 
     private void proceedToCheckout(List<CartItem> selectedItems) {
-        Toast.makeText(requireContext(),
-                "Đã chọn " + selectedItems.size() + " sản phẩm - Tổng: " +
-                        String.format("%,.0f ₫", cartAdapter.getTotalPrice()),
+        // TODO: Chuyển sang màn hình thanh toán
+        Toast.makeText(this,
+                "Đã chọn " + selectedItems.size() + " sản phẩm - Tổng: "
+                        + String.format("%,.0f ₫", cartAdapter.getTotalPrice()),
                 Toast.LENGTH_SHORT).show();
 
-        Intent intent = new Intent(requireContext(), CheckoutActivity.class);
+        Intent intent = new Intent(this, CheckoutActivity.class);
         intent.putExtra("selectedItems", new ArrayList<>(selectedItems));
         startActivity(intent);
     }

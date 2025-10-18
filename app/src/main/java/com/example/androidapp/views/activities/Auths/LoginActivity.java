@@ -1,4 +1,4 @@
-package com.example.androidapp.views.activities;
+package com.example.androidapp.views.activities.Auths;
 
 import static android.content.ContentValues.TAG;
 
@@ -15,17 +15,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.androidapp.R;
+import com.example.androidapp.views.activities.MainActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import org.w3c.dom.Text;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText etEmail;
@@ -136,15 +132,8 @@ public class LoginActivity extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
                             if (user.isEmailVerified()) {
-                                // Email đã xác minh → Cho vào app
-                                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-
-                                // Chuyển sang màn hình chính (MainActivity)
-                                Intent intent = new Intent(this, HomeActivity.class);
-                                startActivity(intent);
-                                finish(); // Đóng LoginActivity
+                                CheckUserRoleActivity(user.getUid());
                             } else {
-                                // Email chưa xác minh
                                 Toast.makeText(this,
                                         "Vui lòng xác minh email trước khi đăng nhập.",
                                         Toast.LENGTH_LONG).show();
@@ -156,6 +145,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
+
     // check role
     private void CheckUserRoleActivity(String userId) {
         db.collection("users").document(userId)
@@ -163,14 +153,13 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         String role = documentSnapshot.getString("role");
-
                         if (role != null) {
                             if (role.equals("admin")) {
                                 Toast.makeText(this, "Xin chào Admin!", Toast.LENGTH_SHORT).show();
                                 startActivity(new Intent(this, AdminActivity.class));
                             } else {
                                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(this, MainActivity.class));
+                                startActivity(new Intent(this, HomeActivity.class));
                             }
                             finish();
                         } else {

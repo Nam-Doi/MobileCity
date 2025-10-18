@@ -1,4 +1,4 @@
-package com.example.androidapp.views.activities;
+package com.example.androidapp.views.activities.Auths;
 
 import android.os.Bundle;
 import android.widget.ImageView;
