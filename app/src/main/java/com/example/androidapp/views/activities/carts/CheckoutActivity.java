@@ -25,7 +25,6 @@ import java.util.ArrayList;
 
 public class CheckoutActivity extends AppCompatActivity {
     private ImageView imgBack;
-    private TextView tvTittle;
     private TextView tvTotal;
     private Button btnCheckout;
     private RecyclerView rvCheckoutItems;
@@ -34,6 +33,7 @@ public class CheckoutActivity extends AppCompatActivity {
     private TextView tvTotalPayment;
     private ArrayList<CartItem> selectedItems;
     private CheckoutAdapter checkoutAdapter;
+    private TextView tvReceiverName, tvReceiverPhone, tvReceiverAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +45,7 @@ public class CheckoutActivity extends AppCompatActivity {
         setupRecyclerView();   // 3. Setup RecyclerView với dữ liệu
         calculateTotal();      // 4. Tính tổng tiền
         setupEventListeners(); // 5. Gắn sự kiện
+        receiveAddress();      // 6. Nhận địa chỉ nếu có
     }
 
     private void initViews() {
@@ -55,7 +56,9 @@ public class CheckoutActivity extends AppCompatActivity {
         layoutAddress = findViewById(R.id.layoutAddress);
         layoutPaymentMethod = findViewById(R.id.layoutPaymentMethod);
         tvTotalPayment = findViewById(R.id.tvTotalPayment);
-        tvTittle = findViewById(R.id.tvTitle);
+        tvReceiverName = findViewById(R.id.tvReceiverName);
+        tvReceiverPhone = findViewById(R.id.tvReceiverPhone);
+        tvReceiverAddress = findViewById(R.id.tvAddress);
     }
 
     private void receiveData() {
@@ -74,6 +77,18 @@ public class CheckoutActivity extends AppCompatActivity {
             Toast.makeText(this, "Không có sản phẩm được chọn", Toast.LENGTH_SHORT).show();
             finish();
             return;
+        }
+    }
+
+    private void receiveAddress() {
+        String receiverName = getIntent().getStringExtra("receiverName");
+        String receiverPhone = getIntent().getStringExtra("receiverPhone");
+        String address = getIntent().getStringExtra("address");
+
+        if (receiverName != null && receiverPhone != null && address != null) {
+            tvReceiverName.setText(receiverName);
+            tvReceiverPhone.setText(receiverPhone);
+            tvReceiverAddress.setText(address);
         }
     }
 
@@ -105,7 +120,9 @@ public class CheckoutActivity extends AppCompatActivity {
 
         layoutAddress.setOnClickListener(v -> {
             Intent intent = new Intent(this, SelectAddressActivity.class);
-            startActivity(intent);
+            // Truyền selectedItems để giữ dữ liệu khi quay lại
+            intent.putParcelableArrayListExtra("selectedItems", selectedItems);
+            startActivityForResult(intent, 1001);
         });
 
         layoutPaymentMethod.setOnClickListener(v -> {
@@ -132,6 +149,24 @@ public class CheckoutActivity extends AppCompatActivity {
         // Intent intent = new Intent(this, OrderSuccessActivity.class);
         // startActivity(intent);
         // finish();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
+            // Nhận dữ liệu địa chỉ từ SelectAddressActivity
+            String receiverName = data.getStringExtra("receiverName");
+            String receiverPhone = data.getStringExtra("receiverPhone");
+            String address = data.getStringExtra("address");
+
+            if (receiverName != null && receiverPhone != null && address != null) {
+                tvReceiverName.setText(receiverName);
+                tvReceiverPhone.setText(receiverPhone);
+                tvReceiverAddress.setText(address);
+            }
+        }
     }
 
     // Helper method để format tiền tệ

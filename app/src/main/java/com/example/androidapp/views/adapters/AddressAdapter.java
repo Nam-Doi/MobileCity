@@ -18,15 +18,21 @@ import java.util.List;
 public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.AddressViewHolder> {
     private List<AddressItems> addressItemsList;
     private OnCartChangeListener listener;
+    private OnAddressSelectedListener addressSelectedListener;
 
-    public AddressAdapter(List<AddressItems> addressItemsList, OnCartChangeListener listener) {
+
+    public AddressAdapter(List<AddressItems> addressItemsList, OnCartChangeListener listener, OnAddressSelectedListener addressSelectedListener) {
         this.addressItemsList = addressItemsList;
         this.listener = listener;
+        this.addressSelectedListener= addressSelectedListener;
     }
     public interface OnCartChangeListener {
         void onCartUpdated();
         void onEditAddress(AddressItems item);
 
+    }
+    public interface OnAddressSelectedListener {
+        void onAddressSelected(AddressItems item);
     }
     @NonNull
     @Override
@@ -44,16 +50,21 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.AddressV
         holder.tvAddress.setText(item.getAddress());
         holder.rbSelectAddress.setChecked(item.isSelected());
 
-        // Khi click vào radio hoặc layout thì chọn địa chỉ
+        // Khi click chọn 1 địa chỉ
         View.OnClickListener selectListener = v -> {
             for (AddressItems address : addressItemsList) {
                 address.setSelected(false);
             }
             item.setSelected(true);
-            notifyDataSetChanged(); // cập nhật lại danh sách
+            notifyDataSetChanged();
 
+            // Gọi callback khi chọn địa chỉ
+            if (addressSelectedListener != null) {
+                addressSelectedListener.onAddressSelected(item);
+            }
+            // Báo cho cart listener nếu cần
             if (listener != null) {
-                listener.onCartUpdated(); // báo cho Activity biết có thay đổi
+                listener.onCartUpdated();
             }
         };
 
