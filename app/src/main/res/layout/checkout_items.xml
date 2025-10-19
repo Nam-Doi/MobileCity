@@ -18,14 +18,6 @@
         android:orientation="horizontal"
         android:padding="12dp"
         android:gravity="center_vertical">
-
-        <CheckBox
-            android:id="@+id/cbSelectItem"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:checked="false"/>
-
         <ImageView
             android:id="@+id/imgProduct"
             android:layout_width="80dp"
@@ -51,27 +43,6 @@
                 android:maxLines="2"
                 android:ellipsize="end"
                 android:lineSpacingExtra="2dp"/>
-
-            <!-- Product Variant -->
-            <TextView
-                android:id="@+id/tvVariant"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Màu xám, L"
-                android:textSize="12sp"
-                android:textColor="#666666"
-                android:background="@drawable/bg_variant"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:drawableEnd="@drawable/ic_dropdown"
-                android:drawablePadding="4dp"
-                android:layout_marginTop="8dp"
-                android:clickable="true"
-                android:focusable="true"/>
-
-            <!-- Price and Quantity -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -88,6 +59,7 @@
                     android:baselineAligned="false">
 
                     <TextView
+                        android:padding="6dp"
                         android:id="@+id/tvPriceOriginal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -102,6 +74,7 @@
                         android:layout_weight="0"/>
 
                     <TextView
+                        android:padding="6dp"
                         android:id="@+id/tvPrice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -114,63 +87,46 @@
                         android:maxLines="1"
                         android:scrollHorizontally="true"
                         android:layout_weight="1"/>
-                </LinearLayout>
-
-                <!-- Quantity Control -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:background="@drawable/bg_quantity_container">
-
-                    <TextView
-                        android:id="@+id/tvMinus"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:gravity="center"
-                        android:text="−"
-                        android:textSize="18sp"
-                        android:textColor="#666666"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground"/>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="20dp"
-                        android:background="#E0E0E0"/>
-
                     <TextView
                         android:id="@+id/tvQuantity"
-                        android:layout_width="40dp"
-                        android:layout_height="28dp"
-                        android:gravity="center"
-                        android:text="1"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/black"/>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="20dp"
-                        android:background="#E0E0E0"/>
-
-                    <TextView
-                        android:id="@+id/tvPlus"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:gravity="center"
-                        android:text="+"
-                        android:textSize="18sp"
-                        android:textColor="#666666"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground"/>
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:padding="6dp"
+                        android:text="x1"/>
                 </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp"
+        android:gravity="end">
+
+        <TextView
+            android:id="@+id/tvItemCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tổng số tiền (2 sản phẩm):"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginEnd="8dp"/>
+
+        <TextView
+            android:id="@+id/tvItemTotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="756.864đ"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"/>
 
     </LinearLayout>
 

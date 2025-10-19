@@ -1,6 +1,4 @@
-package com.example.androidapp.views.activities;
-
-import static android.content.ContentValues.TAG;
+package com.example.androidapp.views.activities.Auths;
 
 import android.content.Intent;
 import android.os.Bundle;

@@ -46,4 +46,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation("com.google.firebase:firebase-database:20.3.0")
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("com.squareup.picasso:picasso:2.8")
 }
