@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
 
     <application
         android:allowBackup="true"
@@ -13,6 +16,27 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidApp">
+        <!-- ADMIN ACTIVITIES -->
+        <activity
+            android:name=".views.activities.admin.ManageProductActivity"
+            android:exported="false" />
+
+        <activity android:name=".views.activities.admin.AddProductActivity" />
+
+        <activity
+            android:name=".views.activities.admin.ViewProductsActivity"
+            android:exported="false" />
+
+        <activity android:name=".views.activities.admin.DetailProductActivity" />
+
+        <activity
+            android:name=".views.activities.admin.ManageUsersActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".views.activities.admin.AdminSettingsActivity"
+            android:exported="false" />
+
         <activity
             android:name=".views.activities.Product.DetailProductActivity"
             android:exported="false" />
