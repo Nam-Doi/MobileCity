@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,10 +28,12 @@ import java.util.List;
 public class CartFragment extends Fragment implements CartAdapter.OnCartChangeListener {
 
     private RecyclerView recyclerCart;
+    private CheckBox cbSelectItem;
     private TextView tvTotal;
     private Button btnCheckout;
     private List<CartItem> cartList;
     private CartAdapter cartAdapter;
+    private ImageView imBack;
 
     @Nullable
     @Override
@@ -37,10 +41,11 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
                              @Nullable Bundle savedInstanceState) {
         // Nối fragment với layout tương ứng
         View view = inflater.inflate(R.layout.fragment_cart, container, false);
-
+        imBack = view.findViewById(R.id.btnBack);
         recyclerCart = view.findViewById(R.id.recyclerCart);
         tvTotal = view.findViewById(R.id.tvTotal);
         btnCheckout = view.findViewById(R.id.btnCheckout);
+        cbSelectItem = view.findViewById(R.id.cbSelectItem);
         loadCartData();
         setupRecyclerView();
         setupListeners();
@@ -132,6 +137,12 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
     }
 
     private void setupListeners() {
+
+        imBack.setOnClickListener(v -> {
+            requireActivity()
+                    .getSupportFragmentManager()
+                    .popBackStack();
+        });
         btnCheckout.setOnClickListener(v -> {
             List<CartItem> selectedItems = cartAdapter.getSelectedItems();
             if (selectedItems.isEmpty()) {
@@ -140,11 +151,23 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
                 proceedToCheckout(selectedItems);
             }
         });
+        //check all
+        cbSelectItem.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            cartAdapter.selectAll(isChecked);
+        });
+
     }
 
     @Override
     public void onCartUpdated() {
         updateTotalPrice();
+        // Kiểm tra xem tất cả item đã được chọn chưa
+        boolean allSelected = cartAdapter.getSelectedItemCount() == cartList.size() && !cartList.isEmpty();
+        cbSelectItem.setOnCheckedChangeListener(null); //tranhs lap vo han
+        cbSelectItem.setChecked(allSelected);
+        cbSelectItem.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            cartAdapter.selectAll(isChecked);
+        });
     }
 
     private void updateTotalPrice() {

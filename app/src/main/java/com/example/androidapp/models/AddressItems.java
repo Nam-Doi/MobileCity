@@ -43,4 +43,5 @@ public class AddressItems {
         this.receiverPhone = receiverPhone;
         this.isSelected = isSelected;
     }
+    public AddressItems(){}
 }

@@ -22,6 +22,7 @@ public class Product implements Serializable {
         this.brand = brand;
         this.price = price;
         this.imageUrls = imageUrls;
+
         this.stock = stock;
         this.specifications = specifications;
     }

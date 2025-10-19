@@ -38,9 +38,14 @@
             android:exported="false" />
 
         <activity
+            android:name=".views.activities.Product.DetailProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".views.activities.carts.AddAddressActivity"
+            android:exported="false" />
+        <activity
             android:name=".views.activities.Auths.HomeActivity"
             android:exported="false" />
-
         <activity
             android:name=".views.activities.Auths.AdminActivity"
             android:exported="false" />
