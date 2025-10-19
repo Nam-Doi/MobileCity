@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidApp">
         <activity
-            android:name=".views.activities.Product.DetailProductActivity"
+            android:name=".views.activities.Auths.LoginActivity"
             android:exported="false" />
         <activity
             android:name=".views.activities.carts.AddAddressActivity"
@@ -47,7 +47,7 @@
             android:name=".views.activities.carts.cartActivity"
             android:exported="false" />
         <activity
-            android:name=".views.activities.Auths.LoginActivity"
+            android:name=".views.activities.Product.DetailProductActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
