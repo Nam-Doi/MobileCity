@@ -14,6 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidApp">
         <activity
+            android:name=".views.activities.Product.DetailProductActivity"
+            android:exported="false" />
+        <activity
             android:name=".views.activities.carts.AddAddressActivity"
             android:exported="false" />
         <activity
