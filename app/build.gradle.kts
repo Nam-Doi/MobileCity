@@ -49,4 +49,7 @@ dependencies {
     implementation("com.google.firebase:firebase-database:20.3.0")
     implementation("com.google.android.material:material:1.9.0")
     implementation("com.squareup.picasso:picasso:2.8")
+    //thanh dan
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
 }
