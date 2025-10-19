@@ -34,9 +34,9 @@ public class cartActivity extends AppCompatActivity implements CartAdapter.OnCar
         btnCheckout = findViewById(R.id.btnCheckout);
 
         cartList = new ArrayList<>();
-        cartList.add(new CartItem("Iphone 17 Pro Max", 12000000, 1, R.drawable.iphone_17));
-        cartList.add(new CartItem("Iphone 17 Pro Orange", 15000000, 1, R.drawable.iphone17_orange));
-        cartList.add(new CartItem("Huawei Pro Max", 20000000, 1, R.drawable.huawei));
+//        cartList.add(new CartItem("Iphone 17 Pro Max", 12000000, 1, R.drawable.iphone_17));
+//        cartList.add(new CartItem("Iphone 17 Pro Orange", 15000000, 1, R.drawable.iphone17_orange));
+//        cartList.add(new CartItem("Huawei Pro Max", 20000000, 1, R.drawable.huawei));
 
         adapter = new CartAdapter(cartList,this);
 

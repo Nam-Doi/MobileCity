@@ -21,12 +21,16 @@
             android:exported="false" />
         <activity
             android:name=".views.activities.MainActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".views.activities.SignUpActivity"
             android:exported="false" />
         <activity
-            android:name=".views.activities.LoginActivity"
+            android:name=".views.activities.DetailProductActivity"
+            android:exported="false" />
+        <!--            android:name=".views.activities.LoginActivity-->
+        <activity
+            android:name=".views.activities.Test"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
