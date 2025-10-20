@@ -115,7 +115,11 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         }
         return total;
     }
+    public int getTotalQuantity() {
+        int count = cartList.size();
+        return count;
 
+    }
     // Đếm số lượng item được chọn
     public int getSelectedItemCount() {
         int count = 0;
