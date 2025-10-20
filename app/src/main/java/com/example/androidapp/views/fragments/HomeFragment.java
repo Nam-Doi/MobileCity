@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView; // Thêm import
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
 import com.example.androidapp.views.activities.Product.DetailProductActivity;
-import com.example.androidapp.views.activities.admin.DetailProductActivity;
 import com.example.androidapp.views.adapters.ProductGridAdapter;
 import com.example.androidapp.views.adapters.SearchSuggestionAdapter; // ✅ IMPORT MỚI
 import com.google.firebase.firestore.FirebaseFirestore;
