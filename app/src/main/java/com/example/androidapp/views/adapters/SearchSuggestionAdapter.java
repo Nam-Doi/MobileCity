@@ -50,7 +50,7 @@ public class SearchSuggestionAdapter extends RecyclerView.Adapter<SearchSuggesti
         holder.tvName.setText(product.getName());
 
         // 2. Xử lý Giá tiền (từ Long sang String tiền tệ)
-        if (product.getPrice() != null) {
+        if (product.getPrice() >= 0.0) {
             NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
             holder.tvPrice.setText(currencyFormatter.format(product.getPrice()));
         } else {
