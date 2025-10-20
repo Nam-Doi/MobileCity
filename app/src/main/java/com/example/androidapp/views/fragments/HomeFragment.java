@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView; // Thêm import
 
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
+import com.example.androidapp.views.activities.Product.DetailProductActivity;
 import com.example.androidapp.views.activities.admin.DetailProductActivity;
 import com.example.androidapp.views.adapters.ProductGridAdapter;
 import com.example.androidapp.views.adapters.SearchSuggestionAdapter; // ✅ IMPORT MỚI
@@ -72,6 +73,19 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
         // LƯU Ý: productAdapter PHẢI CÓ constructor nhận thêm 'this' (OnItemClickListener)
         productAdapter = new ProductGridAdapter(requireContext(), productList, this);
         gridViewProducts.setAdapter(productAdapter);
+        //Thành thêm
+        gridViewProducts.setOnItemClickListener((parent, itemView, position, id) -> {
+            Product selectedProduct = productList.get(position);
+
+            if (selectedProduct != null && selectedProduct.getId() != null) {
+                Intent intent = new Intent(getActivity(), DetailProductActivity.class);
+
+                // Gửi đi ID chính xác của sản phẩm với key là "DOC_ID"
+                intent.putExtra("DOC_ID", selectedProduct.getId());
+
+                startActivity(intent);
+            }
+        });//End
 
         // 2. Khởi tạo Adapter cho RecyclerView tìm kiếm
         // Dùng SearchSuggestionAdapter và truyền 'this' (OnItemClickListener)
@@ -191,4 +205,5 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
 
         popup.show();
     }
+
 }

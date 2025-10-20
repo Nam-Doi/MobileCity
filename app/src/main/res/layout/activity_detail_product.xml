@@ -15,7 +15,7 @@
         android:titleTextColor="@android:color/white"
         android:popupTheme="@style/ThemeOverlay.AppCompat.Light"></androidx.appcompat.widget.Toolbar>
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/searchSuggestionsRecycler"
+        android:id="@+id/rv_suggestItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
@@ -25,7 +25,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:background="@color/white"
-        android:id="@+id/scr_detail"
+        android:id="@+id/sv_detail"
         android:layout_height="0dp"
         android:layout_weight="1">
 
@@ -35,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
-                android:id="@+id/product_name"
+                android:id="@+id/tv_name_product"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Tên sản phẩm"
@@ -43,7 +43,7 @@
                 android:textStyle="bold"
                 android:paddingTop="16dp"/>
             <ImageView
-                android:id="@+id/product_image"
+                android:id="@+id/iv_product"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:scaleType="fitCenter"
@@ -53,7 +53,7 @@
                 android:orientation="horizontal"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:id="@+id/product_price"
+                    android:id="@+id/tv_prooduct_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0₫"
@@ -70,6 +70,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:id="@+id/tv_stock"
                     android:text="Hết hàng">
                 </TextView>
             </LinearLayout>
@@ -86,40 +87,35 @@
                 android:layout_height="wrap_content"
                 android:stretchColumns="1">
             </TableLayout>
-
-
         </LinearLayout>
     </ScrollView>
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCart"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:cornerRadius="16dp"
-            app:strokeColor="@color/white"
-            app:icon="@drawable/ic_shopping_cart"
-            app:iconGravity="textStart">
-        </com.google.android.material.button.MaterialButton>
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Thêm giỏ"
-            android:id="@+id/btnAddtoCart"
-            app:cornerRadius="16dp">
-        </Button>
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:cornerRadius="16dp"
-            android:id="@+id/btnBuy"
-            android:text="Mua ngay">
-        </Button>
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_to_cart"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="Thêm giỏ"
+            android:textColor="@color/primary_blue"
+            app:iconGravity="textStart"
+            app:strokeColor="@color/primary_blue"
+            app:cornerRadius="16dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_buy"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Mua ngay"
+            android:backgroundTint="@color/primary_blue"
+            app:cornerRadius="16dp"/>
+    </LinearLayout>
 </LinearLayout>
