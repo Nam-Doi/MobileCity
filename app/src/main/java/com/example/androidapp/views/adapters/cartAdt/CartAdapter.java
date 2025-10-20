@@ -1,4 +1,4 @@
-package com.example.androidapp.views.adapters;
+package com.example.androidapp.views.adapters.cartAdt;
 
 import android.graphics.Paint;
 import android.view.LayoutInflater;

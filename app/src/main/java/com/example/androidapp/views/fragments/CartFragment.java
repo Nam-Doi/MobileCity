@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
 import com.example.androidapp.views.activities.carts.CheckoutActivity;
-import com.example.androidapp.views.adapters.CartAdapter;
+import com.example.androidapp.views.adapters.cartAdt.CartAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

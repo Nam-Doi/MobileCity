@@ -17,9 +17,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidApp">
         <activity
-            android:name=".views.activities.carts.EditAddressActivity"
+            android:name=".views.activities.carts.PaymentMethodActivity"
             android:exported="false" />
-        <!-- ADMIN ACTIVITIES -->
+        <activity
+            android:name=".views.activities.carts.EditAddressActivity"
+            android:exported="false" /> <!-- ADMIN ACTIVITIES -->
         <activity
             android:name=".views.activities.admin.ManageProductActivity"
             android:exported="false" />

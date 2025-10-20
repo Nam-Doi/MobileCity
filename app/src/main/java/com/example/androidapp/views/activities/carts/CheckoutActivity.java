@@ -9,17 +9,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
-import com.example.androidapp.views.adapters.CheckoutAdapter;
+import com.example.androidapp.views.adapters.cartAdt.CheckoutAdapter;
 
 import java.util.ArrayList;
 
@@ -126,8 +122,9 @@ public class CheckoutActivity extends AppCompatActivity {
         });
 
         layoutPaymentMethod.setOnClickListener(v -> {
-            Toast.makeText(this, "Chức năng chọn phương thức thanh toán đang phát triển", Toast.LENGTH_SHORT).show();
-            // TODO: Mở Dialog/Activity chọn phương thức thanh toán
+            Intent intent = new Intent (this, PaymentMethodActivity.class);
+            intent.putParcelableArrayListExtra("selectedItems", selectedItems);
+            startActivityForResult(intent, 1001);
         });
     }
 

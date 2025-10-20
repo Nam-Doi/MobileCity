@@ -6,4 +6,6 @@
     <color name="purple_500">#8B5CF6</color>
     <color name="purple_700">#7C3AED</color>
     <color name="input_stroke_color">#E5E7EB</color>
+    <color name="black">#000000</color>
+
 </resources>

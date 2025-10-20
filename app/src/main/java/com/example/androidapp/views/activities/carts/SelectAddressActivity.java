@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidapp.R;
 import com.example.androidapp.models.AddressItems;
-import com.example.androidapp.views.adapters.AddressAdapter;
+import com.example.androidapp.views.adapters.cartAdt.AddressAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
