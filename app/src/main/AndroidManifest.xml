@@ -22,6 +22,10 @@
         <activity
             android:name=".views.activities.carts.EditAddressActivity"
             android:exported="false" /> <!-- ADMIN ACTIVITIES -->
+        <activity android:name=".views.activities.Order.OrdersManagementActivity"
+            android:exported="false"/>
+        <activity android:name=".views.activities.Order.OrderDetailActivity"
+            android:exported="false"/>
         <activity
             android:name=".views.activities.admin.ManageProductActivity"
             android:exported="false" />
@@ -66,6 +70,8 @@
         <activity
             android:name=".views.activities.Auths.SignUpActivity"
             android:exported="false" />
+        <activity android:name=".views.activities.Order.MyOrdersActivity"
+            android:exported="false"/>
         <activity
             android:name=".views.activities.Auths.LoginActivity"
             android:exported="true">
