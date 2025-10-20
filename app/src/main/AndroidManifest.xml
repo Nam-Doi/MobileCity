@@ -23,11 +23,11 @@
             android:name=".views.activities.carts.EditAddressActivity"
             android:exported="false" /> <!-- ADMIN ACTIVITIES -->
         <activity
-            android:name=".views.activities.admin.ManageProductActivity"
+            android:name=".views.activities.Product.DetailProductActivity"
             android:exported="false" />
         <activity android:name=".views.activities.admin.AddProductActivity" />
         <activity
-            android:name=".views.activities.admin.ViewProductsActivity"
+            android:name=".views.activities.admin.ManageProductActivity"
             android:exported="false" />
         <activity android:name=".views.activities.admin.DetailProductActivity" />
         <activity
@@ -37,7 +37,7 @@
             android:name=".views.activities.admin.AdminSettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".views.activities.Product.DetailProductActivity"
+            android:name=".views.activities.admin.ViewProductsActivity"
             android:exported="false" />
         <activity
             android:name=".views.activities.carts.AddAddressActivity"
