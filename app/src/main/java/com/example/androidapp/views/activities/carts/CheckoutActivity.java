@@ -17,7 +17,15 @@ import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
 import com.example.androidapp.views.adapters.cartAdt.CheckoutAdapter;
 
+import com.example.androidapp.models.Order;
+import com.example.androidapp.models.OrderItem;
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
+import java.util.List;
+
 
 public class CheckoutActivity extends AppCompatActivity {
     private ImageView imgBack;
@@ -134,18 +142,67 @@ public class CheckoutActivity extends AppCompatActivity {
             return;
         }
 
-        // TODO: Xử lý thanh toán
-        // 1. Validate địa chỉ và phương thức thanh toán
-        // 2. Gọi API đặt hàng
-        // 3. Lưu đơn hàng vào database
-        // 4. Xóa items khỏi giỏ hàng
-        // 5. Chuyển đến màn hình xác nhận
+        String receiverName = tvReceiverName.getText().toString().trim();
+        String receiverPhone = tvReceiverPhone.getText().toString().trim();
+        String receiverAddress = tvReceiverAddress.getText().toString().trim();
 
-        Toast.makeText(this, "Đang xử lý thanh toán...", Toast.LENGTH_SHORT).show();
+        // 1. Kiểm tra thông tin giao hàng
+        if (receiverName.isEmpty() || receiverPhone.isEmpty() || receiverAddress.isEmpty()) {
+            Toast.makeText(this, "Vui lòng chọn thông tin giao hàng", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // Intent intent = new Intent(this, OrderSuccessActivity.class);
-        // startActivity(intent);
-        // finish();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        String currentUid = "guest"; // Giá trị mặc định nếu user chưa đăng nhập
+        if (auth.getCurrentUser() != null) {
+            currentUid = auth.getCurrentUser().getUid();
+        }
+
+        // 2. Chuyển đổi CartItems -> OrderItems
+        List<OrderItem> orderItems = new ArrayList<>();
+        double total = 0;
+
+        for (CartItem cartItem : selectedItems) {
+            OrderItem item = new OrderItem();
+            item.setProductId(cartItem.getId());
+            item.setName(cartItem.getName());
+            item.setPrice(cartItem.getPrice());
+            item.setQty(cartItem.getQuantity());
+
+            orderItems.add(item);
+            total += cartItem.getTotalPrice(); // Dùng hàm tính tổng có sẵn
+        }
+
+        // 3. Tạo ID cho đơn hàng MỚI (Cách làm chuẩn)
+        String newOrderId = db.collection("orders").document().getId();
+
+        // 4. Tạo đối tượng Order (Dùng model của Giai đoạn 1)
+        Order newOrder = new Order();
+        newOrder.setOrderId(newOrderId); // Gán ID mới
+        newOrder.setUserId(currentUid);
+        newOrder.setCustomerName(receiverName);
+        newOrder.setPhone(receiverPhone);
+        newOrder.setAddress(receiverAddress);
+        newOrder.setTotal(total);
+        newOrder.setStatus("pending"); // Trạng thái mặc định
+        newOrder.setCreatedAt(Timestamp.now());
+        newOrder.setItems(orderItems);
+
+        // 5. Lưu đối tượng Order lên Firestore
+        db.collection("orders").document(newOrderId).set(newOrder)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Đặt hàng thành công!", Toast.LENGTH_SHORT).show();
+
+                    // TODO: Báo cho team Giỏ hàng rằng họ cần code logic
+                    // để xóa các sản phẩm đã mua khỏi giỏ hàng ở đây.
+
+                    // Đóng màn hình Checkout và quay về.
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi khi đặt hàng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override

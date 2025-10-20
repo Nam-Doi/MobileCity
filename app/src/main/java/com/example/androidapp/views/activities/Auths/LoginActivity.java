@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
@@ -33,8 +35,7 @@ public class LoginActivity extends AppCompatActivity {
     private ImageView imgPasswordToggle;
     private boolean isPasswordVisible = false;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +54,9 @@ public class LoginActivity extends AppCompatActivity {
         tvSignUp = findViewById(R.id.tvSignUp);
         btnLogin = findViewById(R.id.btnLogin);
         imgPasswordToggle = findViewById(R.id.ivPasswordToggle);
-
+        progressBar = findViewById(R.id.progressBar); // ✅ KHỞI TẠO MỚI
     }
+
     //kiem tra du lieu
     private boolean validateInput(String email, String password) {
         if (email.isEmpty()) {
@@ -68,6 +70,26 @@ public class LoginActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+    // ✅ HÀM QUẢN LÝ TRẠNG THÁI LOADING
+    private void setLoading(boolean isLoading) {
+        if (isLoading) {
+            progressBar.setVisibility(View.VISIBLE);
+            btnLogin.setText(""); // Ẩn chữ "Login"
+            btnLogin.setEnabled(false); // Vô hiệu hóa nút
+            // Tùy chọn: Vô hiệu hóa EditTexts để ngăn chỉnh sửa
+            etEmail.setEnabled(false);
+            etPassword.setEnabled(false);
+            imgPasswordToggle.setEnabled(false);
+
+        } else {
+            progressBar.setVisibility(View.GONE);
+            btnLogin.setText("Login"); // Hiện lại chữ "Login"
+            btnLogin.setEnabled(true); // Kích hoạt lại nút
+            etEmail.setEnabled(true);
+            etPassword.setEnabled(true);
+            imgPasswordToggle.setEnabled(true);
+        }
     }
     private void setupListeners() {
         btnLogin.setOnClickListener(v -> loginUser());
@@ -126,6 +148,8 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        setLoading(true); // ✅ BẮT ĐẦU TẢI (SAU KHI VALIDATE)
+
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
@@ -134,12 +158,22 @@ public class LoginActivity extends AppCompatActivity {
                             if (user.isEmailVerified()) {
                                 CheckUserRoleActivity(user.getUid());
                             } else {
+                                // Lỗi: Chưa xác minh email
+                                setLoading(false); // ✅ KẾT THÚC TẢI
+
                                 Toast.makeText(this,
                                         "Vui lòng xác minh email trước khi đăng nhập.",
                                         Toast.LENGTH_LONG).show();
                             }
                         }
+                        else {
+                            // Lỗi không xác định
+                            setLoading(false); // ✅ KẾT THÚC TẢI
+                        }
                     } else {
+                        // Lỗi: Sai Email/Password
+                        setLoading(false); // ✅ KẾT THÚC TẢI
+
                         Toast.makeText(this, "Email hoặc mật khẩu không đúng!",
                                 Toast.LENGTH_SHORT).show();
                     }
@@ -163,13 +197,22 @@ public class LoginActivity extends AppCompatActivity {
                             }
                             finish();
                         } else {
+                            // Lỗi: Không tìm thấy role
+                            setLoading(false); // ✅ KẾT THÚC TẢI
+
                             Toast.makeText(this, "Không tìm thấy quyền người dùng!", Toast.LENGTH_SHORT).show();
                         }
                     } else {
+                        // Lỗi: Không tìm thấy role
+                        setLoading(false); // ✅ KẾT THÚC TẢI
+
                         Toast.makeText(this, "Người dùng không tồn tại trong Firestore!", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
+                    // Lỗi: Không tìm thấy role
+                    setLoading(false); // ✅ KẾT THÚC TẢI
+
                     Toast.makeText(this, "Lỗi khi đọc dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Error getting role", e);
                 });
@@ -194,5 +237,4 @@ public class LoginActivity extends AppCompatActivity {
             etPassword.setSelection(etPassword.getText().length());
         });
     }
-
 }
