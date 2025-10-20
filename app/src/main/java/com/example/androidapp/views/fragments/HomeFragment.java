@@ -1,5 +1,6 @@
 package com.example.androidapp.views.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -16,6 +17,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
+import com.example.androidapp.views.activities.Product.DetailProductActivity;
 import com.example.androidapp.views.adapters.ProductGridAdapter;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -48,6 +50,19 @@ public class HomeFragment extends Fragment {
         productList = new ArrayList<>();
         productAdapter = new ProductGridAdapter(requireContext(), productList);
         gridViewProducts.setAdapter(productAdapter);
+        //Thành thêm
+        gridViewProducts.setOnItemClickListener((parent, itemView, position, id) -> {
+            Product selectedProduct = productList.get(position);
+
+            if (selectedProduct != null && selectedProduct.getId() != null) {
+                Intent intent = new Intent(getActivity(), DetailProductActivity.class);
+
+                // Gửi đi ID chính xác của sản phẩm với key là "DOC_ID"
+                intent.putExtra("DOC_ID", selectedProduct.getId());
+
+                startActivity(intent);
+            }
+        });//End
 
         // Tải sản phẩm từ Firebase
         loadProductsFromFirebase();
@@ -107,4 +122,5 @@ public class HomeFragment extends Fragment {
 
         popup.show();
     }
+
 }

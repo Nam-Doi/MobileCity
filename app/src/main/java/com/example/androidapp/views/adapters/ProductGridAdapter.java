@@ -71,11 +71,11 @@ public class ProductGridAdapter extends BaseAdapter {
                     .into(holder.imgProduct);
         }
 
-        convertView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, DetailProductActivity.class);
-            intent.putExtra("phones", product);
-            context.startActivity(intent);
-        });
+//        convertView.setOnClickListener(v -> {
+//            Intent intent = new Intent(context, DetailProductActivity.class);
+//            intent.putExtra("phones", product);
+//            context.startActivity(intent);
+//        });
 
         return convertView;
     }

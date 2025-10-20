@@ -39,15 +39,15 @@ import java.util.Locale;
 import java.util.Map;
 
 public class DetailProductActivity extends AppCompatActivity {
-    ImageView productImage;
-    TextView productName, productPrice;
+    ImageView iv_product;
+    TextView tv_name_product, tv_product_price, tv_stock;
     TableLayout tableLayout;
-    Button btnCart, btnBuy, btnAddToCart;
-    RecyclerView suggestItem;
+    Button btn_buy, btn_add_to_cart;
+    RecyclerView rv_suggestItem;
     List<Product> suggestionList = new ArrayList<>();
     SearchSuggestionAdapter suggestionAdapter;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    ScrollView scr_detail;
+    ScrollView sv_detail;
     MenuItem searchItem;
     SearchView searchView;
 
@@ -63,39 +63,38 @@ public class DetailProductActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             toolbar.getNavigationIcon().setTint(Color.WHITE);
         }
-        productImage = findViewById(R.id.product_image);
-        productName = findViewById(R.id.product_name);
-        productPrice = findViewById(R.id.product_price);
+        iv_product = findViewById(R.id.iv_product);
+        tv_name_product = findViewById(R.id.tv_name_product);
+        tv_product_price = findViewById(R.id.tv_prooduct_price);
         tableLayout = findViewById(R.id.tablelayout);
-        scr_detail=findViewById(R.id.scr_detail);
-        btnCart = findViewById(R.id.btnCart);
-        btnAddToCart = findViewById(R.id.btnAddtoCart);
-        btnBuy = findViewById(R.id.btnBuy);
-        suggestItem = findViewById(R.id.searchSuggestionsRecycler);
+        sv_detail=findViewById(R.id.sv_detail);
+        tv_stock=findViewById(R.id.tv_stock);
+        btn_add_to_cart = findViewById(R.id.btn_add_to_cart);
+        btn_buy = findViewById(R.id.btn_buy);
+        rv_suggestItem = findViewById(R.id.rv_suggestItem);
         //Sự kiện click các nút
-        btnCart.setOnClickListener(v -> Toast.makeText(this, "Xem giỏ hàng", Toast.LENGTH_SHORT).show());
-        btnAddToCart.setOnClickListener(v -> Toast.makeText(this, "Đã thêm vào giỏ", Toast.LENGTH_SHORT).show());
-        btnBuy.setOnClickListener(v -> Toast.makeText(this, "Mua ngay", Toast.LENGTH_SHORT).show());
+        btn_add_to_cart.setOnClickListener(v -> Toast.makeText(this, "Đã thêm vào giỏ", Toast.LENGTH_SHORT).show());
+        btn_buy.setOnClickListener(v -> Toast.makeText(this, "Mua ngay", Toast.LENGTH_SHORT).show());
         //Load thông tin theo id máy của sự kiện click
         String docId = getIntent().getStringExtra("DOC_ID");
         if (docId != null) {
             loadProductFromFirestore(docId);
         }
 
-        suggestItem.setLayoutManager(new LinearLayoutManager(this));
+        rv_suggestItem.setLayoutManager(new LinearLayoutManager(this));
         suggestionAdapter = new SearchSuggestionAdapter(suggestionList, product -> /*khi click vào 1 sản phẩm gợi ý thì tực hiện 3 hành động dưới*/{
             // 1. Tải lại dữ liệu của sản phẩm mới ngay trên trang hiện tại
             loadProductFromFirestore(product.getId());
 
             // 2. Ẩn danh sách gợi ý
-            suggestItem.setVisibility(View.GONE);
+            rv_suggestItem.setVisibility(View.GONE);
 
             // 3. Đóng thanh tìm kiếm
             if (searchItem != null) {
                 searchItem.collapseActionView();
             }
         });
-        suggestItem.setAdapter(suggestionAdapter);
+        rv_suggestItem.setAdapter(suggestionAdapter);
         //Tạo một GestureDetector để nhận diện cử chỉ "chạm một lần"
         GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -106,7 +105,7 @@ public class DetailProductActivity extends AppCompatActivity {
                 hideKeyboard();
 
                 // Ẩn danh sách gợi ý 👇
-                suggestItem.setVisibility(View.GONE);
+                rv_suggestItem.setVisibility(View.GONE);
 
                 // Bỏ focus khỏi thanh tìm kiếm
                 if (searchView != null) {
@@ -118,7 +117,7 @@ public class DetailProductActivity extends AppCompatActivity {
         });
 
         //Gắn Listener vào ScrollView
-        scr_detail.setOnTouchListener((v, event) -> {
+        sv_detail.setOnTouchListener((v, event) -> {
             // Chuyển sự kiện chạm cho GestureDetector xử lý
             gestureDetector.onTouchEvent(event);
             // Trả về false để không làm ảnh hưởng đến sự kiện cuộn
@@ -136,20 +135,27 @@ public class DetailProductActivity extends AppCompatActivity {
                         Long price = documentSnapshot.getLong("price");
                         List<String> imageUrls = (List<String>) documentSnapshot.get("imageUrls");
                         Map<String, Object> specifications = (Map<String, Object>) documentSnapshot.get("specifications");
-
-                        productName.setText(name);
-
+                        //Lấy s lượng
+                        Long stock = documentSnapshot.getLong("stock");
+                        if (stock != null && stock > 0) {
+                            tv_stock.setText("Còn: " + stock);
+                            tv_stock.setTextColor(Color.parseColor("#2E7D32"));
+                        } else {
+                            tv_stock.setText("Hết hàng");
+                            tv_stock.setTextColor(Color.RED);
+                        }
+                        tv_name_product.setText(name);
                         if (price != null) {
 
                             NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-                            productPrice.setText(currencyFormatter.format(price));
+                            tv_product_price.setText(currencyFormatter.format(price));
                         }
 
                         if (imageUrls != null && !imageUrls.isEmpty()) {
                             Glide.with(this)
                                     .load(imageUrls.get(0))
                                     .placeholder(R.drawable.ic_launcher_background)
-                                    .into(productImage);
+                                    .into(iv_product);
                         }
 
                         if (specifications != null) {
@@ -199,7 +205,7 @@ public class DetailProductActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {//Khi gõ
-                if (newText.isEmpty()) {suggestItem.setVisibility(View.GONE);
+                if (newText.isEmpty()) {rv_suggestItem.setVisibility(View.GONE);
                     return false;
                 }
                 String keyword = newText.toLowerCase();
@@ -213,7 +219,7 @@ public class DetailProductActivity extends AppCompatActivity {
                                 }
                             }
                             suggestionAdapter.notifyDataSetChanged();
-                            suggestItem.setVisibility(!suggestionList.isEmpty() ? View.VISIBLE : View.GONE);
+                            rv_suggestItem.setVisibility(!suggestionList.isEmpty() ? View.VISIBLE : View.GONE);
                         })
                         .addOnFailureListener(e -> Log.e("DEBUG_SEARCH", "Lỗi khi tìm kiếm", e));
                 return true;
