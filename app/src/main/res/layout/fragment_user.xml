@@ -44,11 +44,13 @@
             android:text="Thông tin tài khoản"
             android:textSize="22sp" />
         <TextView
+            android:id="@+id/tv_my_orders"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:gravity="center_vertical"
             android:text="Đơn hàng"
-            android:textSize="22sp" />
+            android:textSize="22sp"
+            android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="60dp"

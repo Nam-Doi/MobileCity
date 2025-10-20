@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.androidapp.R;
+import com.example.androidapp.views.activities.Order.OrdersManagementActivity;
 import com.example.androidapp.views.activities.admin.AdminSettingsActivity;
 import com.example.androidapp.views.activities.admin.ManageProductActivity;
 import com.example.androidapp.views.activities.admin.ManageUsersActivity;
@@ -72,8 +73,10 @@ public class AdminActivity extends AppCompatActivity {
         });
 
         //Mở manage order
-
-
+        cardManageOrders.setOnClickListener(v ->{
+            Intent intent = new Intent(AdminActivity.this, OrdersManagementActivity.class);
+            startActivity(intent);
+        });
         //Mở manage account
         cardManageUsers.setOnClickListener(v -> {
             Intent intent = new Intent(AdminActivity.this, ManageUsersActivity.class);
