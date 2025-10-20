@@ -1,7 +1,6 @@
 package com.example.androidapp.views.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
-import com.example.androidapp.views.activities.admin.DetailProductActivity;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -21,10 +19,14 @@ import java.util.Locale;
 public class ProductGridAdapter extends BaseAdapter {
     private Context context;
     private List<Product> productList;
+    private SearchSuggestionAdapter.OnItemClickListener listener; // ✅ Khai báo Listener
 
-    public ProductGridAdapter(Context context, List<Product> productList) {
+    // ✅ CONSTRUCTOR MỚI: Nhận thêm OnItemClickListener
+    public ProductGridAdapter(Context context, List<Product> productList,
+                              SearchSuggestionAdapter.OnItemClickListener listener) {
         this.context = context;
         this.productList = productList;
+        this.listener = listener;
     }
 
     @Override
@@ -71,10 +73,11 @@ public class ProductGridAdapter extends BaseAdapter {
                     .into(holder.imgProduct);
         }
 
+        // ✅ THAY THẾ LOGIC INTENT CŨ bằng việc gọi Listener
         convertView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, DetailProductActivity.class);
-            intent.putExtra("phones", product);
-            context.startActivity(intent);
+            if (listener != null) {
+                listener.onItemClick(product);
+            }
         });
 
         return convertView;
