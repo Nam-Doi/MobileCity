@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidapp.R;
 import com.example.androidapp.models.AddressItems;
-import com.example.androidapp.views.adapters.AddressAdapter;
+import com.example.androidapp.views.adapters.cartAdt.AddressAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -22,7 +22,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectAddressActivity extends AppCompatActivity {
+public class SelectAddressActivity extends AppCompatActivity implements AddressAdapter.OnCartChangeListener {
     private ImageView imgBack;
     private RecyclerView rvCheckoutAddress;
     private List<AddressItems> addressList;
@@ -65,7 +65,7 @@ public class SelectAddressActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         addressList = new ArrayList<>();
 
-        addressAdapter = new AddressAdapter(addressList, null, address -> {
+        addressAdapter = new AddressAdapter(addressList, this, address -> {
             // Trả về dữ liệu địa chỉ đã chọn về CheckoutActivity
             Intent resultIntent = new Intent();
             resultIntent.putExtra("receiverName", address.getReceiverName());
@@ -79,7 +79,7 @@ public class SelectAddressActivity extends AppCompatActivity {
         rvCheckoutAddress.setAdapter(addressAdapter);
     }
 
-    // 🔹 Dùng snapshot listener để realtime update
+    // Dùng snapshot listener để realtime update
     private void listenToAddressUpdates() {
         addressListener = addressRef.addSnapshotListener((querySnapshot, error) -> {
             if (error != null) {
@@ -91,7 +91,10 @@ public class SelectAddressActivity extends AppCompatActivity {
                 addressList.clear();
                 for (var document : querySnapshot.getDocuments()) {
                     AddressItems address = document.toObject(AddressItems.class);
-                    addressList.add(address);
+                    if (address != null) {
+                        address.setAddressId(document.getId());
+                        addressList.add(address);
+                    }
                 }
                 addressAdapter.notifyDataSetChanged();
             }
@@ -106,13 +109,25 @@ public class SelectAddressActivity extends AppCompatActivity {
 
 
     }
+    @Override
+    public void onCartUpdated() {
+        // Không cần làm gì vì đã có realtime listener
+    }
+    @Override
+    public void onEditAddress(AddressItems item) {
+        // Mở màn hình Edit Address
+        Intent intent = new Intent(this, EditAddressActivity.class);
+        intent.putExtra("addressId", item.getAddressId());
+        intent.putExtra("receiverName", item.getReceiverName());
+        intent.putExtra("receiverPhone", item.getReceiverPhone());
+        intent.putExtra("address", item.getAddress());
+        startActivity(intent);
+    }
     protected void onDestroy(){
         super.onDestroy();
         if (addressListener != null) {
             addressListener.remove();
         }
     }
-
-
 
 }
