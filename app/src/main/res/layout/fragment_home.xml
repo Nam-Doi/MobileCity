@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="#F5F5F5">
 
-    <!-- Thanh top bar -->
+    <!-- 🔹 Thanh top bar -->
     <LinearLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
@@ -17,16 +17,13 @@
         android:elevation="4dp"
         android:gravity="center_vertical">
 
-        <!-- Logo hoặc tiêu đề -->
         <ImageView
             android:id="@+id/imgLogo"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:src="@drawable/ic_home"
-            android:contentDescription="Logo"
             android:layout_marginEnd="10dp" />
 
-        <!-- Thanh tìm kiếm -->
         <EditText
             android:id="@+id/edtSearch"
             android:layout_width="0dp"
@@ -41,37 +38,46 @@
             android:textSize="14sp"
             android:singleLine="true" />
 
-        <!-- Nút menu 3 gạch -->
         <ImageButton
             android:id="@+id/menuButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@color/primary_blue"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#6800c8"
             android:src="@drawable/ic_menu"
             android:contentDescription="Menu"
             android:layout_marginStart="8dp"/>
     </LinearLayout>
 
-    <!-- Phần nội dung chính của trang -->
-    <ScrollView
+    <!-- 🔹 Khung chứa sản phẩm và loading -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <LinearLayout
+        <!-- GridView hiển thị sản phẩm -->
+        <GridView
+            android:id="@+id/gridViewProducts"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp">
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="8dp"
+            android:horizontalSpacing="8dp"
+            android:verticalSpacing="8dp"
+            android:numColumns="2"
+            android:gravity="center"
+            android:scrollbarStyle="outsideOverlay"
+            android:stretchMode="columnWidth"
+            android:overScrollMode="always"
+            android:fadingEdge="none" />
 
-            <TextView
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="Nội dung trang chủ"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:layout_marginTop="10dp" />
-        </LinearLayout>
-    </ScrollView>
+
+        <!-- Thanh loading -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+    </FrameLayout>
 
 </LinearLayout>
