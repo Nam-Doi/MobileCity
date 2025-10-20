@@ -72,7 +72,6 @@ public class ProductGridAdapter extends BaseAdapter {
                     .load(product.getImageUrls().get(0))
                     .into(holder.imgProduct);
         }
-
         // ✅ THAY THẾ LOGIC INTENT CŨ bằng việc gọi Listener
         convertView.setOnClickListener(v -> {
             if (listener != null) {
