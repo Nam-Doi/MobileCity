@@ -21,6 +21,10 @@
             android:name=".views.activities.admin.ManageProductActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".views.activities.admin.EditProductActivity"
+            android:exported="false" />
+
         <activity android:name=".views.activities.admin.AddProductActivity" />
 
         <activity

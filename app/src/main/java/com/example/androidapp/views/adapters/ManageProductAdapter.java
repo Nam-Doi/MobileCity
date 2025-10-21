@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
+import com.example.androidapp.models.ProductVariant; // SỬA: Import thêm
 import com.example.androidapp.views.activities.admin.DetailProductActivity;
 
 import java.text.NumberFormat;
@@ -51,11 +52,32 @@ public class ManageProductAdapter extends RecyclerView.Adapter<ManageProductAdap
 
         holder.tvName.setText(product.getName());
         holder.tvBrand.setText(product.getBrand());
-        holder.tvPrice.setText(NumberFormat.getCurrencyInstance(new Locale("vi","VN")).format(product.getPrice()));
 
-        if(product.getImageUrls() != null && !product.getImageUrls().isEmpty()){
-            Glide.with(context).load(product.getImageUrls().get(0)).into(holder.imgProduct);
+        // --- SỬA TỪ ĐÂY ---
+        List<ProductVariant> variants = product.getVariants();
+
+        if (variants != null && !variants.isEmpty()) {
+            // Lấy phiên bản đầu tiên để hiển thị
+            ProductVariant defaultVariant = variants.get(0);
+
+            // Sửa: Lấy giá từ variant
+            holder.tvPrice.setText(NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(defaultVariant.getPrice()));
+
+            // Sửa: Lấy ảnh từ variant
+            if (defaultVariant.getImageUrls() != null && !defaultVariant.getImageUrls().isEmpty()) {
+                Glide.with(context).load(defaultVariant.getImageUrls().get(0)).into(holder.imgProduct);
+            } else {
+                // Xử lý nếu variant không có ảnh
+                holder.imgProduct.setImageResource(R.drawable.ic_launcher_background); // (Bạn cần có 1 ảnh placeholder)
+            }
+
+        } else {
+            // Xử lý nếu sản phẩm chưa có phiên bản nào
+            holder.tvPrice.setText("Chưa có giá");
+            holder.imgProduct.setImageResource(R.drawable.ic_launcher_background); // (Bạn cần có 1 ảnh placeholder)
         }
+        // --- SỬA ĐẾN ĐÂY ---
+
 
         // Click vào ảnh để xem chi tiết
         holder.imgProduct.setOnClickListener(v -> {
@@ -73,12 +95,12 @@ public class ManageProductAdapter extends RecyclerView.Adapter<ManageProductAdap
         return productList.size();
     }
 
-    public static class ProductViewHolder extends RecyclerView.ViewHolder{
+    public static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct;
         TextView tvName, tvBrand, tvPrice;
         Button btnEdit, btnDelete;
 
-        public ProductViewHolder(@NonNull View itemView){
+        public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
             imgProduct = itemView.findViewById(R.id.imgProduct);
             tvName = itemView.findViewById(R.id.tvProductName);
