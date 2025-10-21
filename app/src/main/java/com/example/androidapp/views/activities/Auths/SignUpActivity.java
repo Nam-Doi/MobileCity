@@ -34,7 +34,7 @@ public class SignUpActivity extends AppCompatActivity {
     private TextView tvLogin;
 
     // Các biến Firebase
-    private FirebaseAuth mAuth;  // xác thực người dùng
+    private FirebaseAuth mAuth; // xác thực người dùng
     private FirebaseFirestore db;// database
 
     @Override
@@ -56,7 +56,7 @@ public class SignUpActivity extends AppCompatActivity {
         setupLogin(); // quay lai trang login
     }
 
-    //find view tái sử dungj oke
+    // find view tái sử dungj oke
     private void initViews() {
         etFullName = findViewById(R.id.etFullName);
         etEmail = findViewById(R.id.etEmail);
@@ -66,24 +66,25 @@ public class SignUpActivity extends AppCompatActivity {
         tvLogin = findViewById(R.id.tvLogin);
 
     }
-    //bat su kien click vao login
+
+    // bat su kien click vao login
     private void setupLogin() {
         tvLogin.setOnClickListener(v -> {
             startActivity(new Intent(this, LoginActivity.class));
         });
     }
 
-    //hàm click oke
+    // hàm click oke
     private void setupListeners() {
         btnSignUp.setOnClickListener(v -> signUp());
     }
 
-    //hàm đăng ký oke
+    // hàm đăng ký oke
     private void signUp() {
         String fullName = etFullName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
-        //kiem tra tinh hop le của dữ liệu
+        // kiem tra tinh hop le của dữ liệu
         if (!validateInput(fullName, email, password)) {
             return;
         }
@@ -92,7 +93,7 @@ public class SignUpActivity extends AppCompatActivity {
         createAccountAndSaveToFirestore(fullName, email, password);
     }
 
-    //hàm kiểm tra dữ liệu hợp lệ
+    // hàm kiểm tra dữ liệu hợp lệ
     private boolean validateInput(String fullName, String email, String password) {
         if (fullName.isEmpty()) {
             etFullName.setError("Vui lòng nhập họ tên");
@@ -126,7 +127,8 @@ public class SignUpActivity extends AppCompatActivity {
 
         return true;
     }
-    //hiện pass
+
+    // hiện pass
     private void setupPasswordToggle() {
         imgPasswordToggle.setOnClickListener(v -> {
             if (isPasswordVisible) {
@@ -147,7 +149,7 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void createAccountAndSaveToFirestore(String fullName, String email,
-                                                 String password) {
+            String password) {
         // Gọi Firebase Auth để tạo tài khoản mới
         mAuth.createUserWithEmailAndPassword(email, password)
                 // addOnCompleteListener: Lắng nghe kết quả khi hoàn thành
@@ -191,7 +193,7 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
-    //lưu thông tin user
+    // lưu thông tin user
     private void saveUserToFirestore(String uid, String fullName, String email) {
         // Tạo object User với các thông tin cần lưu
         users user = new users(
@@ -217,10 +219,9 @@ public class SignUpActivity extends AppCompatActivity {
                     Toast.makeText(SignUpActivity.this,
                             "Đăng ký thành công! Vui lòng kiểm tra email để xác minh.",
                             Toast.LENGTH_LONG).show();
-
-                    // Có thể chuyển sang màn hình khác hoặc đóng Activity
-                    // finish();
-                    // startActivity(new Intent(this, LoginActivity.class));
+                    // Chuyển về màn hình đăng nhập để user đăng nhập sau khi xác minh email
+                    startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
+                    finish();
                 })
                 // addOnFailureListener: Được gọi khi lưu thất bại
                 .addOnFailureListener(e -> {
@@ -232,7 +233,7 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
-    //gui email xac thuc
+    // gui email xac thuc
     private void sendVerificationEmail(FirebaseUser user) {
         // Gọi hàm gửi email xác minh của Firebase
         user.sendEmailVerification()
@@ -250,57 +251,57 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 });
     }
-//    private void getUserInfo(String uid) {
-//        // Truy cập collection "users", document có ID = uid
-//        db.collection("users")
-//                .document(uid)
-//                .get()  // Lấy dữ liệu
-//                // addOnSuccessListener: Khi lấy dữ liệu thành công
-//                .addOnSuccessListener(documentSnapshot -> {
-//                    // Kiểm tra document có tồn tại không
-//                    if (documentSnapshot.exists()) {
-//                        // Chuyển đổi document thành object User
-//                        users user = documentSnapshot.toObject(users.class);
-//
-//                        // Kiểm tra user không null
-//                        if (user != null) {
-//                            // Sử dụng thông tin user
-//                            Log.d(TAG, "User name: " + user.getFullName());
-//                            Log.d(TAG, "Email: " + user.getEmail());
-//                            Log.d(TAG, "Role: " + user.getRole());
-//
-//                            // Có thể hiển thị lên UI
-//                            // tvUserName.setText(user.getFullName());
-//                            // tvEmail.setText(user.getEmail());
-//                        }
-//                    } else {
-//                        // Document không tồn tại
-//                        Log.d(TAG, "No such document");
-//                    }
-//                })
-//                // addOnFailureListener: Khi có lỗi
-//                .addOnFailureListener(e -> {
-//                    Log.e(TAG, "Error getting user info", e);
-//                    Toast.makeText(SignUpActivity.this,
-//                            "Không thể tải thông tin người dùng",
-//                            Toast.LENGTH_SHORT).show();
-//                });
-//    }
-//    //update users
-//    private void updateUserAddress(String uid, String newAddress) {
-//        // Cập nhật chỉ 1 field cụ thể
-//        db.collection("users")
-//                .document(uid)
-//                .update("address", newAddress)  // Chỉ cập nhật field "address"
-//                .addOnSuccessListener(aVoid -> {
-//                    Log.d(TAG, "Address updated successfully");
-//                    Toast.makeText(SignUpActivity.this,
-//                            "Cập nhật địa chỉ thành công",
-//                            Toast.LENGTH_SHORT).show();
-//                })
-//                .addOnFailureListener(e -> {
-//                    Log.e(TAG, "Error updating address", e);
-//                });
-//    }
-//}
+    // private void getUserInfo(String uid) {
+    // // Truy cập collection "users", document có ID = uid
+    // db.collection("users")
+    // .document(uid)
+    // .get() // Lấy dữ liệu
+    // // addOnSuccessListener: Khi lấy dữ liệu thành công
+    // .addOnSuccessListener(documentSnapshot -> {
+    // // Kiểm tra document có tồn tại không
+    // if (documentSnapshot.exists()) {
+    // // Chuyển đổi document thành object User
+    // users user = documentSnapshot.toObject(users.class);
+    //
+    // // Kiểm tra user không null
+    // if (user != null) {
+    // // Sử dụng thông tin user
+    // Log.d(TAG, "User name: " + user.getFullName());
+    // Log.d(TAG, "Email: " + user.getEmail());
+    // Log.d(TAG, "Role: " + user.getRole());
+    //
+    // // Có thể hiển thị lên UI
+    // // tvUserName.setText(user.getFullName());
+    // // tvEmail.setText(user.getEmail());
+    // }
+    // } else {
+    // // Document không tồn tại
+    // Log.d(TAG, "No such document");
+    // }
+    // })
+    // // addOnFailureListener: Khi có lỗi
+    // .addOnFailureListener(e -> {
+    // Log.e(TAG, "Error getting user info", e);
+    // Toast.makeText(SignUpActivity.this,
+    // "Không thể tải thông tin người dùng",
+    // Toast.LENGTH_SHORT).show();
+    // });
+    // }
+    // //update users
+    // private void updateUserAddress(String uid, String newAddress) {
+    // // Cập nhật chỉ 1 field cụ thể
+    // db.collection("users")
+    // .document(uid)
+    // .update("address", newAddress) // Chỉ cập nhật field "address"
+    // .addOnSuccessListener(aVoid -> {
+    // Log.d(TAG, "Address updated successfully");
+    // Toast.makeText(SignUpActivity.this,
+    // "Cập nhật địa chỉ thành công",
+    // Toast.LENGTH_SHORT).show();
+    // })
+    // .addOnFailureListener(e -> {
+    // Log.e(TAG, "Error updating address", e);
+    // });
+    // }
+    // }
 }

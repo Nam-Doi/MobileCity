@@ -33,10 +33,18 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         // --- Hiển thị Fragment mặc định khi vào app ---
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_container, new HomeFragment())
-                .commit();
+        boolean openCart = getIntent() != null && getIntent().getBooleanExtra("open_cart", false);
+        if (openCart) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_container, new CartFragment())
+                    .commit();
+        } else {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_container, new HomeFragment())
+                    .commit();
+        }
 
         // --- Xử lý khi bấm item ở Bottom Navigation ---
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -62,6 +70,17 @@ public class HomeActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    @Override
+    protected void onNewIntent(android.content.Intent intent) {
+        super.onNewIntent(intent);
+        if (intent != null && intent.getBooleanExtra("open_cart", false)) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_container, new CartFragment())
+                    .commit();
+        }
     }
 
     private void showPopupMenu(View v) {
