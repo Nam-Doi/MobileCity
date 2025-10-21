@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
+import com.example.androidapp.models.ProductVariant;
+import com.example.androidapp.views.activities.Product.DetailProductActivity;
 import com.example.androidapp.views.activities.admin.DetailProductActivitys;
 
 import java.text.NumberFormat;
@@ -48,19 +50,36 @@ public class ManageProductAdapter extends RecyclerView.Adapter<ManageProductAdap
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
-
+        if (product == null) return;
         holder.tvName.setText(product.getName());
         holder.tvBrand.setText(product.getBrand());
-        holder.tvPrice.setText(NumberFormat.getCurrencyInstance(new Locale("vi","VN")).format(product.getPrice()));
+        List<ProductVariant> variants = product.getVariants();
+        if (variants != null && !variants.isEmpty()) {
+            // Lấy variant đầu tiên làm mặc định
+            ProductVariant defaultVariant = variants.get(0);
 
-        if(product.getImageUrls() != null && !product.getImageUrls().isEmpty()){
-            Glide.with(context).load(product.getImageUrls().get(0)).into(holder.imgProduct);
+            // Lấy giá
+            holder.tvPrice.setText(NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(defaultVariant.getPrice()));
+
+            // Lấy ảnh
+            if (defaultVariant.getImageUrls() != null && !defaultVariant.getImageUrls().isEmpty()) {
+                Glide.with(context).load(defaultVariant.getImageUrls().get(0)).into(holder.imgProduct);
+            } else {
+                holder.imgProduct.setImageResource(R.drawable.ic_launcher_background); // Cần có ảnh placeholder
+            }
+        } else {
+            // Xử lý nếu sản phẩm không có variant
+            holder.tvPrice.setText("Chưa có giá");
+            holder.imgProduct.setImageResource(R.drawable.ic_launcher_background); // Cần có ảnh placeholder
         }
 
+
+
         // Click vào ảnh để xem chi tiết
-        holder.imgProduct.setOnClickListener(v -> {
-            Intent intent = new Intent(context, DetailProductActivitys.class);
-            intent.putExtra("product", product); // product implements Serializable
+        // --- SỬA: THÊM SỰ KIỆN CLICK ĐỂ MỞ CHI TIẾT SẢN PHẨM ---
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, DetailProductActivitys.class); // Mở màn hình chi tiết người dùng
+            intent.putExtra("product", product); // Gửi product (đã implements Serializable)
             context.startActivity(intent);
         });
 
@@ -70,7 +89,7 @@ public class ManageProductAdapter extends RecyclerView.Adapter<ManageProductAdap
 
     @Override
     public int getItemCount() {
-        return productList.size();
+        return productList != null ? productList.size() : 0;
     }
 
     public static class ProductViewHolder extends RecyclerView.ViewHolder{

@@ -50,6 +50,7 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation("com.google.firebase:firebase-database:20.3.0")
     implementation("com.google.android.material:material:1.9.0")
+    implementation ("com.google.firebase:firebase-storage")
     implementation("com.squareup.picasso:picasso:2.8")
     // Glide for loading images
     implementation ("com.github.bumptech.glide:glide:4.16.0")
@@ -58,4 +59,6 @@ dependencies {
     //thanh dan
     implementation("com.github.bumptech.glide:glide:4.15.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
+
+
 }
