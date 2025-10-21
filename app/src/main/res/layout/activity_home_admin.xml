@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient_background"
-    android:fillViewport="true">
+    android:background="@android:color/white" android:fillViewport="true"
+    tools:context=".views.activities.Auths.AdminActivity">
 
     <LinearLayout
         android:orientation="vertical"
@@ -13,20 +14,19 @@
         android:padding="24dp"
         android:gravity="center_horizontal">
 
-        <!-- Header -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="32dp">
 
             <ImageView
                 android:id="@+id/imgAdminAvatar"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:src="@drawable/admin_avt"
-                android:background="@drawable/circle_background"
+                android:padding="4dp"
                 android:scaleType="centerCrop" />
 
             <TextView
@@ -34,33 +34,27 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Admin Name"
-                android:textColor="@color/white"
-                android:textStyle="bold"
+                android:textColor="@android:color/black" android:textStyle="bold"
                 android:textSize="20sp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="12dp" />
         </LinearLayout>
 
-        <!-- Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Admin Dashboard"
-            android:textColor="@color/white"
-            android:textSize="26sp"
+            android:textColor="@android:color/black" android:textSize="26sp"
             android:textStyle="bold"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="24dp" />
 
-        <!-- Dashboard Menu -->
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:columnCount="2"
-            android:rowCount="3"
-            android:alignmentMode="alignMargins"
+            android:rowCount="3" android:alignmentMode="alignMargins"
             android:rowOrderPreserved="false"
             android:useDefaultMargins="true">
 
-            <!-- 1. Quản lý mặt hàng -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardManageProducts"
                 android:layout_width="0dp"
@@ -68,158 +62,164 @@
                 android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#33FFFFFF">
+                app:cardBackgroundColor="@android:color/white" app:cardElevation="4dp"> <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/manage_product"
-                        app:tint="@color/white" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Quản lý mặt hàng"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
-                </LinearLayout>
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/manage_product"
+                    app:tint="#101010" /> <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Quản lý mặt hàng"
+                android:textColor="#090909" android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:gravity="center"/>
+            </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 2. Xem mặt hàng -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardViewProducts"
                 android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:layout_columnWeight="1"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#33FFFFFF">
+                app:cardBackgroundColor="@android:color/white"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/view_product"
-                        app:tint="@color/white" />
+                        app:tint="#101010" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Xem mặt hàng"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
+                        android:textColor="#090909"
+                        android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 3. Quản lý đơn hàng -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardManageOrders"
                 android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:layout_columnWeight="1"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#33FFFFFF">
+                app:cardBackgroundColor="@android:color/white"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/manage_order"
-                        app:tint="@color/white" />
+                        app:tint="#101010" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Quản lý đơn hàng"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
+                        android:textColor="#090909"
+                        android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 4. Quản lý tài khoản -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardManageUsers"
                 android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:layout_columnWeight="1"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#33FFFFFF">
+                app:cardBackgroundColor="@android:color/white"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/manage_account"
-                        app:tint="@color/white" />
+                        app:tint="#101010" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Quản lý user"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
+                        android:textColor="#090909"
+                        android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 5. Cài đặt -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSettings"
                 android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:layout_columnWeight="1"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#33FFFFFF">
+                app:cardBackgroundColor="@android:color/white"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:padding="8dp">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/setting_ad"
-                        app:tint="@color/white" />
+                        app:tint="#101010" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Cài đặt"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
+                        android:textColor="#090909"
+                        android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
         </GridLayout>
     </LinearLayout>
 </ScrollView>

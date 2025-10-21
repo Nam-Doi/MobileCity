@@ -2,6 +2,7 @@ package com.example.androidapp.views.activities.admin;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log; // <-- THÊM DÒNG NÀY
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -45,11 +46,14 @@ public class ManageProductActivity extends AppCompatActivity {
 
         productList = new ArrayList<>();
         adapter = new ManageProductAdapter(this, productList, new ManageProductAdapter.OnProductActionListener() {
+
             @Override
             public void onEdit(Product product) {
-                Toast.makeText(ManageProductActivity.this, "Sửa: " + product.getName(), Toast.LENGTH_SHORT).show();
-                // Mở EditProductActivity nếu có
+                Intent intent = new Intent(ManageProductActivity.this, EditProductActivity.class);
+                intent.putExtra("product", product); // Truyền object product
+                startActivity(intent);
             }
+
 
             @Override
             public void onDelete(Product product) {
@@ -78,15 +82,36 @@ public class ManageProductActivity extends AppCompatActivity {
         fetchProducts();
     }
 
+    // --- HÀM ĐÃ SỬA LỖI NẰM Ở ĐÂY ---
     private void fetchProducts() {
         db.collection("phones").get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     productList.clear();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        Product product = doc.toObject(Product.class);
-                        product.setId(doc.getId()); // gán ID từ Firestore
-                        productList.add(product);
+
+                        // Bọc trong try-catch để bắt lỗi
+                        try {
+                            // Lệnh có thể gây crash
+                            Product product = doc.toObject(Product.class);
+
+                            // Kiểm tra an toàn: Nếu 'variants' là null (dữ liệu cũ)
+                            // hoặc cấu trúc sai, ta bỏ qua
+                            if (product.getVariants() == null) {
+                                Log.w("FetchProduct", "Bỏ qua sản phẩm có cấu trúc cũ/lỗi: " + doc.getId());
+                                continue; // Bỏ qua, đi đến sản phẩm tiếp theo
+                            }
+
+                            // Nếu không lỗi, thêm vào list
+                            product.setId(doc.getId());
+                            productList.add(product);
+
+                        } catch (Exception e) {
+                            // Bắt lỗi (bao gồm cả lỗi "Expected List, got HashMap")
+                            Log.e("FetchProductError", "Lỗi map dữ liệu cho sản phẩm: " + doc.getId(), e);
+                            // Bỏ qua sản phẩm lỗi này và tiếp tục
+                        }
                     }
+                    // Cập nhật adapter sau khi đã lọc
                     adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e ->

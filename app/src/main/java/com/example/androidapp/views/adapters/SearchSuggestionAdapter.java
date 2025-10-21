@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
+import com.example.androidapp.models.ProductVariant;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -49,23 +50,32 @@ public class SearchSuggestionAdapter extends RecyclerView.Adapter<SearchSuggesti
         // 1. Hiển thị tên sản phẩm
         holder.tvName.setText(product.getName());
 
-        // 2. Xử lý Giá tiền (từ Long sang String tiền tệ)
-        if (product.getPrice() >= 0.0) {
-            NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-            holder.tvPrice.setText(currencyFormatter.format(product.getPrice()));
-        } else {
-            holder.tvPrice.setText("N/A"); // Hoặc giá trị mặc định
-        }
+        // --- SỬA TỪ ĐÂY ---
+        List<ProductVariant> variants = product.getVariants();
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
-        // 3. Xử lý Hình ảnh (lấy ảnh đầu tiên từ mảng imageUrls)
-        List<String> imageUrls = product.getImageUrls();
-        if (imageUrls != null && !imageUrls.isEmpty()) {
-            Glide.with(holder.itemView.getContext())
-                    .load(imageUrls.get(0)) // Lấy ảnh đầu tiên
-                    .placeholder(R.drawable.ic_launcher_background)
-                    .into(holder.imgProduct);
+        if (variants != null && !variants.isEmpty()) {
+            // Lấy variant đầu tiên làm mặc định
+            ProductVariant defaultVariant = variants.get(0);
+
+            // 2. Xử lý Giá tiền
+            holder.tvPrice.setText(currencyFormatter.format(defaultVariant.getPrice()));
+
+            // 3. Xử lý Hình ảnh
+            List<String> imageUrls = defaultVariant.getImageUrls();
+            if (imageUrls != null && !imageUrls.isEmpty()) {
+                Glide.with(holder.itemView.getContext())
+                        .load(imageUrls.get(0)) // Lấy ảnh đầu tiên
+                        // Sửa ic_launcher_background thành ảnh placeholder của bạn
+                        .placeholder(R.drawable.ic_launcher_background)
+                        .into(holder.imgProduct);
+            } else {
+                holder.imgProduct.setImageResource(R.drawable.ic_launcher_background);
+            }
         } else {
             // Nếu không có ảnh, hiển thị ảnh mặc định
+            // Nếu không có variant, hiển thị giá trị mặc định
+            holder.tvPrice.setText("N/A");
             holder.imgProduct.setImageResource(R.drawable.ic_launcher_background);
         }
 

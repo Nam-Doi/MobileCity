@@ -54,51 +54,64 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
     public View onCreateView(@NonNull LayoutInflater inflater,
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
+        View view = null;
+        try {
+            view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
+            // Ánh xạ Views
+            ImageButton menuButton = view.findViewById(R.id.menuButton);
+            if (menuButton != null)
+                menuButton.setOnClickListener(this::showPopupMenu);
 
-        // Ánh xạ Views
-        ImageButton menuButton = view.findViewById(R.id.menuButton);
-        menuButton.setOnClickListener(this::showPopupMenu);
+            edtSearch = view.findViewById(R.id.edtSearch); // ✅ Ánh xạ EditText
+            gridViewProducts = view.findViewById(R.id.gridViewProducts);
+            recyclerViewSearchResults = view.findViewById(R.id.recyclerViewSearchResults); // ✅ Ánh xạ RecyclerView
 
-        edtSearch = view.findViewById(R.id.edtSearch); // ✅ Ánh xạ EditText
-        gridViewProducts = view.findViewById(R.id.gridViewProducts);
-        recyclerViewSearchResults = view.findViewById(R.id.recyclerViewSearchResults); // ✅ Ánh xạ RecyclerView
+            // Khởi tạo List
+            productList = new ArrayList<>();
+            searchList = new ArrayList<>();
 
-        // Khởi tạo List
-        productList = new ArrayList<>();
-        searchList = new ArrayList<>();
+            // 1. Khởi tạo Adapter cho GridView chính
+            productAdapter = new ProductGridAdapter(requireContext(), productList, this);
+            if (gridViewProducts != null)
+                gridViewProducts.setAdapter(productAdapter);
 
-        // 1. Khởi tạo Adapter cho GridView chính
-        // LƯU Ý: productAdapter PHẢI CÓ constructor nhận thêm 'this'
-        // (OnItemClickListener)
-        productAdapter = new ProductGridAdapter(requireContext(), productList, this);
-        gridViewProducts.setAdapter(productAdapter);
-        // Thành thêm
-        gridViewProducts.setOnItemClickListener((parent, itemView, position, id) -> {
-            Product selectedProduct = productList.get(position);
-
-            if (selectedProduct != null && selectedProduct.getId() != null) {
-                Intent intent = new Intent(getActivity(), DetailProductActivity.class);
-
-                // Gửi đi ID chính xác của sản phẩm với key là "DOC_ID"
-                intent.putExtra("DOC_ID", selectedProduct.getId());
-
-                startActivity(intent);
+            // Click handler
+            if (gridViewProducts != null) {
+                gridViewProducts.setOnItemClickListener((parent, itemView, position, id) -> {
+                    try {
+                        Product selectedProduct = (productList != null && position >= 0
+                                && position < productList.size()) ? productList.get(position) : null;
+                        if (selectedProduct != null && selectedProduct.getId() != null) {
+                            Intent intent = new Intent(getActivity(), DetailProductActivity.class);
+                            intent.putExtra("DOC_ID", selectedProduct.getId());
+                            startActivity(intent);
+                        }
+                    } catch (Exception e) {
+                        android.util.Log.e("HomeFragment", "Error on grid item click", e);
+                    }
+                });
             }
-        });// End
 
-        // 2. Khởi tạo Adapter cho RecyclerView tìm kiếm
-        // Dùng SearchSuggestionAdapter và truyền 'this' (OnItemClickListener)
-        searchAdapter = new SearchSuggestionAdapter(searchList, this);
-        recyclerViewSearchResults.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerViewSearchResults.setAdapter(searchAdapter);
+            // 2. Khởi tạo Adapter cho RecyclerView tìm kiếm
+            searchAdapter = new SearchSuggestionAdapter(searchList, this);
+            if (recyclerViewSearchResults != null) {
+                recyclerViewSearchResults.setLayoutManager(new LinearLayoutManager(requireContext()));
+                recyclerViewSearchResults.setAdapter(searchAdapter);
+            }
 
-        // Thiết lập Listener tìm kiếm
-        setupSearchListener();
+            // Thiết lập Listener tìm kiếm
+            setupSearchListener();
 
-        // Tải sản phẩm từ Firebase
-        loadProductsFromFirebase();
+            // Tải sản phẩm từ Firebase
+            loadProductsFromFirebase();
+        } catch (Exception ex) {
+            android.util.Log.e("HomeFragment", "Exception in onCreateView", ex);
+            // Show a user-friendly message and prevent crash
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "Lỗi khi khởi tạo trang chủ", Toast.LENGTH_LONG).show();
+            }
+        }
 
         return view;
     }
@@ -172,19 +185,35 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
         db.collection("phones")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    productList.clear();
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        Product product = doc.toObject(Product.class);
-                        if (product != null) {
-                            // Đảm bảo Product có ID tài liệu để truyền tới DetailProductActivity
-                            product.setId(doc.getId());
-                            productList.add(product);
+                    try {
+                        if (productList != null)
+                            productList.clear();
+                        int count = 0;
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            try {
+                                Product product = doc.toObject(Product.class);
+                                if (product != null) {
+                                    product.setId(doc.getId());
+                                    productList.add(product);
+                                    count++;
+                                }
+                            } catch (Exception e) {
+                                android.util.Log.w("HomeFragment", "Failed to parse product doc: " + doc.getId(), e);
+                            }
                         }
+                        android.util.Log.d("HomeFragment", "Loaded products: " + count);
+                        if (productAdapter != null)
+                            productAdapter.notifyDataSetChanged();
+                    } catch (Exception e) {
+                        android.util.Log.e("HomeFragment", "Error processing products response", e);
                     }
-                    productAdapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(
-                        e -> Toast.makeText(getContext(), "Không thể tải sản phẩm", Toast.LENGTH_SHORT).show());
+                        e -> {
+                            android.util.Log.e("HomeFragment", "Failed to load products", e);
+                            if (getContext() != null)
+                                Toast.makeText(getContext(), "Không thể tải sản phẩm", Toast.LENGTH_SHORT).show();
+                        });
     }
 
     private void showPopupMenu(View v) {

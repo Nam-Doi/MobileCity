@@ -47,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         setupListeners();
         setupPasswordToggle();
     }
+
     private void initViews() {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
@@ -57,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar); // ✅ KHỞI TẠO MỚI
     }
 
-    //kiem tra du lieu
+    // kiem tra du lieu
     private boolean validateInput(String email, String password) {
         if (email.isEmpty()) {
             etEmail.setError("Vui lòng nhập email");
@@ -71,6 +72,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         return true;
     }
+
     // ✅ HÀM QUẢN LÝ TRẠNG THÁI LOADING
     private void setLoading(boolean isLoading) {
         if (isLoading) {
@@ -91,6 +93,7 @@ public class LoginActivity extends AppCompatActivity {
             imgPasswordToggle.setEnabled(true);
         }
     }
+
     private void setupListeners() {
         btnLogin.setOnClickListener(v -> loginUser());
         tvSignUp.setOnClickListener(v -> {
@@ -100,45 +103,45 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(this, ForgotPasswordActivity.class));
         });
     }
-//    private void loginUser() {
-//        String email = etEmail.getText().toString().trim();
-//        String password = etPassword.getText().toString().trim();
-//
-//        if (!validateInput(email, password)) {
-//            return;
-//        }
-//
-//        // Gọi Firebase Auth để đăng nhập
-//        mAuth.signInWithEmailAndPassword(email, password)
-//                .addOnCompleteListener(this, task -> {
-//                    if (task.isSuccessful()) {
-//                        Log.d(TAG, "signInWithEmail:success");
-//
-//                        FirebaseUser user = mAuth.getCurrentUser();
-//
-//                        if (user != null) {
-//                            if (user.isEmailVerified()) {
-//                                // Email đã xác minh → Cho vào app
-//                                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-//
-//                                // Chuyển sang màn hình chính (MainActivity)
-//                                Intent intent = new Intent(this, MainActivity.class);
-//                                startActivity(intent);
-//                                finish(); // Đóng LoginActivity
-//                            } else {
-//                                // Email chưa xác minh
-//                                Toast.makeText(this,
-//                                        "Vui lòng xác minh email trước khi đăng nhập.",
-//                                        Toast.LENGTH_LONG).show();
-//                            }
-//                        }
-//                    } else {
-//                        Log.w(TAG, "signInWithEmail:failure", task.getException());
-//                        Toast.makeText(this, "Email hoặc mật khẩu không đúng!",
-//                                Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//    }
+    // private void loginUser() {
+    // String email = etEmail.getText().toString().trim();
+    // String password = etPassword.getText().toString().trim();
+    //
+    // if (!validateInput(email, password)) {
+    // return;
+    // }
+    //
+    // // Gọi Firebase Auth để đăng nhập
+    // mAuth.signInWithEmailAndPassword(email, password)
+    // .addOnCompleteListener(this, task -> {
+    // if (task.isSuccessful()) {
+    // Log.d(TAG, "signInWithEmail:success");
+    //
+    // FirebaseUser user = mAuth.getCurrentUser();
+    //
+    // if (user != null) {
+    // if (user.isEmailVerified()) {
+    // // Email đã xác minh → Cho vào app
+    // Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+    //
+    // // Chuyển sang màn hình chính (MainActivity)
+    // Intent intent = new Intent(this, MainActivity.class);
+    // startActivity(intent);
+    // finish(); // Đóng LoginActivity
+    // } else {
+    // // Email chưa xác minh
+    // Toast.makeText(this,
+    // "Vui lòng xác minh email trước khi đăng nhập.",
+    // Toast.LENGTH_LONG).show();
+    // }
+    // }
+    // } else {
+    // Log.w(TAG, "signInWithEmail:failure", task.getException());
+    // Toast.makeText(this, "Email hoặc mật khẩu không đúng!",
+    // Toast.LENGTH_SHORT).show();
+    // }
+    // });
+    // }
 
     private void loginUser() {
         String email = etEmail.getText().toString().trim();
@@ -152,31 +155,52 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            if (user.isEmailVerified()) {
-                                CheckUserRoleActivity(user.getUid());
+                    try {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            if (user != null) {
+                                if (user.isEmailVerified()) {
+                                    try {
+                                        CheckUserRoleActivity(user.getUid());
+                                    } catch (Exception e) {
+                                        // Guard against unexpected crashes inside role check
+                                        setLoading(false);
+                                        Log.e(TAG, "Error during role check", e);
+                                        Toast.makeText(this, "Lỗi khi xác thực quyền người dùng.", Toast.LENGTH_LONG)
+                                                .show();
+                                    }
+                                } else {
+                                    // Lỗi: Chưa xác minh email
+                                    setLoading(false); // ✅ KẾT THÚC TẢI
+
+                                    Toast.makeText(this,
+                                            "Vui lòng xác minh email trước khi đăng nhập.",
+                                            Toast.LENGTH_LONG).show();
+                                }
                             } else {
-                                // Lỗi: Chưa xác minh email
+                                // Lỗi không xác định
                                 setLoading(false); // ✅ KẾT THÚC TẢI
-
-                                Toast.makeText(this,
-                                        "Vui lòng xác minh email trước khi đăng nhập.",
-                                        Toast.LENGTH_LONG).show();
+                                Log.w(TAG, "signInWithEmail: success but user is null");
                             }
-                        }
-                        else {
-                            // Lỗi không xác định
+                        } else {
+                            // Lỗi: Sai Email/Password
                             setLoading(false); // ✅ KẾT THÚC TẢI
-                        }
-                    } else {
-                        // Lỗi: Sai Email/Password
-                        setLoading(false); // ✅ KẾT THÚC TẢI
 
-                        Toast.makeText(this, "Email hoặc mật khẩu không đúng!",
-                                Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Email hoặc mật khẩu không đúng!",
+                                    Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "signInWithEmail:failure", task.getException());
+                        }
+                    } catch (Exception e) {
+                        setLoading(false);
+                        Log.e(TAG, "Unexpected error in sign-in completion", e);
+                        Toast.makeText(this, "Lỗi không xác định khi đăng nhập", Toast.LENGTH_SHORT).show();
                     }
+                })
+                .addOnFailureListener(e -> {
+                    // Ensure any async failure is logged and UI reset
+                    setLoading(false);
+                    Log.e(TAG, "signInWithEmailAndPassword failed", e);
+                    Toast.makeText(this, "Lỗi khi đăng nhập: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -218,7 +242,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    //hiện pass
+    // hiện pass
     private void setupPasswordToggle() {
         imgPasswordToggle.setOnClickListener(v -> {
             if (isPasswordVisible) {
