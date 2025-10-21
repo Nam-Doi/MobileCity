@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
+import com.example.androidapp.views.adapters.OptionAdapter;
 import com.example.androidapp.views.adapters.SearchSuggestionAdapter;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -135,7 +136,7 @@ public class DetailProductActivity extends AppCompatActivity {
                         Long price = documentSnapshot.getLong("price");
                         List<String> imageUrls = (List<String>) documentSnapshot.get("imageUrls");
                         Map<String, Object> specifications = (Map<String, Object>) documentSnapshot.get("specifications");
-                        //Lấy s lượng
+                        //Lấy số lượng
                         Long stock = documentSnapshot.getLong("stock");
                         if (stock != null && stock > 0) {
                             tv_stock.setText("Còn: " + stock);
@@ -143,6 +144,23 @@ public class DetailProductActivity extends AppCompatActivity {
                         } else {
                             tv_stock.setText("Hết hàng");
                             tv_stock.setTextColor(Color.RED);
+                        }
+                        // Hiển thị MÀU SẮC
+                        List<String> colors = (List<String>) documentSnapshot.get("colorOptions");
+                        if (colors != null && !colors.isEmpty()) {
+                            RecyclerView rvColors = findViewById(R.id.rv_color_option);
+                            // Dùng OptionAdapter với type là "color"
+                            OptionAdapter colorAdapter = new OptionAdapter(colors, OptionAdapter.TYPE_COLOR);
+                            rvColors.setAdapter(colorAdapter);
+                        }
+
+                        // Hiển thị BỘ NHỚ
+                        List<String> memoryOpts = (List<String>) documentSnapshot.get("memoryOptions");
+                        if (memoryOpts != null && !memoryOpts.isEmpty()) {
+                            RecyclerView rvMemory = findViewById(R.id.rv_memory_option);
+                            // Dùng OptionAdapter với type là "memory"
+                            OptionAdapter memoryAdapter = new OptionAdapter(memoryOpts, OptionAdapter.TYPE_MEMORY);
+                            rvMemory.setAdapter(memoryAdapter);
                         }
                         tv_name_product.setText(name);
                         if (price != null) {
@@ -170,6 +188,7 @@ public class DetailProductActivity extends AppCompatActivity {
                     Log.e("Firestore", "Error", e);
                 });
     }
+
     //Hàm này tạo bảng thông số chi tiết
     private void displaySpecs(Map<String, Object> specs) {
         tableLayout.removeAllViews();
@@ -190,6 +209,7 @@ public class DetailProductActivity extends AppCompatActivity {
             tableLayout.addView(row);
         }
     }
+
     //Tìm kiếm
     @Override
     public boolean onCreateOptionsMenu(Menu menu)/*Khởi tạo, hiển thị thanh menu*/ {
@@ -236,6 +256,7 @@ public class DetailProductActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         // Tìm view đang có focus để ẩn bàn phím từ nó
