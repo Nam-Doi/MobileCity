@@ -5,7 +5,8 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import com.google.firebase.Timestamp;
 import java.util.List;
-
+import com.google.firebase.firestore.IgnoreExtraProperties;
+@IgnoreExtraProperties
 public class Order implements Parcelable {
 
     // --- Fields ---

@@ -3,7 +3,8 @@ package com.example.androidapp.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
-
+import com.google.firebase.firestore.IgnoreExtraProperties;
+@IgnoreExtraProperties
 public class OrderItem implements Parcelable {
 
     private String productId;
