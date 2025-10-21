@@ -15,7 +15,7 @@ import com.example.androidapp.models.Product;
 
 import java.util.Map;
 
-public class DetailProductActivity extends AppCompatActivity {
+public class DetailProductActivitys extends AppCompatActivity {
 
     private ImageView imgProduct;
     private TextView tvName, tvBrand, tvPrice, tvStock;

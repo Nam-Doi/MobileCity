@@ -30,7 +30,7 @@
         <activity
             android:name=".views.activities.admin.ManageProductActivity"
             android:exported="false" />
-        <activity android:name=".views.activities.admin.DetailProductActivity" />
+        <activity android:name=".views.activities.admin.DetailProductActivitys" />
         <activity
             android:name=".views.activities.admin.ManageUsersActivity"
             android:exported="false" />

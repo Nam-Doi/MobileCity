@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
-import com.example.androidapp.views.activities.admin.DetailProductActivity;
+import com.example.androidapp.views.activities.admin.DetailProductActivitys;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -59,7 +59,7 @@ public class ManageProductAdapter extends RecyclerView.Adapter<ManageProductAdap
 
         // Click vào ảnh để xem chi tiết
         holder.imgProduct.setOnClickListener(v -> {
-            Intent intent = new Intent(context, DetailProductActivity.class);
+            Intent intent = new Intent(context, DetailProductActivitys.class);
             intent.putExtra("product", product); // product implements Serializable
             context.startActivity(intent);
         });

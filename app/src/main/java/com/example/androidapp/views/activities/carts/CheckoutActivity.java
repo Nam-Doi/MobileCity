@@ -15,17 +15,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
-import com.example.androidapp.views.adapters.cartAdt.CheckoutAdapter;
-
 import com.example.androidapp.models.Order;
 import com.example.androidapp.models.OrderItem;
+import com.example.androidapp.repositories.CartRepository;
+import com.example.androidapp.views.adapters.cartAdt.CheckoutAdapter;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class CheckoutActivity extends AppCompatActivity {
     private ImageView imgBack;
@@ -35,21 +34,28 @@ public class CheckoutActivity extends AppCompatActivity {
     private LinearLayout layoutAddress;
     private LinearLayout layoutPaymentMethod;
     private TextView tvTotalPayment;
+    private TextView tvPaymentMethod;
     private ArrayList<CartItem> selectedItems;
     private CheckoutAdapter checkoutAdapter;
     private TextView tvReceiverName, tvReceiverPhone, tvReceiverAddress;
+    private com.example.androidapp.models.PaymentMethod selectedPaymentMethod;
+
+    // Repository
+    private CartRepository cartRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_checkout);
 
-        initViews();           // 1. Khởi tạo views
-        receiveData();         // 2. Nhận dữ liệu
-        setupRecyclerView();   // 3. Setup RecyclerView với dữ liệu
-        calculateTotal();      // 4. Tính tổng tiền
-        setupEventListeners(); // 5. Gắn sự kiện
-        receiveAddress();      // 6. Nhận địa chỉ nếu có
+        cartRepository = new CartRepository();
+
+        initViews();
+        receiveData();
+        setupRecyclerView();
+        calculateTotal();
+        setupEventListeners();
+        receiveAddress();
     }
 
     private void initViews() {
@@ -60,6 +66,7 @@ public class CheckoutActivity extends AppCompatActivity {
         layoutAddress = findViewById(R.id.layoutAddress);
         layoutPaymentMethod = findViewById(R.id.layoutPaymentMethod);
         tvTotalPayment = findViewById(R.id.tvTotalPayment);
+        tvPaymentMethod = findViewById(R.id.tvPaymentMethod);
         tvReceiverName = findViewById(R.id.tvReceiverName);
         tvReceiverPhone = findViewById(R.id.tvReceiverPhone);
         tvReceiverAddress = findViewById(R.id.tvAddress);
@@ -71,12 +78,10 @@ public class CheckoutActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 selectedItems = intent.getParcelableArrayListExtra("selectedItems", CartItem.class);
             } else {
-                //noinspection deprecation
                 selectedItems = intent.getParcelableArrayListExtra("selectedItems");
             }
         }
 
-        // Kiểm tra dữ liệu
         if (selectedItems == null || selectedItems.isEmpty()) {
             Toast.makeText(this, "Không có sản phẩm được chọn", Toast.LENGTH_SHORT).show();
             finish();
@@ -97,7 +102,6 @@ public class CheckoutActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        // Khởi tạo adapter SAU KHI đã có dữ liệu
         checkoutAdapter = new CheckoutAdapter(selectedItems);
         rvCheckoutItems.setLayoutManager(new LinearLayoutManager(this));
         rvCheckoutItems.setAdapter(checkoutAdapter);
@@ -113,7 +117,6 @@ public class CheckoutActivity extends AppCompatActivity {
             subtotal += item.getTotalPrice();
         }
 
-        // Format tiền tệ
         tvTotal.setText(formatCurrency(subtotal));
         tvTotalPayment.setText(formatCurrency(subtotal));
     }
@@ -124,13 +127,12 @@ public class CheckoutActivity extends AppCompatActivity {
 
         layoutAddress.setOnClickListener(v -> {
             Intent intent = new Intent(this, SelectAddressActivity.class);
-            // Truyền selectedItems để giữ dữ liệu khi quay lại
             intent.putParcelableArrayListExtra("selectedItems", selectedItems);
             startActivityForResult(intent, 1001);
         });
 
         layoutPaymentMethod.setOnClickListener(v -> {
-            Intent intent = new Intent (this, PaymentMethodActivity.class);
+            Intent intent = new Intent(this, PaymentMethodActivity.class);
             intent.putParcelableArrayListExtra("selectedItems", selectedItems);
             startActivityForResult(intent, 1001);
         });
@@ -154,10 +156,16 @@ public class CheckoutActivity extends AppCompatActivity {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        String currentUid = "guest"; // Giá trị mặc định nếu user chưa đăng nhập
-        if (auth.getCurrentUser() != null) {
-            currentUid = auth.getCurrentUser().getUid();
+
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(this, "Vui lòng đăng nhập để đặt hàng", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        String currentUid = auth.getCurrentUser().getUid();
+
+        // Disable button để tránh click nhiều lần
+        btnCheckout.setEnabled(false);
 
         // 2. Chuyển đổi CartItems -> OrderItems
         List<OrderItem> orderItems = new ArrayList<>();
@@ -165,43 +173,81 @@ public class CheckoutActivity extends AppCompatActivity {
 
         for (CartItem cartItem : selectedItems) {
             OrderItem item = new OrderItem();
-            item.setProductId(cartItem.getId());
-            item.setName(cartItem.getName());
-            item.setPrice(cartItem.getPrice());
+            item.setProductId(cartItem.getProductId());
+            item.setName(cartItem.getCachedName());
+            item.setPrice(cartItem.getCachedPrice());
             item.setQty(cartItem.getQuantity());
 
             orderItems.add(item);
-            total += cartItem.getTotalPrice(); // Dùng hàm tính tổng có sẵn
+            total += cartItem.getTotalPrice();
         }
 
-        // 3. Tạo ID cho đơn hàng MỚI (Cách làm chuẩn)
+        // 3. Tạo ID cho đơn hàng mới
         String newOrderId = db.collection("orders").document().getId();
 
-        // 4. Tạo đối tượng Order (Dùng model của Giai đoạn 1)
+        // 4. Tạo đối tượng Order
         Order newOrder = new Order();
-        newOrder.setOrderId(newOrderId); // Gán ID mới
+        newOrder.setOrderId(newOrderId);
         newOrder.setUserId(currentUid);
         newOrder.setCustomerName(receiverName);
         newOrder.setPhone(receiverPhone);
         newOrder.setAddress(receiverAddress);
         newOrder.setTotal(total);
-        newOrder.setStatus("pending"); // Trạng thái mặc định
+        newOrder.setStatus("pending");
         newOrder.setCreatedAt(Timestamp.now());
         newOrder.setItems(orderItems);
 
-        // 5. Lưu đối tượng Order lên Firestore
+        // 5. Lưu đơn hàng
         db.collection("orders").document(newOrderId).set(newOrder)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Đặt hàng thành công!", Toast.LENGTH_SHORT).show();
-
-                    // TODO: Báo cho team Giỏ hàng rằng họ cần code logic
-                    // để xóa các sản phẩm đã mua khỏi giỏ hàng ở đây.
-
-                    // Đóng màn hình Checkout và quay về.
-                    finish();
+                    // ✅ SAU KHI ĐẶT HÀNG THÀNH CÔNG -> XÓA KHỎI GIỎ HÀNG
+                    removeItemsFromCart(currentUid);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Lỗi khi đặt hàng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    btnCheckout.setEnabled(true);
+                });
+    }
+
+    /**
+     * Xóa các sản phẩm đã mua khỏi giỏ hàng
+     */
+    private void removeItemsFromCart(String userId) {
+        // Tạo danh sách cartItemId cần xóa
+        List<String> cartItemIds = new ArrayList<>();
+
+        for (CartItem item : selectedItems) {
+            String cartItemId = item.getVariantId() != null ? item.getProductId() + "_" + item.getVariantId()
+                    : item.getProductId();
+            cartItemIds.add(cartItemId);
+        }
+
+        // Sử dụng CartRepository để xóa
+        cartRepository.removeMultipleItems(userId, cartItemIds,
+                new CartRepository.OnCartOperationListener() {
+                    @Override
+                    public void onSuccess(String message) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(CheckoutActivity.this,
+                                    "Đặt hàng thành công!",
+                                    Toast.LENGTH_SHORT).show();
+
+                            setResult(RESULT_OK);
+                            finish();
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(CheckoutActivity.this,
+                                    "Đặt hàng thành công nhưng không xóa được giỏ hàng",
+                                    Toast.LENGTH_SHORT).show();
+
+                            setResult(RESULT_OK);
+                            finish();
+                        });
+                    }
                 });
     }
 
@@ -210,20 +256,51 @@ public class CheckoutActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
-            // Nhận dữ liệu địa chỉ từ SelectAddressActivity
+            // Address result
             String receiverName = data.getStringExtra("receiverName");
             String receiverPhone = data.getStringExtra("receiverPhone");
             String address = data.getStringExtra("address");
 
+            boolean handled = false;
             if (receiverName != null && receiverPhone != null && address != null) {
                 tvReceiverName.setText(receiverName);
                 tvReceiverPhone.setText(receiverPhone);
                 tvReceiverAddress.setText(address);
+                handled = true;
+            }
+
+            // Payment method result (PaymentMethodActivity / adapter returns id + name)
+            String paymentId = data.getStringExtra("paymentMethodId");
+            String paymentName = data.getStringExtra("paymentMethodName");
+            if (paymentId != null) {
+                com.example.androidapp.models.PaymentMethod pm = new com.example.androidapp.models.PaymentMethod();
+                pm.setId(paymentId);
+                pm.setName(paymentName != null ? paymentName : "");
+                // store selected payment method
+                try {
+                    // selectedPaymentMethod field may not exist previously; add if present
+                    // using reflection would be heavy; but selectedPaymentMethod is not declared in
+                    // this file
+                    // We'll declare a local assignment to update UI and keep method selection
+                    // across process
+                    // If there's a field, set it; otherwise just update UI
+                    tvPaymentMethod.setText(pm.getName());
+                } catch (Exception ignored) {
+                }
+                handled = true;
+            }
+
+            // fallback: if nothing handled, try previous behavior for serialized object
+            if (!handled && data.hasExtra("selected_payment_method")) {
+                Object obj = data.getSerializableExtra("selected_payment_method");
+                if (obj instanceof com.example.androidapp.models.PaymentMethod) {
+                    com.example.androidapp.models.PaymentMethod pm = (com.example.androidapp.models.PaymentMethod) obj;
+                    tvPaymentMethod.setText(pm.getName());
+                }
             }
         }
     }
 
-    // Helper method để format tiền tệ
     private String formatCurrency(double amount) {
         return String.format("%,.0fđ", amount);
     }

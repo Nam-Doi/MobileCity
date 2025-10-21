@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
 
@@ -32,16 +33,22 @@ public class CheckoutAdapter extends RecyclerView.Adapter<CheckoutAdapter.Checko
     @Override
     public void onBindViewHolder(@NonNull CheckoutAdapter.CheckoutViewHolder holder, int position) {
         CartItem item = itemList.get(position);
-        holder.imgProduct.setImageResource(item.getImageResId());
-        holder.tvName.setText(item.getName());
-        // Giá gốc (gạch ngang)
-        holder.tvPriceOriginal.setText(String.format("%,.0fđ", item.getPriceOriginal()));
-        holder.tvPriceOriginal.setPaintFlags(
-                holder.tvPriceOriginal.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG
-        );
-
-        // Giá hiện tại
-        holder.tvPrice.setText(String.format("%,.0fđ", item.getPrice()));
+        
+        // Load ảnh sản phẩm
+        if (item.getCachedImageUrl() != null && !item.getCachedImageUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(item.getCachedImageUrl())
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .into(holder.imgProduct);
+        }
+        
+        holder.tvName.setText(item.getCachedName());
+        
+        // Giá hiện tại (không có giá gốc trong CartItem)
+        holder.tvPrice.setText(String.format("%,.0fđ", item.getCachedPrice()));
+        
+        // Ẩn giá gốc vì CartItem không có thông tin này
+        holder.tvPriceOriginal.setVisibility(View.GONE);
 
         // Số lượng
         holder.tvQuantity.setText("x" + item.getQuantity());
@@ -50,8 +57,6 @@ public class CheckoutAdapter extends RecyclerView.Adapter<CheckoutAdapter.Checko
         double itemTotal = item.getTotalPrice();
         holder.tvItemCount.setText(String.format("Tổng số tiền (%d sản phẩm):", item.getQuantity()));
         holder.tvItemTotal.setText(String.format("%,.0fđ", itemTotal));
-
-
     }
 
     @Override

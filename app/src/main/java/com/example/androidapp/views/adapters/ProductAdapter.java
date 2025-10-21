@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
-import com.example.androidapp.views.activities.admin.DetailProductActivity;
+import com.example.androidapp.views.activities.admin.DetailProductActivitys;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -52,7 +52,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         // Khi click vào ảnh mở DetailActivity
         holder.imgProduct.setOnClickListener(v -> {
-            Intent intent = new Intent(context, DetailProductActivity.class);
+            Intent intent = new Intent(context, DetailProductActivitys.class);
             intent.putExtra("phones", (Parcelable) product); // Product cần implements Serializable hoặc Parcelable
             context.startActivity(intent);
         });

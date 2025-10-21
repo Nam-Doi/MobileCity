@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView; // Thêm import
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
 import com.example.androidapp.views.activities.Product.DetailProductActivity;
+import com.example.androidapp.views.activities.admin.DetailProductActivitys;
 import com.example.androidapp.views.adapters.ProductGridAdapter;
 import com.example.androidapp.views.adapters.SearchSuggestionAdapter; // ✅ IMPORT MỚI
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -51,8 +52,8 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
@@ -69,10 +70,11 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
         searchList = new ArrayList<>();
 
         // 1. Khởi tạo Adapter cho GridView chính
-        // LƯU Ý: productAdapter PHẢI CÓ constructor nhận thêm 'this' (OnItemClickListener)
+        // LƯU Ý: productAdapter PHẢI CÓ constructor nhận thêm 'this'
+        // (OnItemClickListener)
         productAdapter = new ProductGridAdapter(requireContext(), productList, this);
         gridViewProducts.setAdapter(productAdapter);
-        //Thành thêm
+        // Thành thêm
         gridViewProducts.setOnItemClickListener((parent, itemView, position, id) -> {
             Product selectedProduct = productList.get(position);
 
@@ -84,7 +86,7 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
 
                 startActivity(intent);
             }
-        });//End
+        });// End
 
         // 2. Khởi tạo Adapter cho RecyclerView tìm kiếm
         // Dùng SearchSuggestionAdapter và truyền 'this' (OnItemClickListener)
@@ -102,20 +104,31 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
     }
 
     // ✅ TRIỂN KHAI HÀNH ĐỘNG CLICK (Hàm xử lý chuyển màn hình chi tiết)
+    // @Override
+    // public void onItemClick(Product product) {
+    // // Tùy chọn: Ẩn khung tìm kiếm và bàn phím sau khi click
+    // recyclerViewSearchResults.setVisibility(View.GONE);
+    // edtSearch.setText(""); // Xóa nội dung tìm kiếm
+    //
+    // Intent intent = new Intent(requireContext(), DetailProductActivity.class);
+    // intent.putExtra("phones", product);
+    // startActivity(intent);
+    // }
     @Override
     public void onItemClick(Product product) {
-        // Tùy chọn: Ẩn khung tìm kiếm và bàn phím sau khi click
         recyclerViewSearchResults.setVisibility(View.GONE);
-        edtSearch.setText(""); // Xóa nội dung tìm kiếm
+        edtSearch.setText("");
 
         Intent intent = new Intent(requireContext(), DetailProductActivity.class);
-        intent.putExtra("phones", product);
+        intent.putExtra("DOC_ID", product.getId()); // ✅ Truyền ID thay vì object
         startActivity(intent);
     }
 
     private void setupSearchListener() {
         edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -131,7 +144,9 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
                 }
             }
 
-            @Override public void afterTextChanged(Editable s) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
         });
     }
 
@@ -160,12 +175,16 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
                     productList.clear();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Product product = doc.toObject(Product.class);
-                        productList.add(product);
+                        if (product != null) {
+                            // Đảm bảo Product có ID tài liệu để truyền tới DetailProductActivity
+                            product.setId(doc.getId());
+                            productList.add(product);
+                        }
                     }
                     productAdapter.notifyDataSetChanged();
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(), "Không thể tải sản phẩm", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(
+                        e -> Toast.makeText(getContext(), "Không thể tải sản phẩm", Toast.LENGTH_SHORT).show());
     }
 
     private void showPopupMenu(View v) {

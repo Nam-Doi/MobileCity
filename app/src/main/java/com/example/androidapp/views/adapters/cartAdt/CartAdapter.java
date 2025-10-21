@@ -12,8 +12,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
+import com.example.androidapp.repositories.CartRepository;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,16 +47,27 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public void onBindViewHolder(@NonNull CartAdapter.CartViewHolder holder, int position) {
         CartItem item = cartList.get(position);
 
-        // Set data
-        holder.imgProduct.setImageResource(item.getImageResId());
-        holder.tvName.setText(item.getName());
-        holder.tvVariant.setText(item.getVariant());
-        holder.tvPriceOriginal.setText(String.format("%,.0fđ", item.getPriceOriginal()));
-        holder.tvPriceOriginal.setPaintFlags(holder.tvPriceOriginal.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        holder.tvPrice.setText(String.format("%,.0fđ", item.getPrice()));
+        // Load ảnh sản phẩm
+        if (item.getCachedImageUrl() != null && !item.getCachedImageUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(item.getCachedImageUrl())
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .into(holder.imgProduct);
+        }
+
+        holder.tvName.setText(item.getCachedName());
+        holder.tvVariant.setText(item.getVariantName() != null ? item.getVariantName() : "Mặc định");
+
+        // Ẩn giá gốc vì CartItem không có thông tin này (view có thể không tồn tại
+        // trong layout)
+        if (holder.tvPriceOriginal != null) {
+            holder.tvPriceOriginal.setVisibility(View.GONE);
+        }
+        holder.tvPrice.setText(String.format("%,.0fđ", item.getCachedPrice()));
         holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
 
-        // QUAN TRỌNG: Remove listener cũ trước khi set checked để tránh trigger không cần thiết
+        // QUAN TRỌNG: Remove listener cũ trước khi set checked để tránh trigger không
+        // cần thiết
         holder.cbSelectItem.setOnCheckedChangeListener(null);
         holder.cbSelectItem.setChecked(item.isSelected());
 
@@ -74,7 +89,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 if (item.isSelected() && listener != null) {
                     listener.onCartUpdated();
                 }
-            }else {
+            } else {
                 // Hiển thị dialog xác nhận xóa
                 showDeleteConfirmDialog(v, item, holder.getAdapterPosition());
             }
@@ -94,7 +109,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         // Click variant để chọn biến thể
         holder.tvVariant.setOnClickListener(v -> {
             Toast.makeText(v.getContext(),
-                    "Chọn biến thể: " + item.getName(),
+                    "Chọn biến thể: " + item.getVariantName(),
                     Toast.LENGTH_SHORT).show();
             // TODO: Show variant selection dialog
         });
@@ -115,11 +130,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         }
         return total;
     }
+
     public int getTotalQuantity() {
         int count = cartList.size();
         return count;
 
     }
+
     // Đếm số lượng item được chọn
     public int getSelectedItemCount() {
         int count = 0;
@@ -161,16 +178,44 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             listener.onCartUpdated();
         }
     }
+
     // Hiển thị dialog xác nhận xóa
     private void showDeleteConfirmDialog(View view, CartItem item, int position) {
         new android.app.AlertDialog.Builder(view.getContext())
                 .setTitle("Xóa sản phẩm")
                 .setMessage("Bạn có muốn xóa bỏ sản phẩm này?")
                 .setPositiveButton("Đồng ý", (dialog, which) -> {
-                    removeItem(position);
-                    Toast.makeText(view.getContext(),
-                            "Đã xóa sản phẩm khỏi giỏ hàng",
-                            Toast.LENGTH_SHORT).show();
+                    // Xóa trên Firestore trước, sau đó xóa local nếu thành công
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    if (user == null) {
+                        Toast.makeText(view.getContext(), "Vui lòng đăng nhập để xóa sản phẩm", Toast.LENGTH_SHORT)
+                                .show();
+                        return;
+                    }
+
+                    CartRepository repo = new CartRepository();
+                    String userId = user.getUid();
+                    String productId = item.getProductId();
+                    String variantId = item.getVariantId();
+
+                    repo.removeItem(userId, productId, variantId, new CartRepository.OnCartOperationListener() {
+                        @Override
+                        public void onSuccess(String message) {
+                            // Tìm lại vị trí item trong danh sách (position có thể đã thay đổi)
+                            int idx = cartList.indexOf(item);
+                            if (idx >= 0) {
+                                removeItem(idx);
+                            }
+                            Toast.makeText(view.getContext(), "Đã xóa sản phẩm khỏi giỏ hàng", Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Toast.makeText(view.getContext(), "Không thể xóa sản phẩm: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 })
                 .setNegativeButton("Không", (dialog, which) -> {
                     dialog.dismiss();
@@ -191,7 +236,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             tvName = itemView.findViewById(R.id.tvName);
             tvVariant = itemView.findViewById(R.id.tvVariant);
             tvPriceOriginal = itemView.findViewById(R.id.tvPriceOriginal);
-            tvPriceOriginal.setPaintFlags(tvPriceOriginal.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            if (tvPriceOriginal != null) {
+                tvPriceOriginal.setPaintFlags(tvPriceOriginal.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            }
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvQuantity = itemView.findViewById(R.id.tvQuantity);
             tvMinus = itemView.findViewById(R.id.tvMinus);
