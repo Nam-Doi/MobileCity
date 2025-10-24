@@ -30,8 +30,10 @@ import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
 import com.example.androidapp.models.Product;
+import com.example.androidapp.models.ProductVariant;
 import com.example.androidapp.repositories.CartRepository;
 import com.example.androidapp.views.activities.carts.CheckoutActivity;
+import com.example.androidapp.views.adapters.OptionAdapter;
 import com.example.androidapp.views.adapters.SearchSuggestionAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -43,24 +45,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DetailProductActivity extends AppCompatActivity {
+    String selectedColor, selectedMemory;
     ImageView iv_product;
     TextView tv_name_product, tv_product_price, tv_stock;
     TableLayout tableLayout;
     Button btn_buy, btn_add_to_cart;
-    RecyclerView rv_suggestItem;
+    RecyclerView rv_suggestItem, rvColorOption, rvMemoryOption;
     List<Product> suggestionList = new ArrayList<>();
     SearchSuggestionAdapter suggestionAdapter;
     // luu san pham hien tai
     Product currentProduct;
+    ProductVariant selectedVariant;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     FirebaseAuth auth = FirebaseAuth.getInstance();
     CartRepository cartRepository;
     ScrollView sv_detail;
     MenuItem searchItem;
     SearchView searchView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,12 +77,15 @@ public class DetailProductActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Thông tin chi tiết");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             toolbar.getNavigationIcon().setTint(Color.WHITE);
+            toolbar.setTitleTextColor(Color.WHITE);
         }
         iv_product = findViewById(R.id.iv_product);
         tv_name_product = findViewById(R.id.tv_name_product);
         tv_product_price = findViewById(R.id.tv_prooduct_price);
         tableLayout = findViewById(R.id.tablelayout);
         sv_detail = findViewById(R.id.sv_detail);
+        rvColorOption = findViewById(R.id.rv_color_option);
+        rvMemoryOption = findViewById(R.id.rv_memory_option);
         tv_stock = findViewById(R.id.tv_stock);
         btn_add_to_cart = findViewById(R.id.btn_add_to_cart);
         btn_buy = findViewById(R.id.btn_buy);
@@ -290,75 +297,39 @@ public class DetailProductActivity extends AppCompatActivity {
 
     // Hàm lấy dữ liệu và loadform
     private void loadProductFromFirestore(String docId) {
-        Log.d("DetailProduct", "Loading product with ID: " + docId);
         db.collection("phones")
                 .document(docId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        Log.d("DetailProduct", "Product document exists");
-                        // Tạo đối tượng Product từ Firestore document
                         currentProduct = documentSnapshot.toObject(Product.class);
-                        if (currentProduct != null) {
-                            currentProduct.setId(documentSnapshot.getId()); // Đảm bảo có ID
-                            Log.d("DetailProduct",
-                                    "Product loaded: " + currentProduct.getName() + " ID: " + currentProduct.getId());
-                        } else {
-                            Log.e("DetailProduct", "Failed to parse Product from document");
+                        if (currentProduct == null) return;
+
+                        // Hiển thị thông tin chung
+                        tv_name_product.setText(currentProduct.getName());
+                        if (currentProduct.getSpecifications() != null) {
+                            displaySpecs(currentProduct.getSpecifications());
                         }
 
-                        String name = documentSnapshot.getString("name");
-                        Long price = documentSnapshot.getLong("price");
-                        List<String> imageUrls = (List<String>) documentSnapshot.get("imageUrls");
-                        Map<String, Object> specifications = (Map<String, Object>) documentSnapshot
-                                .get("specifications");
-                        // Lấy s lượng
-                        Long stock = documentSnapshot.getLong("stock");
-                        if (stock != null && stock > 0) {
-                            tv_stock.setText("Còn: " + stock);
-                            tv_stock.setTextColor(Color.parseColor("#2E7D32"));
-                        } else {
-                            tv_stock.setText("Hết hàng");
-                            tv_stock.setTextColor(Color.RED);
+                        // Cài đặt và hiển thị các lựa chọn biến thể
+                        if (currentProduct.getVariants() != null && !currentProduct.getVariants().isEmpty()) {
+                            setupVariantSelectors(currentProduct.getVariants());
                         }
-                        tv_name_product.setText(name);
-                        if (price != null) {
-
-                            NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-                            tv_product_price.setText(currencyFormatter.format(price));
-                        }
-
-                        if (imageUrls != null && !imageUrls.isEmpty()) {
-                            Glide.with(this)
-                                    .load(imageUrls.get(0))
-                                    .placeholder(R.drawable.ic_launcher_background)
-                                    .into(iv_product);
-                        }
-
-                        if (specifications != null) {
-                            displaySpecs(specifications);// gọi hàm tạo bảng
-                        }
-                    } else {
-                        Toast.makeText(this, "Không tìm thấy sản phẩm", Toast.LENGTH_SHORT).show();
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Lấy dữ liệu thất bại", Toast.LENGTH_SHORT).show();
-                    Log.e("Firestore", "Error", e);
                 });
     }
 
     // Hàm này tạo bảng thông số chi tiết
-    private void displaySpecs(Map<String, Object> specs) {
+    private void displaySpecs(Map<String, String> specs) {
         tableLayout.removeAllViews();
         if (specs == null)
             return;
         LayoutInflater inflater = LayoutInflater.from(this);
         Map<String, String> labelMapping = Map.of(
-                "display", "Màn hình", "os", "Hệ điều hành", "mainCamera", "Camera sau",
-                "frontCamera", "Camera trước", "cpu", "CPU", "ram", "RAM",
-                "storage", "Bộ nhớ trong", "battery", "Dung lượng pin");
-        for (Map.Entry<String, Object> entry : specs.entrySet()) {
+                "display", "Màn hình:", "os", "Hệ điều hành:", "mainCamera", "Camera sau:",
+                "frontCamera", "Camera trước:", "cpu", "CPU:", "ram", "RAM:",
+                "storage", "Bộ nhớ trong:", "battery", "Dung lượng pin:");
+        for (Map.Entry<String, String> entry : specs.entrySet()) {
             TableRow row = (TableRow) inflater.inflate(R.layout.row_specification, tableLayout, false);
             TextView tvLabel = row.findViewById(R.id.tvLabel);
             TextView tvValue = row.findViewById(R.id.tvValue);
@@ -391,23 +362,29 @@ public class DetailProductActivity extends AppCompatActivity {
                     return false;
                 }
                 String keyword = newText.toLowerCase();
-                db.collection("phones").orderBy("name_lowercase").startAt(keyword).endAt(keyword + "\uf8ff").limit(10)
+
+                // Lấy TẤT CẢ document trong collection "phones"
+                db.collection("phones")
                         .get()
                         .addOnSuccessListener(queryDocumentSnapshots -> {
                             suggestionList.clear();
                             if (!queryDocumentSnapshots.isEmpty()) {
+                                // Lặp qua TẤT CẢ sản phẩm đã tải về
                                 for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                     Product p = doc.toObject(Product.class);
-                                    if (p != null) {
-                                        p.setId(doc.getId());
-                                        suggestionList.add(p);
+                                    if (p != null && p.getName() != null) {
+                                        // Tự lọc bằng code Java ở đây
+                                        if (p.getName().toLowerCase().contains(keyword)) {
+                                            p.setId(doc.getId());
+                                            suggestionList.add(p);
+                                        }
                                     }
                                 }
                             }
                             suggestionAdapter.notifyDataSetChanged();
                             rv_suggestItem.setVisibility(!suggestionList.isEmpty() ? View.VISIBLE : View.GONE);
                         })
-                        .addOnFailureListener(e -> Log.e("DEBUG_SEARCH", "Lỗi khi tìm kiếm", e));
+                        .addOnFailureListener(e -> Log.e("DEBUG_SEARCH", "Lỗi khi lấy dữ liệu", e));
                 return true;
             }
         });
@@ -442,5 +419,86 @@ public class DetailProductActivity extends AppCompatActivity {
             view = new View(this);
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+    private void updateUIForVariant(ProductVariant variant) {
+        if (variant == null) return;
+        this.selectedVariant = variant;
+        btn_buy.setEnabled(true); // Kích hoạt lại nút Mua ngay
+        btn_buy.setText("Mua ngay"); // (Tùy chọn) Đặt lại chữ trên nút
+
+        // Cập nhật giá từ biến thể
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        tv_product_price.setText(currencyFormatter.format(variant.getPrice()));
+
+        // Cập nhật tình trạng kho từ biến thể
+        if (variant.getStock() > 0) {
+            tv_stock.setText("Còn lại: " + variant.getStock());
+            tv_stock.setTextColor(Color.parseColor("#2E7D32"));
+        } else {
+            btn_buy.setEnabled(false); // Vô hiệu hóa nút Mua ngay
+            btn_buy.setText("Không có sẵn"); // (Tùy chọn) Đổi chữ trên nút
+            tv_stock.setText("Hết hàng");
+            tv_stock.setTextColor(Color.RED);
+        }
+
+        // Cập nhật hình ảnh từ biến thể
+        List<String> imageUrls = variant.getImageUrls();
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            Glide.with(this)
+                    .load(imageUrls.get(0))
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .into(iv_product);
+        }
+    }
+
+    private void setupVariantSelectors(List<ProductVariant> variants) {
+        // Lấy variant mặc định (cái đầu tiên)
+        ProductVariant defaultVariant = variants.get(0);
+        selectedColor = defaultVariant.getColor();
+        selectedMemory = defaultVariant.getRam() + "-" + defaultVariant.getStorage();
+        updateUIForVariant(defaultVariant);
+
+        // 1. Tách ra danh sách màu sắc và bộ nhớ DUY NHẤT
+        List<String> colors = variants.stream()
+                .map(ProductVariant::getColor)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<String> memories = variants.stream()
+                .map(v -> v.getRam() + "-" + v.getStorage())
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 2. Tạo Adapter cho Màu sắc
+        OptionAdapter colorAdapter = new OptionAdapter(colors, option -> {
+            selectedColor = option;
+            findAndDisplayMatchingVariant();
+        });
+        rvColorOption.setAdapter(colorAdapter);
+
+        // 3. Tạo Adapter cho Bộ nhớ
+        OptionAdapter memoryAdapter = new OptionAdapter(memories, option -> {
+            selectedMemory = option;
+            findAndDisplayMatchingVariant();
+        });
+        rvMemoryOption.setAdapter(memoryAdapter);
+    }
+
+    private void findAndDisplayMatchingVariant() {
+        if (currentProduct == null || currentProduct.getVariants() == null) return;
+
+        for (ProductVariant variant : currentProduct.getVariants()) {
+            String memory = variant.getRam() + "-" + variant.getStorage();
+            if (variant.getColor().equals(selectedColor) && memory.equals(selectedMemory)) {
+                // Tìm thấy variant khớp, cập nhật giao diện
+                updateUIForVariant(variant);
+                return;
+            }
+        }
+        // (Tùy chọn) Xử lý trường hợp không có variant nào khớp (ví dụ: vô hiệu hóa nút Mua)
+        Toast.makeText(this, "Phiên bản này không có sẵn", Toast.LENGTH_SHORT).show();
+        tv_stock.setText("Sắp về");
+        btn_buy.setEnabled(false); // Vô hiệu hóa nút Mua ngay
+        btn_buy.setText("Không có sẵn"); // (Tùy chọn) Đổi chữ trên nút
     }
 }
