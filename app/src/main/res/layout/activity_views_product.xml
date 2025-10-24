@@ -3,42 +3,79 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@drawable/bg_gradient_background">
+    android:padding="16dp"
+    android:background="@color/white">
 
     <!-- Tiêu đề -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Xem danh sách mặt hàng"
-        android:textColor="@color/white"
-        android:textSize="24sp"
+        android:text="Danh sách sản phẩm"
+        android:textColor="@color/black"
         android:textStyle="bold"
+        android:textSize="22sp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="12dp" />
 
-    <!-- Horizontal ScrollView chứa các button brand -->
-    <HorizontalScrollView
+    <!-- Bộ lọc Category -->
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:layout_marginBottom="16dp">
+        android:text="Chọn loại sản phẩm:"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_marginBottom="4dp" />
 
-        <LinearLayout
-            android:id="@+id/layoutBrandButtons"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="4dp"/>
-    </HorizontalScrollView>
+    <Spinner
+        android:id="@+id/spinnerCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_spinner"
+        android:padding="8dp"
+        android:layout_marginBottom="12dp" />
 
-    <!-- RecyclerView dạng lưới 2 cột -->
+    <!-- Bộ lọc Brand -->
+    <TextView
+        android:id="@+id/tvBrandLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chọn thương hiệu:"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone" />
+
+    <Spinner
+        android:id="@+id/spinnerBrand"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_spinner"
+        android:padding="8dp"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone" />
+
+    <!-- Nút Reset -->
+    <Button
+        android:id="@+id/btnResetFilter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Đặt lại bộ lọc"
+        android:textAllCaps="false"
+        android:backgroundTint="@color/black"
+        android:textColor="@color/white"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Danh sách sản phẩm -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvViewProducts"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingBottom="16dp"/>
+        android:paddingBottom="16dp" />
+
 </LinearLayout>

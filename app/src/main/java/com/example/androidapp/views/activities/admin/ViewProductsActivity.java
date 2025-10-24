@@ -1,84 +1,185 @@
 package com.example.androidapp.views.activities.admin;
 
 import android.os.Bundle;
-import android.util.Log; // <-- THÊM DÒNG NÀY
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidapp.R;
-import com.example.androidapp.views.adapters.ProductAdapter;
 import com.example.androidapp.models.Product;
+import com.example.androidapp.views.adapters.ViewProductAdapter;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ViewProductsActivity extends AppCompatActivity {
+
     private RecyclerView recyclerView;
-    private ProductAdapter adapter;
-    private List<Product> productList;
+    private Spinner spinnerCategory, spinnerBrand;
+    private TextView tvBrandLabel;
+    private Button btnResetFilter;
+
+    private ViewProductAdapter adapter;
+    private final List<Product> allProducts = new ArrayList<>();
+    private final List<Product> filteredProducts = new ArrayList<>();
+
     private FirebaseFirestore db;
+    private ArrayAdapter<String> categoryAdapter, brandAdapter;
+
+    private String selectedCategory = null;
+    private String selectedBrand = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_views_product);
 
-        // SỬA LỖI TIỀM NĂNG:
-        // Đảm bảo tên layout là "activity_view_products" chứ không phải "activity_views_product"
-        setContentView(R.layout.activity_views_product); // <-- Kiểm tra lại tên file XML này
-
+        // Ánh xạ
         recyclerView = findViewById(R.id.rvViewProducts);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        spinnerCategory = findViewById(R.id.spinnerCategory);
+        spinnerBrand = findViewById(R.id.spinnerBrand);
+        tvBrandLabel = findViewById(R.id.tvBrandLabel);
+        btnResetFilter = findViewById(R.id.btnResetFilter);
 
-        productList = new ArrayList<>();
-        adapter = new ProductAdapter(this, productList);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        adapter = new ViewProductAdapter(this, filteredProducts);
         recyclerView.setAdapter(adapter);
 
         db = FirebaseFirestore.getInstance();
-
         fetchProducts();
+
+        // Xử lý chọn Category
+        spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String category = spinnerCategory.getSelectedItem().toString();
+                if (!category.equals("Tất cả")) {
+                    selectedCategory = category;
+                    showBrandFilter(category);
+                } else {
+                    selectedCategory = null;
+                    tvBrandLabel.setVisibility(View.GONE);
+                    spinnerBrand.setVisibility(View.GONE);
+                }
+                applyFilters();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        // Xử lý chọn Brand
+        spinnerBrand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String brand = spinnerBrand.getSelectedItem().toString();
+                selectedBrand = brand.equals("Tất cả") ? null : brand;
+                applyFilters();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        // Nút reset lọc
+        btnResetFilter.setOnClickListener(v -> {
+            selectedCategory = null;
+            selectedBrand = null;
+            spinnerCategory.setSelection(0);
+            tvBrandLabel.setVisibility(View.GONE);
+            spinnerBrand.setVisibility(View.GONE);
+            applyFilters();
+        });
     }
 
-    // --- HÀM ĐÃ SỬA LỖI NẰM Ở ĐÂY ---
     private void fetchProducts() {
         db.collection("phones").get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    productList.clear();
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-
-                        // Bọc trong try-catch để bắt lỗi
+                .addOnSuccessListener(querySnapshot -> {
+                    allProducts.clear();
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
                         try {
-                            // Lệnh có thể gây crash
                             Product product = doc.toObject(Product.class);
-
-                            // Kiểm tra an toàn: Nếu 'variants' là null (dữ liệu cũ)
-                            // hoặc cấu trúc sai, ta bỏ qua
-                            if (product.getVariants() == null) {
-                                Log.w("FetchProduct", "Bỏ qua sản phẩm có cấu trúc cũ/lỗi: " + doc.getId());
-                                continue; // Bỏ qua, đi đến sản phẩm tiếp theo
-                            }
-
-                            // Gán ID cho sản phẩm (quan trọng cho các chức năng sau)
                             product.setId(doc.getId());
 
-                            // Nếu không lỗi, thêm vào list
-                            productList.add(product);
+                            // Chống null dữ liệu
+                            if (product.getName() == null) product.setName("Không tên");
+                            if (product.getBrand() == null) product.setBrand("Không xác định");
+                            if (product.getCategory() == null) product.setCategory("Khác");
 
+                            allProducts.add(product);
                         } catch (Exception e) {
-                            // Bắt lỗi (bao gồm cả lỗi "Expected List, got HashMap")
-                            Log.e("FetchProductError", "Lỗi map dữ liệu cho sản phẩm: " + doc.getId(), e);
-                            // Bỏ qua sản phẩm lỗi này và tiếp tục
+                            e.printStackTrace();
                         }
                     }
-                    // Cập nhật adapter sau khi đã lọc
-                    adapter.notifyDataSetChanged();
+
+                    setupCategorySpinner();
+                    applyFilters();
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(ViewProductsActivity.this, "Lỗi tải dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Lỗi tải dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void setupCategorySpinner() {
+        Set<String> categories = new HashSet<>();
+        for (Product p : allProducts) {
+            if (p.getCategory() != null && !p.getCategory().isEmpty()) {
+                categories.add(p.getCategory());
+            }
+        }
+
+        List<String> sortedCategories = new ArrayList<>(categories);
+        Collections.sort(sortedCategories); // Sắp xếp theo alphabet
+        sortedCategories.add(0, "Tất cả"); // Thêm "Tất cả" lên đầu
+
+        categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, sortedCategories);
+        spinnerCategory.setAdapter(categoryAdapter);
+    }
+
+    private void showBrandFilter(String category) {
+        Set<String> brands = new HashSet<>();
+        for (Product p : allProducts) {
+            if (category.equals(p.getCategory())) {
+                brands.add(p.getBrand());
+            }
+        }
+
+        List<String> sortedBrands = new ArrayList<>(brands);
+        Collections.sort(sortedBrands);
+        sortedBrands.add(0, "Tất cả"); // "Tất cả" luôn ở đầu
+
+        brandAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, sortedBrands);
+        spinnerBrand.setAdapter(brandAdapter);
+
+        tvBrandLabel.setVisibility(View.VISIBLE);
+        spinnerBrand.setVisibility(View.VISIBLE);
+    }
+
+    private void applyFilters() {
+        filteredProducts.clear();
+
+        for (Product p : allProducts) {
+            boolean matchCategory = (selectedCategory == null) || selectedCategory.equals(p.getCategory());
+            boolean matchBrand = (selectedBrand == null) || selectedBrand.equals(p.getBrand());
+
+            if (matchCategory && matchBrand) {
+                filteredProducts.add(p);
+            }
+        }
+
+        adapter.notifyDataSetChanged();
     }
 }

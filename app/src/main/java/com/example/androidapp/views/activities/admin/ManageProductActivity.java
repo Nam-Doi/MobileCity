@@ -2,8 +2,12 @@ package com.example.androidapp.views.activities.admin;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log; // <-- THÊM DÒNG NÀY
-import android.widget.Button;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -14,6 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
 import com.example.androidapp.views.adapters.ManageProductAdapter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -24,14 +30,20 @@ public class ManageProductActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private ManageProductAdapter adapter;
-    private List<Product> productList;
+    private List<Product> allProducts;
+    private List<Product> filteredProducts;
     private FirebaseFirestore db;
-    private Button btnAddProduct;
+
+    // 🔹 Đổi tên để rõ ràng hơn
+    private FloatingActionButton fabAddProduct;
+    private TextInputEditText etSearchProduct;
+    private Spinner spinnerCategory; // 🔹 thay cho spinnerBrand
+    private List<String> categoryList;
 
     @Override
     protected void onResume() {
         super.onResume();
-        fetchProducts(); // refresh khi trở về từ Add/Edit
+        fetchProducts();
     }
 
     @Override
@@ -40,24 +52,26 @@ public class ManageProductActivity extends AppCompatActivity {
         setContentView(R.layout.activity_manage_product);
 
         recyclerView = findViewById(R.id.rvManageProducts);
-        btnAddProduct = findViewById(R.id.btnAddProduct);
+        fabAddProduct = findViewById(R.id.fabAddProduct);
+        etSearchProduct = findViewById(R.id.etSearchProduct);
+        spinnerCategory = findViewById(R.id.spinnerCategory); // 🔹
 
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
-        productList = new ArrayList<>();
-        adapter = new ManageProductAdapter(this, productList, new ManageProductAdapter.OnProductActionListener() {
+        allProducts = new ArrayList<>();
+        filteredProducts = new ArrayList<>();
 
+        adapter = new ManageProductAdapter(this, filteredProducts, new ManageProductAdapter.OnProductActionListener() {
             @Override
             public void onEdit(Product product) {
                 Intent intent = new Intent(ManageProductActivity.this, EditProductActivity.class);
-                intent.putExtra("product", product); // Truyền object product
+                intent.putExtra("product", product);
                 startActivity(intent);
             }
 
-
             @Override
             public void onDelete(Product product) {
-                if(product.getId() != null){
+                if (product.getId() != null) {
                     db.collection("phones").document(product.getId())
                             .delete()
                             .addOnSuccessListener(aVoid -> {
@@ -72,49 +86,83 @@ public class ManageProductActivity extends AppCompatActivity {
         });
 
         recyclerView.setAdapter(adapter);
+        db = FirebaseFirestore.getInstance();
 
-        btnAddProduct.setOnClickListener(v -> {
-            Intent intent = new Intent(ManageProductActivity.this, AddProductActivity.class);
-            startActivity(intent);
+        fabAddProduct.setOnClickListener(v -> {
+            startActivity(new Intent(ManageProductActivity.this, AddProductActivity.class));
         });
 
-        db = FirebaseFirestore.getInstance();
-        fetchProducts();
+        etSearchProduct.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                applyFilter();
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, android.view.View view, int position, long id) {
+                applyFilter();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                applyFilter();
+            }
+        });
     }
 
-    // --- HÀM ĐÃ SỬA LỖI NẰM Ở ĐÂY ---
+    // --- Lấy sản phẩm từ Firestore ---
     private void fetchProducts() {
         db.collection("phones").get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    productList.clear();
+                    allProducts.clear();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-
-                        // Bọc trong try-catch để bắt lỗi
                         try {
-                            // Lệnh có thể gây crash
                             Product product = doc.toObject(Product.class);
-
-                            // Kiểm tra an toàn: Nếu 'variants' là null (dữ liệu cũ)
-                            // hoặc cấu trúc sai, ta bỏ qua
-                            if (product.getVariants() == null) {
-                                Log.w("FetchProduct", "Bỏ qua sản phẩm có cấu trúc cũ/lỗi: " + doc.getId());
-                                continue; // Bỏ qua, đi đến sản phẩm tiếp theo
-                            }
-
-                            // Nếu không lỗi, thêm vào list
+                            if (product.getVariants() == null) continue;
                             product.setId(doc.getId());
-                            productList.add(product);
-
+                            allProducts.add(product);
                         } catch (Exception e) {
-                            // Bắt lỗi (bao gồm cả lỗi "Expected List, got HashMap")
-                            Log.e("FetchProductError", "Lỗi map dữ liệu cho sản phẩm: " + doc.getId(), e);
-                            // Bỏ qua sản phẩm lỗi này và tiếp tục
+                            Log.e("FetchProductError", "Lỗi map dữ liệu: " + doc.getId(), e);
                         }
                     }
-                    // Cập nhật adapter sau khi đã lọc
-                    adapter.notifyDataSetChanged();
+
+                    // --- 🔹 Setup spinner category ---
+                    categoryList = new ArrayList<>();
+                    categoryList.add("All"); // hiển thị tất cả
+
+                    // 🔹 Nếu bạn muốn cố định 3 category cụ thể
+                    categoryList.add("Điện thoại");
+                    categoryList.add("Phụ kiện");
+                    categoryList.add("Máy tính bảng");
+
+                    ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryList);
+                    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerCategory.setAdapter(spinnerAdapter);
+
+                    applyFilter();
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(ManageProductActivity.this, "Lỗi tải dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Lỗi tải dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    // --- 🔹 Filter theo tên + category ---
+    private void applyFilter() {
+        String query = etSearchProduct.getText() != null ? etSearchProduct.getText().toString().trim().toLowerCase() : "";
+        String selectedCategory = spinnerCategory.getSelectedItem() != null ? spinnerCategory.getSelectedItem().toString() : "All";
+
+        filteredProducts.clear();
+        for (Product p : allProducts) {
+            boolean matchesName = p.getName() != null && p.getName().toLowerCase().contains(query);
+            boolean matchesCategory = selectedCategory.equals("All") ||
+                    (p.getCategory() != null && p.getCategory().equalsIgnoreCase(selectedCategory));
+
+            if (matchesName && matchesCategory) {
+                filteredProducts.add(p);
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 }

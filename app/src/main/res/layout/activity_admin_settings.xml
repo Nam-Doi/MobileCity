@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient_background"
+    android:background="#FFFFFF"
     android:padding="24dp">
 
     <LinearLayout
@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cài đặt"
-            android:textColor="@color/white"
+            android:textColor="#000000"
             android:textStyle="bold"
             android:textSize="24sp"
             android:layout_marginBottom="24dp" />
@@ -26,9 +26,11 @@
             android:layout_height="wrap_content"
             android:text="Đổi tên"
             android:textAllCaps="false"
-            android:backgroundTint="@color/purple_700"
-            android:textColor="@color/white"
-            android:layout_marginBottom="12dp" />
+            android:backgroundTint="#000000"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="12dp"
+            android:padding="12dp"
+            android:background="@drawable/btn_black_rounded" />
 
         <Button
             android:id="@+id/btnLogout"
@@ -36,7 +38,8 @@
             android:layout_height="wrap_content"
             android:text="Đăng xuất"
             android:textAllCaps="false"
-            android:backgroundTint="#FF0606"
-            android:textColor="@color/white" />
+            android:background="@drawable/btn_white_border"
+            android:textColor="#FFFFFF"
+            android:padding="12dp" />
     </LinearLayout>
 </ScrollView>
