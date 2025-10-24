@@ -8,28 +8,37 @@ import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+// Import này không được dùng, nhưng tôi giữ lại
+// import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog; // Import thiếu cho AlertDialog
 
 import com.example.androidapp.R;
-import com.example.androidapp.views.activities.MainActivity;
+import com.example.androidapp.models.users;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import com.example.androidapp.views.activities.Auths.AdminActivity;
+import com.example.androidapp.views.activities.Auths.HomeActivity;
+import com.example.androidapp.views.activities.Auths.DisabledUserActivity;
+import com.example.androidapp.views.activities.Auths.SignUpActivity; // Đã có
+import com.example.androidapp.views.activities.Auths.ForgotPasswordActivity; // Đã có
+
+
 public class LoginActivity extends AppCompatActivity {
     private EditText etEmail;
     private EditText etPassword;
     private TextView tvForgotPassword;
+    // btnSignup đã được đổi thành MaterialButton trong file XML của bạn
     private MaterialButton btnLogin, btnSignup;
     private FirebaseAuth mAuth;
     private ImageView imgPasswordToggle;
@@ -60,10 +69,9 @@ public class LoginActivity extends AppCompatActivity {
         btnSignup = findViewById(R.id.btnSignUp);
         btnLogin = findViewById(R.id.btnLogin);
         imgPasswordToggle = findViewById(R.id.ivPasswordToggle);
-        progressBar = findViewById(R.id.progressBar); // ✅ KHỞI TẠO MỚI
+        progressBar = findViewById(R.id.progressBar);
     }
 
-    // kiem tra du lieu
     private boolean validateInput(String email, String password) {
         if (email.isEmpty()) {
             etEmail.setError("Vui lòng nhập email");
@@ -77,6 +85,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         return true;
     }
+
     // ham ghi nho dang nhap
     private void saveLoginCredentials(String email, String password){
         getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -85,6 +94,7 @@ public class LoginActivity extends AppCompatActivity {
                 .putString(KEY_PASSWORD, password)
                 .apply();
     }
+
     private void loadSavedCredentials(){
         var prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         String savedEmail = prefs.getString(KEY_EMAIL, "");
@@ -94,8 +104,10 @@ public class LoginActivity extends AppCompatActivity {
             etPassword.setText(savedPassword);
         }
     }
+
     private void showSaveCredentialsDialog(String email, String password, Runnable onContinue) {
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        // Sử dụng AlertDialog đã import
+        new AlertDialog.Builder(this)
                 .setTitle("Lưu đăng nhập?")
                 .setMessage("Bạn có muốn lưu tài khoản này khum?")
                 .setPositiveButton("yÉ", (dialog, which) -> {
@@ -110,24 +122,27 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-    // ✅ HÀM QUẢN LÝ TRẠNG THÁI LOADING
     private void setLoading(boolean isLoading) {
         if (isLoading) {
             progressBar.setVisibility(View.VISIBLE);
-            btnLogin.setText(""); // Ẩn chữ "Login"
-            btnLogin.setEnabled(false); // Vô hiệu hóa nút
-            // Tùy chọn: Vô hiệu hóa EditTexts để ngăn chỉnh sửa
+            btnLogin.setText("");
+            btnLogin.setEnabled(false);
             etEmail.setEnabled(false);
             etPassword.setEnabled(false);
             imgPasswordToggle.setEnabled(false);
-
+            // Bạn nên vô hiệu hóa cả các nút khác
+            btnSignup.setEnabled(false);
+            tvForgotPassword.setEnabled(false);
         } else {
             progressBar.setVisibility(View.GONE);
-            btnLogin.setText("Login"); // Hiện lại chữ "Login"
-            btnLogin.setEnabled(true); // Kích hoạt lại nút
+            btnLogin.setText("Login");
+            btnLogin.setEnabled(true);
             etEmail.setEnabled(true);
             etPassword.setEnabled(true);
             imgPasswordToggle.setEnabled(true);
+            // Kích hoạt lại
+            btnSignup.setEnabled(true);
+            tvForgotPassword.setEnabled(true);
         }
     }
 
@@ -140,6 +155,7 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(this, ForgotPasswordActivity.class));
         });
     }
+
     private void loginUser() {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
@@ -148,7 +164,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        setLoading(true); // ✅ BẮT ĐẦU TẢI (SAU KHI VALIDATE)
+        setLoading(true);
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
@@ -157,32 +173,20 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
                                 if (user.isEmailVerified()) {
-                                    try {
-                                        CheckUserRoleActivity(user.getUid());
-                                    } catch (Exception e) {
-                                        // Guard against unexpected crashes inside role check
-                                        setLoading(false);
-                                        Log.e(TAG, "Error during role check", e);
-                                        Toast.makeText(this, "Lỗi khi xác thực quyền người dùng.", Toast.LENGTH_LONG)
-                                                .show();
-                                    }
+                                    // Đã xác minh email, kiểm tra vai trò và trạng thái
+                                    CheckUserStatusAndRole(user.getUid());
                                 } else {
-                                    // Lỗi: Chưa xác minh email
-                                    setLoading(false); // ✅ KẾT THÚC TẢI
-
+                                    setLoading(false);
                                     Toast.makeText(this,
                                             "Vui lòng xác minh email trước khi đăng nhập.",
                                             Toast.LENGTH_LONG).show();
                                 }
                             } else {
-                                // Lỗi không xác định
-                                setLoading(false); // ✅ KẾT THÚC TẢI
+                                setLoading(false);
                                 Log.w(TAG, "signInWithEmail: success but user is null");
                             }
                         } else {
-                            // Lỗi: Sai Email/Password
-                            setLoading(false); // ✅ KẾT THÚC TẢI
-
+                            setLoading(false);
                             Toast.makeText(this, "Email hoặc mật khẩu không đúng!",
                                     Toast.LENGTH_SHORT).show();
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -192,86 +196,92 @@ public class LoginActivity extends AppCompatActivity {
                         Log.e(TAG, "Unexpected error in sign-in completion", e);
                         Toast.makeText(this, "Lỗi không xác định khi đăng nhập", Toast.LENGTH_SHORT).show();
                     }
-                })
-                .addOnFailureListener(e -> {
-                    // Ensure any async failure is logged and UI reset
-                    setLoading(false);
-                    Log.e(TAG, "signInWithEmailAndPassword failed", e);
-                    Toast.makeText(this, "Lỗi khi đăng nhập: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
-    // check role
-    private void CheckUserRoleActivity(String userId) {
+    // =================================================================
+    // HÀM NÀY ĐÃ ĐƯỢC HỢP NHẤT (MERGED) TỪ CẢ 2 PHIÊN BẢN
+    // =================================================================
+    private void CheckUserStatusAndRole(String userId) {
         db.collection("users").document(userId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        String role = documentSnapshot.getString("role");
-                        if (role != null) {
+                        // Chuyển document sang model 'users' (Logic từ nhánh remote)
+                        users user = documentSnapshot.toObject(users.class);
+
+                        if (user != null) {
+                            String role = user.getRole();
+                            boolean isActive = user.isActive(); // Lấy trạng thái active (Logic từ nhánh remote)
+
+                            // Lấy thông tin đăng nhập (Logic từ nhánh HEAD)
                             String email = etEmail.getText().toString();
                             String password = etPassword.getText().toString();
                             var prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
                             String savedEmail = prefs.getString(KEY_EMAIL, "");
-                            if(savedEmail.isEmpty() || !savedEmail.equals(email)){
-                                showSaveCredentialsDialog(email, password, () ->{
-                                    navigateToRole(role);
-                                });
 
-                            }else{
-                                navigateToRole(role);
+                            // Tạo một hành động (Runnable) để thực hiện sau khi dialog (nếu có)
+                            Runnable navigateAction = () -> {
+                                setLoading(false); // Dừng loading TẠI ĐÂY
+
+                                // Logic điều hướng (Từ nhánh remote)
+                                if ("admin".equals(role)) {
+                                    Toast.makeText(this, "Xin chào Admin!", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(this, AdminActivity.class));
+                                    finish();
+                                } else {
+                                    if (isActive) {
+                                        Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(this, HomeActivity.class));
+                                        finish();
+                                    } else {
+                                        Toast.makeText(this, "Tài khoản của bạn đã bị vô hiệu hóa.", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(this, DisabledUserActivity.class));
+                                        finish();
+                                    }
+                                }
+                            };
+
+                            // Logic kiểm tra và hiển thị dialog (Từ nhánh HEAD)
+                            if(savedEmail.isEmpty() || !savedEmail.equals(email)){
+                                showSaveCredentialsDialog(email, password, navigateAction);
+                            } else {
+                                navigateAction.run(); // Nếu đã lưu thì chạy luôn
                             }
 
-
                         } else {
-                            // Lỗi: Không tìm thấy role
-                            setLoading(false); // ✅ KẾT THÚC TẢI
-
-                            Toast.makeText(this, "Không tìm thấy quyền người dùng!", Toast.LENGTH_SHORT).show();
+                            // Lỗi: Không thể map dữ liệu
+                            setLoading(false);
+                            Toast.makeText(this, "Lỗi: Không thể đọc dữ liệu người dùng.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        // Lỗi: Không tìm thấy role
-                        setLoading(false); // ✅ KẾT THÚC TẢI
-
+                        // Lỗi: Không tìm thấy document
+                        setLoading(false);
                         Toast.makeText(this, "Người dùng không tồn tại trong Firestore!", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // Lỗi: Không tìm thấy role
-                    setLoading(false); // ✅ KẾT THÚC TẢI
-
+                    // Lỗi: Mất mạng, không có quyền, ...
+                    setLoading(false);
                     Toast.makeText(this, "Lỗi khi đọc dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Error getting role", e);
+                    Log.e(TAG, "Error getting user details", e);
                 });
     }
-    //tách logic kiem tra role đungs k
-    private void navigateToRole(String role){
-        if(role.equals("admin")){
-            startActivity(new Intent(this, AdminActivity.class));
-            Toast.makeText(this, "Xin chào Admin!", Toast.LENGTH_SHORT).show();
-        }
-        else{
-            startActivity(new Intent(this, HomeActivity.class));
-            Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-        }
-        finish();
-    }
+
+    // HÀM navigateToRole() ĐÃ BỊ XÓA VÌ LOGIC CỦA NÓ ĐÃ ĐƯỢC TÍCH HỢP VÀO CheckUserStatusAndRole
+
     // hiện pass
     private void setupPasswordToggle() {
         imgPasswordToggle.setOnClickListener(v -> {
             if (isPasswordVisible) {
-                // Đang hiện → Chuyển sang ẩn
                 etPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 imgPasswordToggle.setImageResource(R.drawable.ic_visibility_off);
                 isPasswordVisible = false;
             } else {
-                // Đang ẩn → Chuyển sang hiện
                 etPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                 imgPasswordToggle.setImageResource(R.drawable.ic_visibility);
                 isPasswordVisible = true;
             }
-
-            // Đưa con trỏ về cuối text
             etPassword.setSelection(etPassword.getText().length());
         });
     }
