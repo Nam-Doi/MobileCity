@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <!-- Thanh điều hướng trên -->
@@ -11,24 +12,26 @@
         android:orientation="horizontal"
         android:padding="8dp"
         android:background="@drawable/bg_gradient_background"
-        android:gravity="center_vertical"
         android:elevation="4dp">
         <ImageView
             android:id="@+id/avatarMedium"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="34dp"
             android:layout_marginLeft="16dp"
             android:src="@drawable/ic_user"
-            android:scaleType="centerCrop"
-            android:layout_gravity="center"
+            android:padding="6dp"
+            app:tint="@color/white"
             android:background="@drawable/bg_circle_mask"/>
         <TextView
             android:id="@+id/tvNameUser"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="45dp"
             android:layout_marginLeft="12dp"
             android:textSize="18sp"
             android:textColor="@color/white"
+            android:textStyle="bold"
             android:hint="Tên tài khoản"/>
     </LinearLayout>
     <LinearLayout
@@ -38,30 +41,14 @@
         android:layout_weight="1"
         android:padding="16dp">
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center_vertical"
-            android:text="Thông tin tài khoản"
-            android:textSize="22sp" />
-        <TextView
             android:id="@+id/tv_my_orders"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:gravity="center_vertical"
             android:text="Đơn hàng"
             android:textSize="22sp"
-            android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center_vertical"
-            android:text="Lịch sử mua hàng"
-            android:textSize="22sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center_vertical"
-            android:text="Chờ nhận hàng"
-            android:textSize="22sp" />
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 </LinearLayout>
