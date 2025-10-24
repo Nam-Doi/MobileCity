@@ -1,22 +1,27 @@
 package com.example.androidapp.views.fragments;
 
-import android.content.Intent; // <-- Thêm import này
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView; // <-- Thêm import này
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.androidapp.R;
-import com.example.androidapp.views.activities.Order.MyOrdersActivity; // <-- Thêm import này
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class UserFragment extends Fragment {
 
-    private TextView tvMyOrders; // Biến cho nút "Đơn hàng"
+    private TextView tvUserName; // TextView để hiển thị tên người dùng
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Nullable
     @Override
@@ -24,20 +29,60 @@ public class UserFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        // 1. Gắn layout
+        // Gắn layout cho fragment
         View view = inflater.inflate(R.layout.fragment_user, container, false);
 
-        // 2. Ánh xạ nút "Đơn hàng" bằng ID
-        tvMyOrders = view.findViewById(R.id.tv_my_orders);
+        // Ánh xạ TextView từ layout
+        // *** LƯU Ý: Đảm bảo trong file fragment_home.xml của bạn có một TextView với id là "tvUserName" ***
+        tvUserName = view.findViewById(R.id.tvNameUser);
 
-        // 3. Gán sự kiện click
-        tvMyOrders.setOnClickListener(v -> {
-            // 4. Tạo Intent để mở MyOrdersActivity
-            Intent intent = new Intent(getActivity(), MyOrdersActivity.class);
-            startActivity(intent);
-        });
+        // Khởi tạo Firebase
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
-        // 5. Trả về view
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Gọi hàm để tải và hiển thị thông tin người dùng
+        loadUserInfo();
+    }
+
+    private void loadUserInfo() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String uid = currentUser.getUid();
+
+            // Truy vấn vào Firestore để lấy thông tin user
+            db.collection("users").document(uid).get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document != null && document.exists()) {
+                                // Lấy trường fullName từ document
+                                String fullName = document.getString("fullName");
+
+                                // Hiển thị tên lên TextView
+                                if (fullName != null && !fullName.isEmpty()) {
+                                    tvUserName.setText(fullName);
+                                } else {
+                                    tvUserName.setText("Xin chào!");
+                                }
+                            } else {
+                                Log.d("HomeFragment", "Không tìm thấy document");
+                                tvUserName.setText("Xin chào!");
+                            }
+                        } else {
+                            Log.e("HomeFragment", "Lỗi khi lấy dữ liệu: ", task.getException());
+                            tvUserName.setText("Xin chào!");
+                        }
+                    });
+        } else {
+            // Trường hợp người dùng chưa đăng nhập
+            tvUserName.setText("Khách");
+        }
     }
 }
