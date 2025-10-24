@@ -1,6 +1,10 @@
 package com.example.androidapp.views.adapters;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,16 +19,18 @@ import java.util.List;
 
 public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionViewHolder> {
 
-    public static final String TYPE_COLOR = "color";
-    public static final String TYPE_MEMORY = "memory";
+    public interface OnOptionClickListener {
+        void onOptionClick(String option);
+    }
 
     private List<String> options;
-    private String type;
     private int selectedPosition = 0;
+    private OnOptionClickListener listener;
 
-    public OptionAdapter(List<String> options, String type) {
+    // CONSTRUCTOR ĐÃ ĐƯỢC ĐƠN GIẢN HÓA (Bỏ tham số 'type')
+    public OptionAdapter(List<String> options, OnOptionClickListener listener) {
         this.options = options;
-        this.type = type;
+        this.listener = listener;
     }
 
     @NonNull
@@ -38,24 +44,21 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
     public void onBindViewHolder(@NonNull OptionViewHolder holder, int position) {
         String option = options.get(position);
 
-        // Dựa vào "type" để quyết định cách hiển thị
-        if (TYPE_COLOR.equals(type)) {
-            // Nếu là màu sắc, tô màu nền và không hiển thị chữ
-            holder.optionView.setText("");
-            holder.optionView.getBackground().setTint(Color.parseColor(option));
-        } else {
-            // Nếu là bộ nhớ (hoặc loại khác), hiển thị chữ
-            holder.optionView.setText(option);
-            // Bỏ tint để nền hiển thị đúng theo selector
-            holder.optionView.getBackground().setTintList(null);
-        }
-        // Xử lý logic chọn
+        // LUÔN LUÔN HIỂN THỊ CHỮ
+        holder.optionView.setText(option);
+        // Bỏ tint để nền hiển thị đúng theo selector
+        holder.optionView.setBackgroundTintList(null);
+
+        // Xử lý logic chọn (giữ nguyên)
         holder.itemView.setSelected(selectedPosition == position);
         holder.itemView.setOnClickListener(v -> {
             if (selectedPosition != holder.getAdapterPosition()) {
                 notifyItemChanged(selectedPosition);
                 selectedPosition = holder.getAdapterPosition();
                 notifyItemChanged(selectedPosition);
+                if (listener != null) {
+                    listener.onOptionClick(options.get(selectedPosition));
+                }
             }
         });
     }
@@ -64,6 +67,8 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
     public int getItemCount() {
         return options.size();
     }
+
+    // HÀM getColorFromString() ĐÃ ĐƯỢC XÓA
 
     static class OptionViewHolder extends RecyclerView.ViewHolder {
         TextView optionView;
