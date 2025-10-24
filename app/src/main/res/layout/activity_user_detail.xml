@@ -97,13 +97,15 @@
                 android:id="@+id/buttonEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Sửa thông tin" />
+                android:text="Sửa thông tin"
+                android:backgroundTint="@color/primary_blue"/>
 
             <Button
                 android:id="@+id/buttonToggleActive"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:backgroundTint="@color/red"
                 tools:text="Vô hiệu hóa tài khoản" />
 
             <Button
@@ -111,6 +113,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:backgroundTint="@color/green"
                 android:text="Lưu thay đổi"
                 android:visibility="gone"
                 tools:visibility="visible"/>

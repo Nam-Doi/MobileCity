@@ -99,7 +99,7 @@ public class HomeActivity extends AppCompatActivity {
             } else if (id == R.id.menu_accessory) {
                 Toast.makeText(this, "Phụ kiện", Toast.LENGTH_SHORT).show();
                 return true;
-            } else if (id == R.id.menu_other) {
+            } else if (id == R.id.menu_tablet) {
                 Toast.makeText(this, "Khác", Toast.LENGTH_SHORT).show();
                 return true;
             }

@@ -62,9 +62,6 @@
             android:name=".views.activities.Auths.ForgotPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".views.activities.MainActivity"
-            android:exported="true" />
-        <activity
             android:name=".views.activities.Auths.SignUpActivity"
             android:exported="false" />
         <activity android:name=".views.activities.Order.MyOrdersActivity"
@@ -84,6 +81,9 @@
             android:exported="false"/>
         <activity android:name=".views.activities.Auths.DisabledUserActivity"
             android:exported="false"/>
+        <activity android:name=".views.activities.Auths.ProfileActivity"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

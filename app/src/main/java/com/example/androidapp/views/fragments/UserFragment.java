@@ -1,10 +1,12 @@
 package com.example.androidapp.views.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.androidapp.R;
+import com.example.androidapp.views.activities.Auths.ProfileActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -20,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class UserFragment extends Fragment {
 
     private TextView tvUserName; // TextView để hiển thị tên người dùng
+    private ImageView avatar;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -31,14 +35,22 @@ public class UserFragment extends Fragment {
 
         // Gắn layout cho fragment
         View view = inflater.inflate(R.layout.fragment_user, container, false);
-
         // Ánh xạ TextView từ layout
         // *** LƯU Ý: Đảm bảo trong file fragment_home.xml của bạn có một TextView với id là "tvUserName" ***
         tvUserName = view.findViewById(R.id.tvNameUser);
-
+        avatar = view.findViewById(R.id.avatarMedium);
         // Khởi tạo Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        View.OnClickListener profileClickListener = v -> {
+            Intent intent = new Intent(getActivity(), ProfileActivity.class);
+            startActivity(intent);
+        };
+
+        // Gán sự kiện click cho cả avatar và tên
+        avatar.setOnClickListener(profileClickListener);
+        tvUserName.setOnClickListener(profileClickListener);
 
         return view;
     }

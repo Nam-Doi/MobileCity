@@ -32,7 +32,7 @@ public class CreateUserActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_user);
+        setContentView(R.layout.activity_create_account);
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
