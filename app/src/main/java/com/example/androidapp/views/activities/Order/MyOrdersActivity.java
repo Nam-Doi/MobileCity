@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager2.widget.ViewPager2;
 import com.example.androidapp.R;
-import com.example.androidapp.views.adapters.MyOrdersPagerAdapter; // Adapter MỚI
+import com.example.androidapp.views.adapters.MyOrdersPagerAdapter;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -15,12 +15,10 @@ public class MyOrdersActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
-    private MyOrdersPagerAdapter pagerAdapter; // Adapter MỚI
-
+    private MyOrdersPagerAdapter pagerAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Gắn layout "activity_my_orders.xml"
         setContentView(R.layout.activity_my_orders);
 
         // 1. Ánh xạ views
@@ -34,7 +32,7 @@ public class MyOrdersActivity extends AppCompatActivity {
         String[] statusTitles = getResources().getStringArray(R.array.order_status_titles);
         String[] statusValues = getResources().getStringArray(R.array.order_status_values);
 
-        // 3. Khởi tạo Adapter MỚI
+        // 3. Khởi tạo Adapter
         pagerAdapter = new MyOrdersPagerAdapter(this, statusValues);
         viewPager.setAdapter(pagerAdapter);
 

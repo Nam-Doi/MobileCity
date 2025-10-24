@@ -9,7 +9,6 @@ import com.example.androidapp.views.fragments.OrderListFragment;
 public class OrderAdminPagerAdapter extends FragmentStateAdapter {
 
     // Lấy các giá trị từ mảng "order_status_values"
-    // (pending, shipped, completed, cancelled)
     private final String[] statusValues;
 
     public OrderAdminPagerAdapter(@NonNull FragmentActivity fragmentActivity, String[] statusValues) {

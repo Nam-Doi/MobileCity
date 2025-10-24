@@ -1,5 +1,6 @@
 package com.example.androidapp.views.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,9 +8,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.OrderItem;
-import com.bumptech.glide.Glide; // Bạn có thể cần thư viện này để tải ảnh sản phẩm
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -17,15 +18,17 @@ import java.util.Locale;
 public class OrderItemDetailAdapter extends RecyclerView.Adapter<OrderItemDetailAdapter.ViewHolder> {
 
     private List<OrderItem> items;
+    private Context context;
 
-    public OrderItemDetailAdapter(List<OrderItem> items) {
+
+    public OrderItemDetailAdapter(List<OrderItem> items, Context context) {
         this.items = items;
+        this.context = context;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Gắn layout "item_order_detail_item.xml"
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_order_detail_item, parent, false);
         return new ViewHolder(view);
@@ -39,16 +42,17 @@ public class OrderItemDetailAdapter extends RecyclerView.Adapter<OrderItemDetail
         holder.tvPrice.setText(formatCurrency(item.getPrice()));
         holder.tvQuantity.setText("x" + item.getQty());
 
-        // TODO: Tải ảnh sản phẩm thật
-        // Hiện tại, chúng ta chưa có link ảnh trong OrderItem
-        // holder.imgProduct.setImageResource(R.drawable.iphone_17); // Ảnh mẫu
+        // --- TẢI ẢNH BẰNG GLIDE ---
+        if (item.getCachedImageUrl() != null && !item.getCachedImageUrl().isEmpty()) {
+            Glide.with(context) // Sử dụng context đã lưu
+                    .load(item.getCachedImageUrl()) // Dùng đúng tên hàm
+                    .placeholder(R.drawable.ic_launcher_background) // Ảnh chờ
+                    .error(R.drawable.ic_launcher_background) // Ảnh lỗi
+                    .into(holder.imgProduct); // ImageView đích
+        } else {
+            holder.imgProduct.setImageResource(R.drawable.ic_launcher_background); // Ảnh mặc định
+        }
 
-        /* // Khi bạn nâng cấp OrderItem để có ảnh:
-        Glide.with(holder.itemView.getContext())
-                .load(item.getImageUrl()) // Giả sử item có getImageUrl()
-                .placeholder(R.drawable.ic_launcher_background)
-                .into(holder.imgProduct);
-        */
     }
 
     @Override
