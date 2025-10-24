@@ -7,13 +7,12 @@
 
     <LinearLayout
         android:id="@+id/top_bar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="94dp"
         android:padding="10dp"
         android:orientation="horizontal"
         android:background="@drawable/bg_gradient_background"
         android:elevation="4dp"
-        android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -22,6 +21,7 @@
             android:id="@+id/imgLogo"
             android:layout_width="36dp"
             android:layout_height="36dp"
+            android:layout_marginTop="34dp"
             android:src="@drawable/ic_home"
             android:layout_marginEnd="10dp" />
 
@@ -30,6 +30,7 @@
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
+            android:layout_marginTop="32dp"
             android:hint="Tìm kiếm sản phẩm..."
             android:background="@drawable/bg_search_box"
             android:paddingHorizontal="12dp"
@@ -43,8 +44,11 @@
             android:id="@+id/menuButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_marginTop="26dp"
             android:backgroundTint="#6800c8"
             android:src="@drawable/ic_menu"
+            android:scaleType="centerCrop"
+            android:gravity="center"
             android:contentDescription="Menu"
             android:layout_marginStart="8dp"/>
     </LinearLayout>
@@ -77,12 +81,12 @@
             android:fadingEdge="none"
             android:gravity="center"
             android:horizontalSpacing="8dp"
+            android:verticalSpacing="10dp"
             android:numColumns="2"
             android:overScrollMode="always"
             android:padding="8dp"
             android:scrollbarStyle="outsideOverlay"
-            android:stretchMode="columnWidth"
-            android:verticalSpacing="8dp" />
+            android:stretchMode="columnWidth" />
 
         <ProgressBar
             android:id="@+id/progressBar"

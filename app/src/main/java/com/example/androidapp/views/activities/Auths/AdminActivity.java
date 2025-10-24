@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+// import com.squareup.picasso.Picasso; // <-- ĐÃ XÓA
+import com.bumptech.glide.Glide; // <-- ĐÃ THÊM
 import com.example.androidapp.R;
 import com.example.androidapp.views.activities.Order.OrdersManagementActivity;
 import com.example.androidapp.views.activities.admin.AdminSettingsActivity;
@@ -21,7 +23,6 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.squareup.picasso.Picasso;
 
 public class AdminActivity extends AppCompatActivity {
 
@@ -60,7 +61,7 @@ public class AdminActivity extends AppCompatActivity {
         applyCardAnimation(cardManageOrders);
         applyCardAnimation(cardManageUsers);
         applyCardAnimation(cardSettings);
-        //Mở manage product
+        //Mở manage product
         cardManageProducts.setOnClickListener(v -> {
             Intent intent = new Intent(AdminActivity.this, ManageProductActivity.class);
             startActivity(intent);
@@ -72,18 +73,18 @@ public class AdminActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        //Mở manage order
+        //Mở manage order
         cardManageOrders.setOnClickListener(v ->{
             Intent intent = new Intent(AdminActivity.this, OrdersManagementActivity.class);
             startActivity(intent);
         });
-        //Mở manage account
+        //Mở manage account
         cardManageUsers.setOnClickListener(v -> {
             Intent intent = new Intent(AdminActivity.this, ManageUsersActivity.class);
             startActivity(intent);
         });
 
-        //Mở settings
+        //Mở settings
         cardSettings.setOnClickListener(v -> {
             Intent intent = new Intent(AdminActivity.this, AdminSettingsActivity.class);
             startActivity(intent);
@@ -116,11 +117,13 @@ public class AdminActivity extends AppCompatActivity {
 
                         String avatarUrl = documentSnapshot.getString("avatarUrl");
                         if (avatarUrl != null && !avatarUrl.isEmpty()) {
-                            Picasso.get()
+                            // --- BẮT ĐẦU THAY THẾ CODE TẠI ĐÂY ---
+                            Glide.with(AdminActivity.this)
                                     .load(avatarUrl)
                                     .placeholder(R.drawable.admin_avt)
                                     .error(R.drawable.admin_avt)
                                     .into(imgAdminAvatar);
+                            // --- KẾT THÚC THAY THẾ CODE ---
                         } else {
                             imgAdminAvatar.setImageResource(R.drawable.admin_avt);
                         }
