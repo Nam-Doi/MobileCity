@@ -35,7 +35,7 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
 
     private RecyclerView recyclerCart;
     private CheckBox cbSelectItem;
-    private TextView tvTotal;
+    private TextView tvTotal,tvTitle;
     private Button btnCheckout;
     private List<CartItem> cartList;
     private CartAdapter cartAdapter;
@@ -60,6 +60,7 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
         tvTotal = view.findViewById(R.id.tvTotal);
         btnCheckout = view.findViewById(R.id.btnCheckout);
         cbSelectItem = view.findViewById(R.id.cbSelectItem);
+        tvTitle = view.findViewById(R.id.tvTitle);
         // tvEmptyCart = view.findViewById(R.id.tvEmptyCart); // Nếu có
 
         cartList = new ArrayList<>();
@@ -201,6 +202,12 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
             cartAdapter.selectAll(isChecked);
         });
     }
+    private void updatetotalcart(){
+        if (!isAdded() || getContext() == null || cartAdapter == null) return;
+
+
+
+    }
 
     private void updateTotalPrice() {
         if (!isAdded() || getContext() == null || cartAdapter == null) return;
@@ -210,9 +217,15 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
             tvTotal.setText(String.format("%,.0f ₫", total));
         }
 
+
         int selectedItemCount = cartAdapter.getSelectedItemCount();
         if (btnCheckout != null) { // Kiểm tra view null
             btnCheckout.setText("Mua hàng (" + selectedItemCount + ")");
+        }
+        int carttotal = cartAdapter.getTotalQuantity();
+        if(tvTitle != null){
+            tvTitle.setText("Giỏ hàng (" + carttotal + ")");
+
         }
     }
 

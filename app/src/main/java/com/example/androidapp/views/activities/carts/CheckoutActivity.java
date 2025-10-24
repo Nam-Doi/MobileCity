@@ -1,6 +1,7 @@
 package com.example.androidapp.views.activities.carts;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
 import com.example.androidapp.models.Order;
@@ -23,6 +25,7 @@ import com.example.androidapp.views.adapters.cartAdt.CheckoutAdapter;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,13 +41,23 @@ public class CheckoutActivity extends AppCompatActivity {
     private LinearLayout layoutPaymentMethod;
     private TextView tvTotalPayment;
     private TextView tvPaymentMethod;
+    private ImageView ivPaymentIcon;
     private ArrayList<CartItem> selectedItems;
     private CheckoutAdapter checkoutAdapter;
     private TextView tvReceiverName, tvReceiverPhone, tvReceiverAddress;
     private com.example.androidapp.models.PaymentMethod selectedPaymentMethod;
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
 
     // Repository
     private CartRepository cartRepository;
+    private static final String PREFS_NAME = "CheckoutPrefs";
+    private static final String KEY_RECEIVER_NAME = "receiverName";
+    private static final String KEY_RECEIVER_PHONE = "receiverPhone";
+    private static final String KEY_RECEIVER_ADDRESS = "receiverAddress";
+    private static final String KEY_PAYMENT_NAME = "name";
+    private static final String KEY_PAYMENT_ICON = "iconUrl";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +65,24 @@ public class CheckoutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_checkout);
 
         cartRepository = new CartRepository();
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+
 
         initViews();
         receiveData();
         setupRecyclerView();
         calculateTotal();
         setupEventListeners();
-        receiveAddress();
+        setDefaultPlaceholderText();
+        if (!receiveAddressFromIntent()) {
+            loadSavedAddress();
+        }
+        if (!receivePaymentMethodFromIntent()) {
+            loadSavedPaymentMethod();
+        }
+
+
     }
 
     private void initViews() {
@@ -70,11 +94,16 @@ public class CheckoutActivity extends AppCompatActivity {
         layoutPaymentMethod = findViewById(R.id.layoutPaymentMethod);
         tvTotalPayment = findViewById(R.id.tvTotalPayment);
         tvPaymentMethod = findViewById(R.id.tvPaymentMethod);
+        ivPaymentIcon = findViewById(R.id.ivPaymentIcon);
         tvReceiverName = findViewById(R.id.tvReceiverName);
         tvReceiverPhone = findViewById(R.id.tvReceiverPhone);
         tvReceiverAddress = findViewById(R.id.tvAddress);
     }
-
+    private void setDefaultPlaceholderText() {
+        tvReceiverName.setText("Tên người nhận");
+        tvReceiverPhone.setText("Số điện thoại");
+        tvReceiverAddress.setText("Vui lòng chọn địa chỉ giao hàng");
+    }
     private void receiveData() {
         Intent intent = getIntent();
         if (intent != null) {
@@ -91,18 +120,132 @@ public class CheckoutActivity extends AppCompatActivity {
             return;
         }
     }
-
-    private void receiveAddress() {
+    // Receiver address from sharedreferences
+    private boolean receiveAddressFromIntent(){
         String receiverName = getIntent().getStringExtra("receiverName");
         String receiverPhone = getIntent().getStringExtra("receiverPhone");
         String address = getIntent().getStringExtra("address");
-
-        if (receiverName != null && receiverPhone != null && address != null) {
+        if(receiverName != null && receiverPhone != null && address != null){
             tvReceiverName.setText(receiverName);
             tvReceiverPhone.setText(receiverPhone);
             tvReceiverAddress.setText(address);
+            saveAddressToPrefs(receiverName, receiverPhone, address);
+            return true;
+        }
+        return false;
+
+    }
+    private void loadSavedAddress(){
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String savedName = prefs.getString(KEY_RECEIVER_NAME, "");
+        String savedPhone = prefs.getString(KEY_RECEIVER_PHONE, "");
+        String savedAddress = prefs.getString(KEY_RECEIVER_ADDRESS, "");
+        if(savedName != null && !savedName.isEmpty() && savedPhone != null &&
+                !savedPhone.isEmpty() && savedAddress != null && !savedAddress.isEmpty()){
+            tvReceiverName.setText(savedName);
+            tvReceiverPhone.setText(savedPhone);
+            tvReceiverAddress.setText(savedAddress);
+        }else{
+            loadDefaultAddressFromFirestore();
+        }
+
+    }
+    private void loadDefaultAddressFromFirestore(){
+        if(auth.getCurrentUser() == null){
+            Log.d("CheckoutDebug", "User not logged in. Cannot load default address.");
+            return;
+        }
+        String userId = auth.getCurrentUser().getUid();
+        db.collection("users").document(userId).collection("addresses")
+                .orderBy("isDefault", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots ->{
+                    if(!queryDocumentSnapshots.isEmpty()){
+                        QueryDocumentSnapshot document = (QueryDocumentSnapshot) queryDocumentSnapshots.getDocuments().get(0);
+                        String name = document.getString("receiverName");
+                        String phone = document.getString("receiverPhone");
+                        String address = document.getString("address");
+                        if(name != null && phone != null && address != null){
+                            tvReceiverName.setText(name);
+                            tvReceiverPhone.setText(phone);
+                            tvReceiverAddress.setText(address);
+                            saveAddressToPrefs(name, phone, address);
+                        }
+                    }else{
+                        Log.d("CheckoutDebug", "No default address found.");
+                        tvReceiverAddress.setText("Vui lòng chọn địa chỉ giao hàng");
+                        tvReceiverName.setText("Tên người nhận");
+                        tvReceiverPhone.setText("Số điện thoại");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("CheckoutDebug", "Error loading default address", e);
+                    Toast.makeText(this, "Lỗi khi tải địa chỉ mặc định", Toast.LENGTH_SHORT).show();
+                });
+    }
+    //luu dia chi vao sharedPreferences
+    private void saveAddressToPrefs(String name, String phone, String address){
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_RECEIVER_NAME, name);
+        editor.putString(KEY_RECEIVER_PHONE, phone);
+        editor.putString(KEY_RECEIVER_ADDRESS, address);
+        editor.apply();
+
+
+    }
+    //luu phuong thuc thanh toan
+    private boolean receivePaymentMethodFromIntent() {
+        String paymentName = getIntent().getStringExtra("paymentMethodName");
+        String paymentIconUrl = getIntent().getStringExtra("paymentMethodIcon"); // URL từ intent trước
+
+        if (paymentName != null) {
+            tvPaymentMethod.setText(paymentName);
+            if (paymentIconUrl != null && !paymentIconUrl.isEmpty()) {
+                Glide.with(this)
+                        .load(paymentIconUrl)
+                        .placeholder(R.drawable.ic_cod)
+                        .error(R.drawable.ic_cod)
+                        .into(ivPaymentIcon);
+            } else {
+                ivPaymentIcon.setImageResource(R.drawable.ic_cod);
+            }
+            savePaymentMethodToPrefs(paymentName, paymentIconUrl != null ? paymentIconUrl : "");
+            return true;
+        }
+        return false;
+    }
+    private void savePaymentMethodToPrefs(String name, String icon) {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_PAYMENT_NAME, name);
+        editor.putString(KEY_PAYMENT_ICON, icon);
+        editor.apply();
+    }
+    private void loadSavedPaymentMethod() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String savedName = prefs.getString(KEY_PAYMENT_NAME, null);
+        String savedIconUrl = prefs.getString(KEY_PAYMENT_ICON, null);
+
+        if (savedName != null) {
+            tvPaymentMethod.setText(savedName);
+            if (savedIconUrl != null && !savedIconUrl.isEmpty()) {
+                Glide.with(this)
+                        .load(savedIconUrl)
+                        .placeholder(R.drawable.ic_cod)
+                        .error(R.drawable.ic_cod)
+                        .into(ivPaymentIcon);
+            } else {
+
+                ivPaymentIcon.setImageResource(R.drawable.ic_cod);
+            }
+        } else {
+            tvPaymentMethod.setText("Chọn phương thức thanh toán");
+            ivPaymentIcon.setImageResource(R.drawable.ic_cod);
         }
     }
+    //------------------------------------// ok
 
     private void setupRecyclerView() {
         checkoutAdapter = new CheckoutAdapter(selectedItems);
@@ -152,7 +295,8 @@ public class CheckoutActivity extends AppCompatActivity {
         String receiverAddress = tvReceiverAddress.getText().toString().trim();
 
         // 1. Kiểm tra thông tin giao hàng
-        if (receiverName.isEmpty() || receiverPhone.isEmpty() || receiverAddress.isEmpty()) {
+        if (receiverName.equals("Tên người nhận") || receiverPhone.equals("Số điện thoại") ||
+                receiverAddress.equals("Vui lòng chọn địa chỉ giao hàng")) {
             Toast.makeText(this, "Vui lòng chọn thông tin giao hàng", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -311,36 +455,36 @@ public class CheckoutActivity extends AppCompatActivity {
                 tvReceiverName.setText(receiverName);
                 tvReceiverPhone.setText(receiverPhone);
                 tvReceiverAddress.setText(address);
+                saveAddressToPrefs(receiverName, receiverPhone, address);
                 handled = true;
             }
 
-            // Payment method result (PaymentMethodActivity / adapter returns id + name)
+            // Payment method result
             String paymentId = data.getStringExtra("paymentMethodId");
             String paymentName = data.getStringExtra("paymentMethodName");
-            if (paymentId != null) {
-                com.example.androidapp.models.PaymentMethod pm = new com.example.androidapp.models.PaymentMethod();
-                pm.setId(paymentId);
-                pm.setName(paymentName != null ? paymentName : "");
-                // store selected payment method
-                try {
-                    // selectedPaymentMethod field may not exist previously; add if present
-                    // using reflection would be heavy; but selectedPaymentMethod is not declared in
-                    // this file
-                    // We'll declare a local assignment to update UI and keep method selection
-                    // across process
-                    // If there's a field, set it; otherwise just update UI
-                    tvPaymentMethod.setText(pm.getName());
-                } catch (Exception ignored) {
+            String paymentIconUrl = data.getStringExtra("paymentMethodIconUrl");
+
+            if (paymentId != null && paymentName != null) {
+                tvPaymentMethod.setText(paymentName);
+                if (paymentIconUrl != null && !paymentIconUrl.isEmpty()) {
+                    Glide.with(this)
+                            .load(paymentIconUrl)
+                            .placeholder(R.drawable.ic_cod)
+                            .error(R.drawable.ic_cod)
+                            .into(ivPaymentIcon);
                 }
+
+                savePaymentMethodToPrefs(paymentName, paymentIconUrl != null ? paymentIconUrl : "");
                 handled = true;
             }
 
-            // fallback: if nothing handled, try previous behavior for serialized object
+            // fallback
             if (!handled && data.hasExtra("selected_payment_method")) {
                 Object obj = data.getSerializableExtra("selected_payment_method");
                 if (obj instanceof com.example.androidapp.models.PaymentMethod) {
                     com.example.androidapp.models.PaymentMethod pm = (com.example.androidapp.models.PaymentMethod) obj;
                     tvPaymentMethod.setText(pm.getName());
+                    savePaymentMethodToPrefs(pm.getName(), "");
                 }
             }
         }

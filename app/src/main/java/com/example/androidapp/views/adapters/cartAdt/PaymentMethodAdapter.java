@@ -57,6 +57,7 @@ public class PaymentMethodAdapter extends RecyclerView.Adapter<PaymentMethodAdap
                 Intent result = new Intent();
                 result.putExtra("paymentMethodId", method.getId());
                 result.putExtra("paymentMethodName", method.getName());
+                result.putExtra("paymentMethodIconUrl", method.getIconUrl());
                 ((Activity) context).setResult(Activity.RESULT_OK, result);
                 ((Activity) context).finish();
             }

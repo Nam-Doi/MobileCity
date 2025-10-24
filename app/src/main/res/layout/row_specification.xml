@@ -9,9 +9,10 @@
 
     <TextView
         android:id="@+id/tvLabel"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Màn hình"
+        android:layout_weight="3"
+        android:text="Màn hình: "
         android:textStyle="bold"
         android:textColor="#616161"
         android:textSize="14sp">
@@ -20,7 +21,8 @@
         android:id="@+id/tvValue"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="9"
+        android:layout_marginLeft="8dp"
         android:text="OLED, 68 tỷ màu..."
         android:textColor="#212121"
         android:textSize="14sp">
