@@ -284,6 +284,7 @@ public class CheckoutActivity extends AppCompatActivity {
         });
     }
 
+    //Thực hiện thanh toán và tạo hóa đơn
     private void processCheckout() {
         if (selectedItems == null || selectedItems.isEmpty()) {
             Toast.makeText(this, "Giỏ hàng trống", Toast.LENGTH_SHORT).show();
@@ -324,7 +325,7 @@ public class CheckoutActivity extends AppCompatActivity {
             item.setName(cartItem.getCachedName());
             item.setPrice(cartItem.getCachedPrice());
             item.setQty(cartItem.getQuantity());
-
+            item.setCachedImageUrl(cartItem.getCachedImageUrl());
             orderItems.add(item);
             total += cartItem.getTotalPrice();
         }
@@ -340,7 +341,7 @@ public class CheckoutActivity extends AppCompatActivity {
         newOrder.setPhone(receiverPhone);
         newOrder.setAddress(receiverAddress);
         newOrder.setTotal(total);
-        newOrder.setStatus("pending");
+        newOrder.setStatus("pending_confirmation");
         newOrder.setCreatedAt(Timestamp.now());
         newOrder.setItems(orderItems);
 
@@ -354,6 +355,7 @@ public class CheckoutActivity extends AppCompatActivity {
 //                    Toast.makeText(this, "Lỗi khi đặt hàng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
 //                    btnCheckout.setEnabled(true);
 //                });
+        //6. lưu đơn hàng bằng Map, HashMap
         Map<String, Object> orderMap = new HashMap<>();
         orderMap.put("orderId", newOrder.getOrderId());
         orderMap.put("userId", newOrder.getUserId());
@@ -363,9 +365,9 @@ public class CheckoutActivity extends AppCompatActivity {
         orderMap.put("total", newOrder.getTotal());
         orderMap.put("status", newOrder.getStatus());
         orderMap.put("createdAt", newOrder.getCreatedAt());
-        orderMap.put("cancellationRequested", newOrder.isCancellationRequested()); // Giữ nguyên từ lần sửa trước
+        orderMap.put("cancellationRequested", newOrder.isCancellationRequested());
 
-// Chuyển đổi List<OrderItem> thành List<Map<String, Object>>
+        // Chuyển đổi List<OrderItem> thành List<Map<String, Object>>
         List<Map<String, Object>> itemsMapList = new ArrayList<>();
         if (newOrder.getItems() != null) {
             for (OrderItem item : newOrder.getItems()) {
@@ -374,26 +376,23 @@ public class CheckoutActivity extends AppCompatActivity {
                 itemMap.put("name", item.getName());
                 itemMap.put("price", item.getPrice());
                 itemMap.put("qty", item.getQty());
-                // KHÔNG thêm stability vào đây
+                itemMap.put("cachedImageUrl", item.getCachedImageUrl());
                 itemsMapList.add(itemMap);
             }
         }
         orderMap.put("items", itemsMapList);
-
-// KHÔNG thêm stability vào orderMap
-
         Log.d("CheckoutDebug", "Chuẩn bị lưu Map: " + orderMap.toString()); // Log Map trước khi lưu
 
 // Dùng set(orderMap) thay vì set(newOrder)
         db.collection("orders").document(newOrderId).set(orderMap)
                 .addOnSuccessListener(aVoid -> {
                     Log.d("CheckoutDebug", "Lưu bằng Map thành công! Kiểm tra Firestore.");
-                    removeItemsFromCart(currentUid); // Vẫn gọi hàm xóa giỏ hàng
+                    removeItemsFromCart(currentUid); //gọi hàm xóa giỏ hàng
                 })
                 .addOnFailureListener(e -> {
                     Log.e("CheckoutDebug", "Lỗi lưu bằng Map", e);
                     Toast.makeText(this, "Lỗi khi đặt hàng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    btnCheckout.setEnabled(true); // Nhớ enable lại nút
+                    btnCheckout.setEnabled(true); //enable lại nút
                 });
 
     }

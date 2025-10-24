@@ -3,23 +3,25 @@ package com.example.androidapp.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
-import com.google.firebase.firestore.IgnoreExtraProperties;
+import com.google.firebase.firestore.IgnoreExtraProperties;//Dùng để tránh lưu các biến không mong muốn
 @IgnoreExtraProperties
 public class OrderItem implements Parcelable {
 
     private String productId;
     private String name;
     private double price;
+    private String cachedImageUrl;
     private int qty;
 
     // Bắt buộc phải có constructor rỗng để Firestore đọc dữ liệu
     public OrderItem() {}
 
-    public OrderItem(String productId, String name, double price, int qty) {
+    public OrderItem(String productId, String name, double price, int qty,String cachedImageUrl) {
         this.productId = productId;
         this.name = name;
         this.price = price;
         this.qty = qty;
+        this.cachedImageUrl = cachedImageUrl;
     }
 
     // --- Getters and Setters ---
@@ -36,6 +38,9 @@ public class OrderItem implements Parcelable {
     public int getQty() { return qty; }
     public void setQty(int qty) { this.qty = qty; }
 
+    public String getCachedImageUrl() {return cachedImageUrl;}
+
+    public void setCachedImageUrl(String cachedImageUrl) {this.cachedImageUrl = cachedImageUrl;}
     // --- Parcelable Implementation (Code đóng gói) ---
 
     protected OrderItem(Parcel in) {
@@ -43,6 +48,7 @@ public class OrderItem implements Parcelable {
         name = in.readString();
         price = in.readDouble();
         qty = in.readInt();
+        cachedImageUrl = in.readString();
     }
 
     public static final Creator<OrderItem> CREATOR = new Creator<OrderItem>() {
@@ -68,5 +74,6 @@ public class OrderItem implements Parcelable {
         dest.writeString(name);
         dest.writeDouble(price);
         dest.writeInt(qty);
+        dest.writeString(cachedImageUrl);
     }
 }

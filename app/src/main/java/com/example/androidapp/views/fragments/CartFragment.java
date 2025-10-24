@@ -24,7 +24,7 @@ import com.example.androidapp.models.CartItem;
 import com.example.androidapp.models.CartItemDisplay;
 import com.example.androidapp.repositories.CartRepository;
 import com.example.androidapp.views.activities.carts.CheckoutActivity;
-import com.example.androidapp.views.adapters.cartAdt.CartAdapter; // Đảm bảo đúng package adapter
+import com.example.androidapp.views.adapters.cartAdt.CartAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -268,7 +268,7 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
             tvEmptyCart.setText(message);
         } else {
             // Nếu không có TextView riêng, hiển thị Toast
-            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show(); // Dùng getContext()
+            //Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show(); // Dùng getContext()
         }
     }
 
