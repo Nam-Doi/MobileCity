@@ -58,15 +58,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.tvName.setText(item.getCachedName());
         holder.tvVariant.setText(item.getVariantName() != null ? item.getVariantName() : "Mặc định");
 
-        // Ẩn giá gốc vì CartItem không có thông tin này (view có thể không tồn tại
-        // trong layout)
-        if (holder.tvPriceOriginal != null) {
-            holder.tvPriceOriginal.setVisibility(View.GONE);
-        }
         holder.tvPrice.setText(String.format("%,.0fđ", item.getCachedPrice()));
         holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
 
-        // QUAN TRỌNG: Remove listener cũ trước khi set checked để tránh trigger không
         // cần thiết
         holder.cbSelectItem.setOnCheckedChangeListener(null);
         holder.cbSelectItem.setChecked(item.isSelected());

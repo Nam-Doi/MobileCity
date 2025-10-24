@@ -11,13 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_alignParentTop="true"
-        android:background="@android:color/white"
+        android:background="@drawable/bg_gradient_background"
         android:elevation="4dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="12dp">
 
         <ImageView
+            android:layout_marginTop="5dp"
             android:id="@+id/btnBack"
             android:layout_width="24dp"
             android:layout_height="24dp"
@@ -26,6 +27,7 @@
             android:contentDescription="Quay lại" />
 
         <TextView
+            android:layout_marginTop="5dp"
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -37,6 +39,7 @@
             android:textStyle="bold" />
 
         <View
+            android:layout_marginTop="5dp"
             android:layout_width="24dp"
             android:layout_height="24dp" />
 

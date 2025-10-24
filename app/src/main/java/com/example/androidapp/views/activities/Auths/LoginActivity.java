@@ -8,6 +8,7 @@ import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -29,13 +30,16 @@ public class LoginActivity extends AppCompatActivity {
     private EditText etEmail;
     private EditText etPassword;
     private TextView tvForgotPassword;
-    private TextView tvSignUp;
-    private MaterialButton btnLogin;
+    private MaterialButton btnLogin, btnSignup;
     private FirebaseAuth mAuth;
     private ImageView imgPasswordToggle;
     private boolean isPasswordVisible = false;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ProgressBar progressBar;
+    private static final String PREFS_NAME = "LoginPrefs";
+    private static final String KEY_EMAIL = "email";
+    private static final String KEY_PASSWORD = "password";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,13 +50,14 @@ public class LoginActivity extends AppCompatActivity {
         initViews();
         setupListeners();
         setupPasswordToggle();
+        loadSavedCredentials();
     }
 
     private void initViews() {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
-        tvSignUp = findViewById(R.id.tvSignUp);
+        btnSignup = findViewById(R.id.btnSignUp);
         btnLogin = findViewById(R.id.btnLogin);
         imgPasswordToggle = findViewById(R.id.ivPasswordToggle);
         progressBar = findViewById(R.id.progressBar); // ✅ KHỞI TẠO MỚI
@@ -72,6 +77,38 @@ public class LoginActivity extends AppCompatActivity {
         }
         return true;
     }
+    // ham ghi nho dang nhap
+    private void saveLoginCredentials(String email, String password){
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .edit()
+                .putString(KEY_EMAIL, email)
+                .putString(KEY_PASSWORD, password)
+                .apply();
+    }
+    private void loadSavedCredentials(){
+        var prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String savedEmail = prefs.getString(KEY_EMAIL, "");
+        String savedPassword = prefs.getString(KEY_PASSWORD, "");
+        if(!savedEmail.isEmpty() && !savedPassword.isEmpty()){
+            etEmail.setText(savedEmail);
+            etPassword.setText(savedPassword);
+        }
+    }
+    private void showSaveCredentialsDialog(String email, String password, Runnable onContinue) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Lưu đăng nhập?")
+                .setMessage("Bạn có muốn lưu tài khoản này khum?")
+                .setPositiveButton("yÉ", (dialog, which) -> {
+                    saveLoginCredentials(email, password);
+                    onContinue.run();
+                })
+                .setNegativeButton("Nooooooooooo", (dialog, which) -> {
+                    onContinue.run();
+                })
+                .setCancelable(false)
+                .show();
+    }
+
 
     // ✅ HÀM QUẢN LÝ TRẠNG THÁI LOADING
     private void setLoading(boolean isLoading) {
@@ -96,53 +133,13 @@ public class LoginActivity extends AppCompatActivity {
 
     private void setupListeners() {
         btnLogin.setOnClickListener(v -> loginUser());
-        tvSignUp.setOnClickListener(v -> {
+        btnSignup.setOnClickListener(v -> {
             startActivity(new Intent(this, SignUpActivity.class));
         });
         tvForgotPassword.setOnClickListener(v -> {
             startActivity(new Intent(this, ForgotPasswordActivity.class));
         });
     }
-    // private void loginUser() {
-    // String email = etEmail.getText().toString().trim();
-    // String password = etPassword.getText().toString().trim();
-    //
-    // if (!validateInput(email, password)) {
-    // return;
-    // }
-    //
-    // // Gọi Firebase Auth để đăng nhập
-    // mAuth.signInWithEmailAndPassword(email, password)
-    // .addOnCompleteListener(this, task -> {
-    // if (task.isSuccessful()) {
-    // Log.d(TAG, "signInWithEmail:success");
-    //
-    // FirebaseUser user = mAuth.getCurrentUser();
-    //
-    // if (user != null) {
-    // if (user.isEmailVerified()) {
-    // // Email đã xác minh → Cho vào app
-    // Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-    //
-    // // Chuyển sang màn hình chính (MainActivity)
-    // Intent intent = new Intent(this, MainActivity.class);
-    // startActivity(intent);
-    // finish(); // Đóng LoginActivity
-    // } else {
-    // // Email chưa xác minh
-    // Toast.makeText(this,
-    // "Vui lòng xác minh email trước khi đăng nhập.",
-    // Toast.LENGTH_LONG).show();
-    // }
-    // }
-    // } else {
-    // Log.w(TAG, "signInWithEmail:failure", task.getException());
-    // Toast.makeText(this, "Email hoặc mật khẩu không đúng!",
-    // Toast.LENGTH_SHORT).show();
-    // }
-    // });
-    // }
-
     private void loginUser() {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
@@ -212,14 +209,20 @@ public class LoginActivity extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         String role = documentSnapshot.getString("role");
                         if (role != null) {
-                            if (role.equals("admin")) {
-                                Toast.makeText(this, "Xin chào Admin!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(this, AdminActivity.class));
-                            } else {
-                                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(this, HomeActivity.class));
+                            String email = etEmail.getText().toString();
+                            String password = etPassword.getText().toString();
+                            var prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                            String savedEmail = prefs.getString(KEY_EMAIL, "");
+                            if(savedEmail.isEmpty() || !savedEmail.equals(email)){
+                                showSaveCredentialsDialog(email, password, () ->{
+                                    navigateToRole(role);
+                                });
+
+                            }else{
+                                navigateToRole(role);
                             }
-                            finish();
+
+
                         } else {
                             // Lỗi: Không tìm thấy role
                             setLoading(false); // ✅ KẾT THÚC TẢI
@@ -241,7 +244,18 @@ public class LoginActivity extends AppCompatActivity {
                     Log.e(TAG, "Error getting role", e);
                 });
     }
-
+    //tách logic kiem tra role đungs k
+    private void navigateToRole(String role){
+        if(role.equals("admin")){
+            startActivity(new Intent(this, AdminActivity.class));
+            Toast.makeText(this, "Xin chào Admin!", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            startActivity(new Intent(this, HomeActivity.class));
+            Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+        }
+        finish();
+    }
     // hiện pass
     private void setupPasswordToggle() {
         imgPasswordToggle.setOnClickListener(v -> {
