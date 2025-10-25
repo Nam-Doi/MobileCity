@@ -27,7 +27,6 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
     private int selectedPosition = 0;
     private OnOptionClickListener listener;
 
-    // CONSTRUCTOR ĐÃ ĐƯỢC ĐƠN GIẢN HÓA (Bỏ tham số 'type')
     public OptionAdapter(List<String> options, OnOptionClickListener listener) {
         this.options = options;
         this.listener = listener;
@@ -67,8 +66,6 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
     public int getItemCount() {
         return options.size();
     }
-
-    // HÀM getColorFromString() ĐÃ ĐƯỢC XÓA
 
     static class OptionViewHolder extends RecyclerView.ViewHolder {
         TextView optionView;
