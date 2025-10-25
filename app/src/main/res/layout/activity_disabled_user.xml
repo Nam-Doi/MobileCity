@@ -18,7 +18,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Vui lòng liên hệ quản trị viên hoặc gửi yêu cầu để được kích hoạt lại."
+        android:text="Do phát hiện vi phạm chính sách sử dụng, tài khoản của bạn đã bị tạm khóa.\n
+Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ bộ phận hỗ trợ qua email hỗ trợ để được xem xét lại."
         android:textAlignment="center"/>
 
     <Button
@@ -26,5 +27,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:backgroundTint="@color/primary_blue"
         android:text="Gửi yêu cầu kích hoạt lại" />
 </LinearLayout>
