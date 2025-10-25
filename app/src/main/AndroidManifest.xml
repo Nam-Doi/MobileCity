@@ -67,6 +67,9 @@
             android:name=".views.activities.Auths.ForgotPasswordActivity"
             android:exported="false" />
         <activity
+            android:name=".views.activities.Product.ReviewActivity"
+            android:exported="false" />
+        <activity
             android:name=".views.activities.Auths.SignUpActivity"
             android:exported="false" />
         <activity
