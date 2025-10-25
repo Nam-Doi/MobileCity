@@ -35,7 +35,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Tạo view cho mỗi item từ file XML layout
-        View view = LayoutInflater.from(context).inflate(R.layout.user_item_layout, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_user_account, parent, false);
         return new UserViewHolder(view);
     }
 

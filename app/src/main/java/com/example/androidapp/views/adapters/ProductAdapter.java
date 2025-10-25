@@ -2,7 +2,6 @@ package com.example.androidapp.views.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,6 @@ import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
 import com.example.androidapp.models.ProductVariant;
 import com.example.androidapp.views.activities.Product.DetailProductActivity;
-import com.example.androidapp.views.activities.admin.DetailProductActivitys;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -36,7 +34,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.admin_item_product, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_admin_product, parent, false);
         return new ProductViewHolder(view);
     }
 

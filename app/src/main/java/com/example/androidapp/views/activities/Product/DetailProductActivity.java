@@ -360,7 +360,7 @@ public class DetailProductActivity extends AppCompatActivity {
                 "frontCamera", "Camera trước:", "cpu", "CPU:", "ram", "RAM:",
                 "storage", "Bộ nhớ trong:", "battery", "Dung lượng pin:");
         for (Map.Entry<String, String> entry : specs.entrySet()) {
-            TableRow row = (TableRow) inflater.inflate(R.layout.row_specification, tableLayout, false);
+            TableRow row = (TableRow) inflater.inflate(R.layout.item_row_specification, tableLayout, false);
             TextView tvLabel = row.findViewById(R.id.tvLabel);
             TextView tvValue = row.findViewById(R.id.tvValue);
             String label = labelMapping.getOrDefault(entry.getKey(), entry.getKey());

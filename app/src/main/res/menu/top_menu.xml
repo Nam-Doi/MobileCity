@@ -8,16 +8,14 @@
 
        <item
            android:id="@+id/menu_phone"
-           android:icon="@drawable/ic_phone"
            android:title="Điện thoại" />
 
        <item
            android:id="@+id/menu_accessory"
-           android:icon="@drawable/ic_phone_accessories"
            android:title="Phụ kiện" />
 
        <item
-           android:id="@+id/menu_other"
-           android:title="Khác" />
+           android:id="@+id/menu_tablet"
+           android:title="Máy tính bảng" />
    </group>
 </menu>
