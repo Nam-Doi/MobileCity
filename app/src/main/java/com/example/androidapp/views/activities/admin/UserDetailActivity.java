@@ -1,6 +1,7 @@
 package com.example.androidapp.views.activities.admin; // Thay đổi package cho đúng với dự án của bạn
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -157,10 +158,10 @@ public class UserDetailActivity extends AppCompatActivity {
     private void updateButtonStatus() {
         if (currentUser.isActive()) {
             buttonToggleActive.setText("Vô hiệu hóa tài khoản");
-            buttonToggleActive.setBackgroundColor(Color.parseColor("FF0000"));
+            buttonToggleActive.setBackgroundColor(ContextCompat.getColor(this, R.color.red));
         } else {
             buttonToggleActive.setText("Kích hoạt tài khoản");
-            buttonToggleActive.setBackgroundColor(Color.parseColor("#00FF00"));
+            buttonToggleActive.setBackgroundColor(ContextCompat.getColor(this, R.color.green));
         }
     }
 

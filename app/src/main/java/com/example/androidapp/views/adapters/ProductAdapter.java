@@ -16,6 +16,7 @@ import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
 import com.example.androidapp.models.ProductVariant;
 import com.example.androidapp.views.activities.Product.DetailProductActivity;
+import com.example.androidapp.views.activities.admin.DetailProductActivitys;
 
 import java.text.NumberFormat;
 import java.util.List;
