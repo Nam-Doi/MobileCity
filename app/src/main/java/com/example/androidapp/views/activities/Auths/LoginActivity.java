@@ -110,11 +110,12 @@ public class LoginActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Lưu đăng nhập?")
                 .setMessage("Bạn có muốn lưu tài khoản này khum?")
-                .setPositiveButton("yÉ", (dialog, which) -> {
+                .setPositiveButton("Lưu", (dialog, which) -> {
                     saveLoginCredentials(email, password);
                     onContinue.run();
                 })
-                .setNegativeButton("Nooooooooooo", (dialog, which) -> {
+                .setNegativeButton("Không", (dialog, which) -> {
+                    saveLoginCredentials("","");
                     onContinue.run();
                 })
                 .setCancelable(false)
@@ -199,9 +200,6 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // =================================================================
-    // HÀM NÀY ĐÃ ĐƯỢC HỢP NHẤT (MERGED) TỪ CẢ 2 PHIÊN BẢN
-    // =================================================================
     private void CheckUserStatusAndRole(String userId) {
         db.collection("users").document(userId)
                 .get()
