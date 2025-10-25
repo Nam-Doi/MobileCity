@@ -118,7 +118,7 @@
                         android:id="@+id/tvReceiverName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Đối Sỹ Nam"
+                        android:text="Arthur"
                         android:textColor="@android:color/black"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -128,7 +128,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="(+84) 362 346 089"
+                        android:text=""
                         android:textColor="#666666"
                         android:textSize="14sp" />
 
@@ -137,7 +137,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Nhà Văn Hoá Thôn 1 Quảng Hải\nXã Quảng Hải, Huyện Quảng Xương, Thanh Hóa"
+                        android:text=""
                         android:textColor="#666666"
                         android:textSize="14sp" />
 

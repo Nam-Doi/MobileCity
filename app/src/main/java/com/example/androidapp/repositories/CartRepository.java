@@ -75,14 +75,45 @@ public class CartRepository {
                 cartData.put("quantity", quantity);
                 cartData.put("isSelected", true);
 
-                // Cache thông tin từ Product để hiển thị nhanh
+                // Cache thông tin từ Product/Variant để hiển thị nhanh
                 cartData.put("cachedName", product.getName());
-                cartData.put("cachedPrice", product.getPrice());
                 cartData.put("cachedBrand", product.getBrand());
 
-                if (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
-                    cartData.put("cachedImageUrl", product.getImageUrls().get(0));
+                // Nếu variant được truyền lên, ưu tiên lấy giá và ảnh từ variant đó
+                double cachedPrice = 0.0;
+                String cachedImageUrl = null;
+                if (variantId != null && product.getVariants() != null) {
+                    for (var v : product.getVariants()) {
+                        if (variantId.equals(v.getId())) {
+                            try {
+                                cachedPrice = v.getPrice();
+                            } catch (Exception ignored) {
+                            }
+                            if (v.getImageUrls() != null && !v.getImageUrls().isEmpty()) {
+                                cachedImageUrl = v.getImageUrls().get(0);
+                            }
+                            break;
+                        }
+                    }
                 }
+
+                // Fallback: nếu không lấy được từ variant thì dùng product-level
+                if (cachedPrice <= 0) {
+                    try {
+                        cachedPrice = product.getPrice();
+                    } catch (Exception ignored) {
+                        cachedPrice = 0.0;
+                    }
+                }
+                if (cachedImageUrl == null) {
+                    if (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
+                        cachedImageUrl = product.getImageUrls().get(0);
+                    }
+                }
+
+                cartData.put("cachedPrice", cachedPrice);
+                if (cachedImageUrl != null)
+                    cartData.put("cachedImageUrl", cachedImageUrl);
 
                 cartData.put("addedAt", System.currentTimeMillis());
                 cartData.put("updatedAt", System.currentTimeMillis());
@@ -133,6 +164,9 @@ public class CartRepository {
                                 .get()
                                 .addOnSuccessListener(productDoc -> {
                                     Product product = productDoc.exists() ? productDoc.toObject(Product.class) : null;
+                                    if (product != null) {
+                                        product.setId(productDoc.getId()); // QUAN TRỌNG: Set ID cho Product
+                                    }
 
                                     displayItems.add(new CartItemDisplay(cartItem, product));
 
@@ -331,6 +365,78 @@ public class CartRepository {
                     }
                 })
                 .addOnFailureListener(listener::onFailure);
+    }
+
+    /**
+     * Cập nhật variant của một item trong giỏ hàng
+     */
+    public void updateVariant(@NonNull String userId, @NonNull String productId,
+            @NonNull String oldVariantId, @NonNull String newVariantId,
+            @NonNull String variantName, double price, String imageUrl,
+            OnCartOperationListener listener) {
+        String oldCartItemId = productId + "_" + oldVariantId;
+        String newCartItemId = productId + "_" + newVariantId;
+
+        // Nếu variant không thay đổi, chỉ cập nhật thông tin
+        if (oldVariantId.equals(newVariantId)) {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("variantName", variantName);
+            updates.put("cachedPrice", price);
+            if (imageUrl != null) {
+                updates.put("cachedImageUrl", imageUrl);
+            }
+            updates.put("updatedAt", System.currentTimeMillis());
+
+            getCartItemRef(userId, oldCartItemId)
+                    .update(updates)
+                    .addOnSuccessListener(aVoid -> listener.onSuccess("Đã cập nhật biến thể"))
+                    .addOnFailureListener(listener::onFailure);
+            return;
+        }
+
+        // Nếu variant thay đổi, cần xóa item cũ và tạo item mới
+        DocumentReference oldRef = getCartItemRef(userId, oldCartItemId);
+        DocumentReference newRef = getCartItemRef(userId, newCartItemId);
+
+        // Lấy thông tin item cũ
+        oldRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (!documentSnapshot.exists()) {
+                listener.onFailure(new Exception("Không tìm thấy item cũ"));
+                return;
+            }
+
+            // Lấy thông tin từ item cũ
+            int quantity = documentSnapshot.getLong("quantity").intValue();
+            boolean isSelected = Boolean.TRUE.equals(documentSnapshot.getBoolean("isSelected"));
+            String cachedName = documentSnapshot.getString("cachedName");
+            long addedAt = documentSnapshot.getLong("addedAt");
+
+            // Tạo dữ liệu cho item mới
+            Map<String, Object> newItemData = new HashMap<>();
+            newItemData.put("productId", productId);
+            newItemData.put("userId", userId);
+            newItemData.put("variantId", newVariantId);
+            newItemData.put("variantName", variantName);
+            newItemData.put("quantity", quantity);
+            newItemData.put("isSelected", isSelected);
+            newItemData.put("cachedName", cachedName);
+            newItemData.put("cachedPrice", price);
+            if (imageUrl != null) {
+                newItemData.put("cachedImageUrl", imageUrl);
+            }
+            newItemData.put("addedAt", addedAt);
+            newItemData.put("updatedAt", System.currentTimeMillis());
+
+            // Tạo item mới
+            newRef.set(newItemData)
+                    .addOnSuccessListener(aVoid -> {
+                        // Xóa item cũ
+                        oldRef.delete()
+                                .addOnSuccessListener(aVoid1 -> listener.onSuccess("Đã cập nhật biến thể"))
+                                .addOnFailureListener(listener::onFailure);
+                    })
+                    .addOnFailureListener(listener::onFailure);
+        }).addOnFailureListener(listener::onFailure);
     }
 
     // Callback Interfaces

@@ -15,22 +15,26 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
+import com.example.androidapp.models.CartItemDisplay;
+import com.example.androidapp.models.Product;
+import com.example.androidapp.models.ProductVariant;
 import com.example.androidapp.repositories.CartRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
-    private List<CartItem> cartList;
+    private List<CartItemDisplay> cartList;
     private OnCartChangeListener listener;
 
     public interface OnCartChangeListener {
         void onCartUpdated();
     }
 
-    public CartAdapter(List<CartItem> cartList, OnCartChangeListener listener) {
+    public CartAdapter(List<CartItemDisplay> cartList, OnCartChangeListener listener) {
         this.cartList = cartList;
         this.listener = listener;
     }
@@ -45,25 +49,27 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull CartAdapter.CartViewHolder holder, int position) {
-        CartItem item = cartList.get(position);
+        CartItemDisplay display = cartList.get(position);
+        CartItem item = display.getCartItem();
 
         // Load ảnh sản phẩm
-        if (item.getCachedImageUrl() != null && !item.getCachedImageUrl().isEmpty()) {
+        String imageUrl = display.getImageUrl();
+        if (imageUrl != null && !imageUrl.isEmpty()) {
             Glide.with(holder.itemView.getContext())
-                    .load(item.getCachedImageUrl())
+                    .load(imageUrl)
                     .placeholder(R.drawable.ic_launcher_background)
                     .into(holder.imgProduct);
         }
 
-        holder.tvName.setText(item.getCachedName());
-        holder.tvVariant.setText(item.getVariantName() != null ? item.getVariantName() : "Mặc định");
+        holder.tvName.setText(display.getProductName());
+        holder.tvVariant.setText(display.getVariantName() != null ? display.getVariantName() : "Mặc định");
 
-        holder.tvPrice.setText(String.format("%,.0fđ", item.getCachedPrice()));
-        holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
+        holder.tvPrice.setText(String.format("%,.0fđ", display.getCurrentPrice()));
+        holder.tvQuantity.setText(String.valueOf(display.getQuantity()));
 
         // cần thiết
         holder.cbSelectItem.setOnCheckedChangeListener(null);
-        holder.cbSelectItem.setChecked(item.isSelected());
+        holder.cbSelectItem.setChecked(display.isSelected());
 
         // Checkbox change listener - Cập nhật total khi check/uncheck
         holder.cbSelectItem.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -75,12 +81,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         // Decrease quantity - Cập nhật total khi giảm số lượng
         holder.tvMinus.setOnClickListener(v -> {
-            if (item.getQuantity() > 1) {
+            if (display.getQuantity() > 1) {
+                // Cập nhật quantity trong CartItem
                 item.setQuantity(item.getQuantity() - 1);
-                holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
+                holder.tvQuantity.setText(String.valueOf(display.getQuantity()));
 
                 // Chỉ cập nhật total nếu item đang được chọn
-                if (item.isSelected() && listener != null) {
+                if (display.isSelected() && listener != null) {
                     listener.onCartUpdated();
                 }
             } else {
@@ -92,21 +99,24 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         // Increase quantity - Cập nhật total khi tăng số lượng
         holder.tvPlus.setOnClickListener(v -> {
             item.setQuantity(item.getQuantity() + 1);
-            holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
+            holder.tvQuantity.setText(String.valueOf(display.getQuantity()));
 
             // Chỉ cập nhật total nếu item đang được chọn
-            if (item.isSelected() && listener != null) {
+            if (display.isSelected() && listener != null) {
                 listener.onCartUpdated();
             }
         });
 
         // Click variant để chọn biến thể
         holder.tvVariant.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(),
-                    "Chọn biến thể: " + item.getVariantName(),
-                    Toast.LENGTH_SHORT).show();
-            // TODO: Show variant selection dialog
+            android.util.Log.d("CartAdapter", "Variant clicked for position: " + holder.getAdapterPosition());
+            android.util.Log.d("CartAdapter", "Variant text: " + holder.tvVariant.getText());
+            showVariantSelectionDialog(v.getContext(), item, holder.getAdapterPosition());
         });
+
+        // Đảm bảo TextView có thể click
+        holder.tvVariant.setClickable(true);
+        holder.tvVariant.setFocusable(true);
     }
 
     @Override
@@ -117,9 +127,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     // Tính tổng tiền các item được chọn
     public double getTotalPrice() {
         double total = 0;
-        for (CartItem item : cartList) {
-            if (item.isSelected()) {
-                total += item.getTotalPrice(); // item.getPrice() * item.getQuantity()
+        for (CartItemDisplay display : cartList) {
+            if (display.isSelected()) {
+                total += display.getTotalPrice();
             }
         }
         return total;
@@ -134,8 +144,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     // Đếm số lượng item được chọn
     public int getSelectedItemCount() {
         int count = 0;
-        for (CartItem item : cartList) {
-            if (item.isSelected()) {
+        for (CartItemDisplay display : cartList) {
+            if (display.isSelected()) {
                 count++;
             }
         }
@@ -145,9 +155,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     // Lấy danh sách item được chọn
     public List<CartItem> getSelectedItems() {
         List<CartItem> selectedItems = new ArrayList<>();
-        for (CartItem item : cartList) {
-            if (item.isSelected()) {
-                selectedItems.add(item);
+        for (CartItemDisplay display : cartList) {
+            if (display.isSelected()) {
+                selectedItems.add(display.getCartItem());
             }
         }
         return selectedItems;
@@ -164,8 +174,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     // Select tất cả items
     public void selectAll(boolean isSelected) {
-        for (CartItem item : cartList) {
-            item.setSelected(isSelected);
+        for (CartItemDisplay display : cartList) {
+            display.getCartItem().setSelected(isSelected);
         }
         notifyDataSetChanged();
         if (listener != null) {
@@ -216,6 +226,129 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
+    }
+
+    // Hiển thị dialog chọn variant
+    private void showVariantSelectionDialog(android.content.Context context, CartItem item, int position) {
+        android.util.Log.d("CartAdapter", "showVariantSelectionDialog called for position: " + position);
+        CartItemDisplay display = cartList.get(position);
+        Product product = display.getProduct();
+
+        android.util.Log.d("CartAdapter", "Product: " + (product != null ? "not null" : "null"));
+        if (product != null) {
+            android.util.Log.d("CartAdapter",
+                    "Variants: " + (product.getVariants() != null ? product.getVariants().size() : "null"));
+        }
+
+        if (product != null && product.getVariants() != null && !product.getVariants().isEmpty()) {
+            android.util.Log.d("CartAdapter", "Showing variant dialog directly");
+            showVariantDialog(context, product, item, position);
+        } else {
+            // Nếu không có product info, load từ Firestore
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("phones")
+                    .document(item.getProductId())
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            Product loadedProduct = documentSnapshot.toObject(Product.class);
+                            if (loadedProduct != null && loadedProduct.getVariants() != null
+                                    && !loadedProduct.getVariants().isEmpty()) {
+                                showVariantDialog(context, loadedProduct, item, position);
+                            } else {
+                                Toast.makeText(context, "Không có biến thể nào", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(context, "Lỗi tải thông tin sản phẩm", Toast.LENGTH_SHORT).show();
+                    });
+        }
+    }
+
+    private void showVariantDialog(android.content.Context context, Product product, CartItem item, int position) {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(context);
+        builder.setTitle("Chọn biến thể");
+
+        // Tạo danh sách các variant
+        List<ProductVariant> variants = product.getVariants();
+        String[] variantNames = new String[variants.size()];
+        for (int i = 0; i < variants.size(); i++) {
+            ProductVariant variant = variants.get(i);
+            variantNames[i] = variant.getColor() + " - " + variant.getRam() + " - " + variant.getStorage() +
+                    " (" + String.format("%,.0fđ", variant.getPrice()) + ")";
+        }
+
+        // Tìm variant hiện tại
+        int currentSelection = 0;
+        for (int i = 0; i < variants.size(); i++) {
+            if (variants.get(i).getId().equals(item.getVariantId())) {
+                currentSelection = i;
+                break;
+            }
+        }
+
+        builder.setSingleChoiceItems(variantNames, currentSelection, (dialog, which) -> {
+            ProductVariant selectedVariant = variants.get(which);
+
+            // Lưu oldVariantId trước khi thay đổi item
+            String oldVariantId = item.getVariantId();
+
+            // Cập nhật thông tin variant trong CartItem (local)
+            item.setVariantId(selectedVariant.getId());
+            item.setVariantName(selectedVariant.getColor() + " - " + selectedVariant.getRam() + " - "
+                    + selectedVariant.getStorage());
+            item.setCachedPrice(selectedVariant.getPrice());
+
+            // Cập nhật ảnh nếu có
+            if (selectedVariant.getImageUrls() != null && !selectedVariant.getImageUrls().isEmpty()) {
+                item.setCachedImageUrl(selectedVariant.getImageUrls().get(0));
+            }
+
+            // Cập nhật CartItemDisplay
+            CartItemDisplay display = cartList.get(position);
+            display.setProduct(product); // Cập nhật product với variant mới
+            // Cập nhật CartItem trong display
+            display.getCartItem().setVariantId(selectedVariant.getId());
+            display.getCartItem().setVariantName(selectedVariant.getColor() + " - " + selectedVariant.getRam() + " - "
+                    + selectedVariant.getStorage());
+            display.getCartItem().setCachedPrice(selectedVariant.getPrice());
+            if (selectedVariant.getImageUrls() != null && !selectedVariant.getImageUrls().isEmpty()) {
+                display.getCartItem().setCachedImageUrl(selectedVariant.getImageUrls().get(0));
+            }
+
+            // Cập nhật trên Firestore
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                CartRepository repo = new CartRepository();
+                String newVariantId = selectedVariant.getId();
+                repo.updateVariant(user.getUid(), item.getProductId(), oldVariantId, newVariantId,
+                        item.getVariantName(), selectedVariant.getPrice(),
+                        selectedVariant.getImageUrls() != null && !selectedVariant.getImageUrls().isEmpty()
+                                ? selectedVariant.getImageUrls().get(0)
+                                : null,
+                        new CartRepository.OnCartOperationListener() {
+                            @Override
+                            public void onSuccess(String message) {
+                                // Cập nhật UI
+                                notifyItemChanged(position);
+                                if (listener != null) {
+                                    listener.onCartUpdated();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                Toast.makeText(context, "Lỗi cập nhật: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+
+            dialog.dismiss();
+        });
+
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+        builder.show();
     }
 
     public static class CartViewHolder extends RecyclerView.ViewHolder {

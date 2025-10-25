@@ -65,6 +65,7 @@ public class DetailProductActivity extends AppCompatActivity {
     ScrollView sv_detail;
     MenuItem searchItem;
     SearchView searchView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -168,8 +169,14 @@ public class DetailProductActivity extends AppCompatActivity {
 
         Log.d("DetailProduct", "Adding product: " + currentProduct.getName() + " ID: " + currentProduct.getId());
 
+        // Kiểm tra variant đã chọn
+        if (selectedVariant == null) {
+            Toast.makeText(this, "Vui lòng chọn màu sắc và bộ nhớ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // Kiểm tra còn hàng
-        if (currentProduct.getStock() <= 0) {
+        if (selectedVariant.getStock() <= 0) {
             Toast.makeText(this, "Sản phẩm đã hết hàng", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -177,13 +184,17 @@ public class DetailProductActivity extends AppCompatActivity {
         // Disable button để tránh click nhiều lần
         btn_add_to_cart.setEnabled(false);
 
-        // Thêm vào giỏ hàng (mặc định số lượng = 1, không có variant)
+        // Tạo variant name từ thông tin đã chọn
+        String variantName = selectedVariant.getColor() + " - " + selectedVariant.getRam() + " - "
+                + selectedVariant.getStorage();
+
+        // Thêm vào giỏ hàng với variant đã chọn
         cartRepository.addToCart(
                 user.getUid(),
                 currentProduct,
                 1, // Số lượng mặc định
-                null, // variantId (nếu có màu/size thì cần dialog chọn)
-                null, // variantName
+                selectedVariant.getId(), // variantId
+                variantName, // variantName
                 new CartRepository.OnCartOperationListener() {
                     @Override
                     public void onSuccess(String message) {
@@ -252,26 +263,44 @@ public class DetailProductActivity extends AppCompatActivity {
             return;
         }
 
-        // Kiểm tra còn hàng
-        if (currentProduct.getStock() <= 0) {
-            Toast.makeText(this, "Sản phẩm đã hết hàng", Toast.LENGTH_SHORT).show();
-            return;
+        // Kiểm tra còn hàng: nếu người dùng đã chọn variant, kiểm tra stock của variant
+        if (selectedVariant != null) {
+            if (selectedVariant.getStock() <= 0) {
+                Toast.makeText(this, "Sản phẩm đã hết hàng", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            if (currentProduct.getStock() <= 0) {
+                Toast.makeText(this, "Sản phẩm đã hết hàng", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
-        // tao cart item tu sp hien tai
+        // tao cart item tu sp hien tai (ưu tiên variant nếu có)
         CartItem cartItem = new CartItem(
                 currentProduct.getId(),
                 user.getUid(),
                 1 // Số lượng mặc định = 1
         );
 
-        // Set cached data
+        // Set cached data and variant info if available
         cartItem.setCachedName(currentProduct.getName());
-        cartItem.setCachedPrice(currentProduct.getPrice());
         cartItem.setSelected(true); // Đánh dấu là đã chọn
 
-        if (currentProduct.getImageUrls() != null && !currentProduct.getImageUrls().isEmpty()) {
-            cartItem.setCachedImageUrl(currentProduct.getImageUrls().get(0));
+        if (selectedVariant != null) {
+            cartItem.setVariantId(selectedVariant.getId());
+            String variantName = selectedVariant.getColor() + " - " + selectedVariant.getRam() + " - "
+                    + selectedVariant.getStorage();
+            cartItem.setVariantName(variantName);
+            cartItem.setCachedPrice(selectedVariant.getPrice());
+            if (selectedVariant.getImageUrls() != null && !selectedVariant.getImageUrls().isEmpty()) {
+                cartItem.setCachedImageUrl(selectedVariant.getImageUrls().get(0));
+            }
+        } else {
+            cartItem.setCachedPrice(currentProduct.getPrice());
+            if (currentProduct.getImageUrls() != null && !currentProduct.getImageUrls().isEmpty()) {
+                cartItem.setCachedImageUrl(currentProduct.getImageUrls().get(0));
+            }
         }
 
         // Tạo ArrayList với 1 item
@@ -303,7 +332,8 @@ public class DetailProductActivity extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         currentProduct = documentSnapshot.toObject(Product.class);
-                        if (currentProduct == null) return;
+                        if (currentProduct == null)
+                            return;
 
                         // Hiển thị thông tin chung
                         tv_name_product.setText(currentProduct.getName());
@@ -420,8 +450,10 @@ public class DetailProductActivity extends AppCompatActivity {
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+
     private void updateUIForVariant(ProductVariant variant) {
-        if (variant == null) return;
+        if (variant == null)
+            return;
         this.selectedVariant = variant;
         btn_buy.setEnabled(true); // Kích hoạt lại nút Mua ngay
         btn_buy.setText("Mua ngay"); // (Tùy chọn) Đặt lại chữ trên nút
@@ -456,6 +488,7 @@ public class DetailProductActivity extends AppCompatActivity {
         ProductVariant defaultVariant = variants.get(0);
         selectedColor = defaultVariant.getColor();
         selectedMemory = defaultVariant.getRam() + "-" + defaultVariant.getStorage();
+        selectedVariant = defaultVariant; // QUAN TRỌNG: Set selectedVariant
         updateUIForVariant(defaultVariant);
 
         // 1. Tách ra danh sách màu sắc và bộ nhớ DUY NHẤT
@@ -470,6 +503,7 @@ public class DetailProductActivity extends AppCompatActivity {
                 .collect(Collectors.toList());
 
         // 2. Tạo Adapter cho Màu sắc
+        rvColorOption.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         OptionAdapter colorAdapter = new OptionAdapter(colors, option -> {
             selectedColor = option;
             findAndDisplayMatchingVariant();
@@ -477,6 +511,7 @@ public class DetailProductActivity extends AppCompatActivity {
         rvColorOption.setAdapter(colorAdapter);
 
         // 3. Tạo Adapter cho Bộ nhớ
+        rvMemoryOption.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         OptionAdapter memoryAdapter = new OptionAdapter(memories, option -> {
             selectedMemory = option;
             findAndDisplayMatchingVariant();
@@ -485,17 +520,20 @@ public class DetailProductActivity extends AppCompatActivity {
     }
 
     private void findAndDisplayMatchingVariant() {
-        if (currentProduct == null || currentProduct.getVariants() == null) return;
+        if (currentProduct == null || currentProduct.getVariants() == null)
+            return;
 
         for (ProductVariant variant : currentProduct.getVariants()) {
             String memory = variant.getRam() + "-" + variant.getStorage();
             if (variant.getColor().equals(selectedColor) && memory.equals(selectedMemory)) {
                 // Tìm thấy variant khớp, cập nhật giao diện
+                selectedVariant = variant; // QUAN TRỌNG: Set selectedVariant
                 updateUIForVariant(variant);
                 return;
             }
         }
-        // (Tùy chọn) Xử lý trường hợp không có variant nào khớp (ví dụ: vô hiệu hóa nút Mua)
+        // (Tùy chọn) Xử lý trường hợp không có variant nào khớp (ví dụ: vô hiệu hóa nút
+        // Mua)
         Toast.makeText(this, "Phiên bản này không có sẵn", Toast.LENGTH_SHORT).show();
         tv_stock.setText("Sắp về");
         btn_buy.setEnabled(false); // Vô hiệu hóa nút Mua ngay

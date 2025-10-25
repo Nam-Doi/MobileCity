@@ -54,14 +54,46 @@ public class CartItemDisplay implements Parcelable {
     }
 
     public String getImageUrl() {
+        // Ưu tiên lấy ảnh từ cachedImageUrl (ảnh của variant đã chọn)
+        if (cartItem.getCachedImageUrl() != null && !cartItem.getCachedImageUrl().isEmpty()) {
+            return cartItem.getCachedImageUrl();
+        }
+        
+        // Nếu không có cachedImageUrl, tìm ảnh từ variant tương ứng
+        if (product != null && product.getVariants() != null && cartItem.getVariantId() != null) {
+            for (ProductVariant variant : product.getVariants()) {
+                if (variant.getId().equals(cartItem.getVariantId()) && 
+                    variant.getImageUrls() != null && !variant.getImageUrls().isEmpty()) {
+                    return variant.getImageUrls().get(0);
+                }
+            }
+        }
+        
+        // Fallback: lấy ảnh chung của sản phẩm
         if (product != null && product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
             return product.getImageUrls().get(0);
         }
-        return cartItem.getCachedImageUrl();
+        
+        return null;
     }
 
     public double getCurrentPrice() {
-        return product != null ? product.getPrice() : cartItem.getCachedPrice();
+        // Ưu tiên lấy giá từ cachedPrice (giá của variant đã chọn)
+        if (cartItem.getCachedPrice() > 0) {
+            return cartItem.getCachedPrice();
+        }
+        
+        // Nếu không có cachedPrice, tìm giá từ variant tương ứng
+        if (product != null && product.getVariants() != null && cartItem.getVariantId() != null) {
+            for (ProductVariant variant : product.getVariants()) {
+                if (variant.getId().equals(cartItem.getVariantId())) {
+                    return variant.getPrice();
+                }
+            }
+        }
+        
+        // Fallback: lấy giá chung của sản phẩm
+        return product != null ? product.getPrice() : 0.0;
     }
 
     public int getQuantity() {

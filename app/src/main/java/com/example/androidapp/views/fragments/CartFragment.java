@@ -37,7 +37,7 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
     private CheckBox cbSelectItem;
     private TextView tvTotal,tvTitle;
     private Button btnCheckout;
-    private List<CartItem> cartList;
+    private List<CartItemDisplay> cartList;
     private CartAdapter cartAdapter;
     private ImageView imBack;
     private ProgressBar progressBar;
@@ -103,15 +103,7 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
 
                 Log.d("CartFragment", "Cart items loaded: " + items.size());
                 cartList.clear();
-                for (CartItemDisplay display : items) {
-                    CartItem cartItem = display.getCartItem();
-                    if (display.getProduct() != null) {
-                        cartItem.setCachedName(display.getProductName());
-                        cartItem.setCachedPrice(display.getCurrentPrice());
-                        cartItem.setCachedImageUrl(display.getImageUrl());
-                    }
-                    cartList.add(cartItem);
-                }
+                cartList.addAll(items);
 
                 if (cartList.isEmpty()) {
                     showEmptyCart("Giỏ hàng trống");
