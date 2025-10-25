@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/detail_toolbar"
         android:layout_width="match_parent"
@@ -101,6 +100,13 @@
                 android:layout_height="wrap_content"
                 android:stretchColumns="1">
             </TableLayout>
+
+            <Button
+                android:id="@+id/btn_write_review"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/primary_blue"
+                android:text="Đánh giá"/>
         </LinearLayout>
     </ScrollView>
     <LinearLayout

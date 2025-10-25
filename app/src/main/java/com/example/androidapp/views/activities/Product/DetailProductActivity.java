@@ -52,7 +52,7 @@ public class DetailProductActivity extends AppCompatActivity {
     ImageView iv_product;
     TextView tv_name_product, tv_product_price, tv_stock;
     TableLayout tableLayout;
-    Button btn_buy, btn_add_to_cart;
+    Button btn_buy, btn_add_to_cart, btn_write_review;
     RecyclerView rv_suggestItem, rvColorOption, rvMemoryOption;
     List<Product> suggestionList = new ArrayList<>();
     SearchSuggestionAdapter suggestionAdapter;
@@ -90,6 +90,7 @@ public class DetailProductActivity extends AppCompatActivity {
         tv_stock = findViewById(R.id.tv_stock);
         btn_add_to_cart = findViewById(R.id.btn_add_to_cart);
         btn_buy = findViewById(R.id.btn_buy);
+        btn_write_review=findViewById(R.id.btn_write_review);
         rv_suggestItem = findViewById(R.id.rv_suggestItem);
         // Sự kiện click các nút
         btn_add_to_cart.setOnClickListener(v -> addToCart());
@@ -144,6 +145,12 @@ public class DetailProductActivity extends AppCompatActivity {
             gestureDetector.onTouchEvent(event);
             // Trả về false để không làm ảnh hưởng đến sự kiện cuộn
             return false;
+        });
+
+        btn_write_review.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ReviewActivity.class );
+            intent.putExtra("PRODUCT_ID", currentProduct.getId());
+            startActivity(intent);
         });
     }
 
@@ -337,7 +344,7 @@ public class DetailProductActivity extends AppCompatActivity {
 
                         // Hiển thị thông tin chung
                         tv_name_product.setText(currentProduct.getName());
-                        if (currentProduct.getSpecifications() != null) {
+                        if (currentProduct.getSpecifications() != null && !currentProduct.getCategory().equals("Phụ kiện")) {
                             displaySpecs(currentProduct.getSpecifications());
                         }
 
@@ -468,7 +475,7 @@ public class DetailProductActivity extends AppCompatActivity {
             tv_stock.setTextColor(Color.parseColor("#2E7D32"));
         } else {
             btn_buy.setEnabled(false); // Vô hiệu hóa nút Mua ngay
-            btn_buy.setText("Không có sẵn"); // (Tùy chọn) Đổi chữ trên nút
+            btn_buy.setText("Không có sẵn");
             tv_stock.setText("Hết hàng");
             tv_stock.setTextColor(Color.RED);
         }
