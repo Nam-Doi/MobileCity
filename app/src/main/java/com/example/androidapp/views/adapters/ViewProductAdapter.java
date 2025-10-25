@@ -14,19 +14,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.Product;
-import com.example.androidapp.models.ProductVariant;
 import com.example.androidapp.views.activities.Product.DetailProductActivity;
+import com.example.androidapp.views.activities.admin.DetailProductActivitys;
 
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
+public class ViewProductAdapter extends RecyclerView.Adapter<ViewProductAdapter.ProductViewHolder> {
 
-    private Context context;
-    private List<Product> productList;
+    private final Context context;
+    private final List<Product> productList;
 
-    public ProductAdapter(Context context, List<Product> productList) {
+    public ViewProductAdapter(Context context, List<Product> productList) {
         this.context = context;
         this.productList = productList;
     }
@@ -34,46 +34,51 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_admin_product, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.admin_item_product, parent, false);
         return new ProductViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
+        if (product == null) return;
 
         holder.tvName.setText(product.getName());
         holder.tvBrand.setText(product.getBrand());
-        // --- SỬA: LẤY GIÁ VÀ ẢNH TỪ VARIANT ---
-        List<ProductVariant> variants = product.getVariants();
-        if (variants != null && !variants.isEmpty()) {
-            // Lấy variant đầu tiên làm mặc định
-            ProductVariant defaultVariant = variants.get(0);
 
-            // Lấy giá
-            holder.tvPrice.setText(NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(defaultVariant.getPrice()));
+        // Định dạng giá tiền: 300.000.000₫
+        double priceValue = product.getPrice();
+        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+        holder.tvPrice.setText(nf.format(priceValue) + "₫");
 
-            // Lấy ảnh
-            if (defaultVariant.getImageUrls() != null && !defaultVariant.getImageUrls().isEmpty()) {
-                Glide.with(context).load(defaultVariant.getImageUrls().get(0)).into(holder.imgProduct);
+        // Load ảnh sản phẩm
+        Object imageData = product.getImageUrls();
+        if (imageData instanceof List) {
+            List<?> list = (List<?>) imageData;
+            if (!list.isEmpty()) {
+                Glide.with(context)
+                        .load(list.get(0))
+                        .placeholder(R.drawable.ic_launcher_background)
+                        .into(holder.ivProduct);
             } else {
-                holder.imgProduct.setImageResource(R.drawable.ic_launcher_background); // Cần có ảnh placeholder
+                holder.ivProduct.setImageResource(R.drawable.ic_launcher_background);
             }
+        } else if (imageData instanceof String) {
+            Glide.with(context)
+                    .load((String) imageData)
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .into(holder.ivProduct);
         } else {
-            // Xử lý nếu sản phẩm không có variant
-            holder.tvPrice.setText("Chưa có giá");
-            holder.imgProduct.setImageResource(R.drawable.ic_launcher_background); // Cần có ảnh placeholder
+            holder.ivProduct.setImageResource(R.drawable.ic_launcher_background);
         }
 
-
-       //SỬA: THÊM SỰ KIỆN CLICK ĐỂ MỞ CHI TIẾT SẢN PHẨM ---
+        // 🟢 SỰ KIỆN CLICK - MỞ CHI TIẾT SẢN PHẨM
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, DetailProductActivitys.class); // Mở layout chi tiết ADMIN
+            Intent intent = new Intent(context, DetailProductActivitys.class);
             intent.putExtra("product", product);
             context.startActivity(intent);
         });
     }
-
 
     @Override
     public int getItemCount() {
@@ -81,17 +86,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     }
 
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgProduct;
+        ImageView ivProduct;
         TextView tvName, tvBrand, tvPrice;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
-            imgProduct = itemView.findViewById(R.id.imgProduct);
+            ivProduct = itemView.findViewById(R.id.iv_product);
             tvName = itemView.findViewById(R.id.tvProductName);
             tvBrand = itemView.findViewById(R.id.tvProductBrand);
             tvPrice = itemView.findViewById(R.id.tvProductPrice);
         }
     }
 }
-
-

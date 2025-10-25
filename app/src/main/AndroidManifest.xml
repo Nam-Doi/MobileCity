@@ -16,6 +16,10 @@
         <activity
             android:name=".views.activities.carts.PaymentMethodActivity"
             android:exported="false" />
+
+        <activity android:name=".views.activities.admin.EditProductActivity"
+                  android:exported="false"
+            />
         <activity
             android:name=".views.activities.carts.EditAddressActivity"
             android:exported="false" /> <!-- ADMIN ACTIVITIES -->
