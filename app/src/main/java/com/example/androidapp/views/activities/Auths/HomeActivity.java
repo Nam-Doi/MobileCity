@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment;
 import com.example.androidapp.R;
 import com.example.androidapp.views.fragments.CartFragment;
 import com.example.androidapp.views.fragments.HomeFragment;
-import com.example.androidapp.views.fragments.NotifyFragment;
+import com.example.androidapp.views.fragments.NotificationFragment;
 import com.example.androidapp.views.fragments.UserFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -56,7 +56,7 @@ public class HomeActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_cart) {
                 selectedFragment = new CartFragment();
             } else if (itemId == R.id.nav_notify) {
-                selectedFragment = new NotifyFragment();
+                selectedFragment = new NotificationFragment();
             } else if (itemId == R.id.nav_user) {
                 selectedFragment = new UserFragment();
             }

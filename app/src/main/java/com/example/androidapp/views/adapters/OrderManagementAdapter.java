@@ -14,7 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.androidapp.R;
+import com.example.androidapp.models.Notification;
 import com.example.androidapp.models.Order;
+import com.example.androidapp.repositories.NotificationRepository;
 import com.example.androidapp.views.activities.Order.OrderDetailActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.NumberFormat;
@@ -30,7 +32,8 @@ public class OrderManagementAdapter extends RecyclerView.Adapter<OrderManagement
     private Context context;
     private FirebaseFirestore db;
     private final String[] statusTitles; // Tên Tiếng Việt
-    private final String[] statusValues; // Giá trị Tiếng Anh
+    private final String[] statusValues; // Giá trị Tiếng Anh chat gpt han hanh tai tro chuong trinh :>
+
 
     public OrderManagementAdapter(List<Order> orders, Context context) {
         this.orders = orders;
@@ -231,4 +234,6 @@ public class OrderManagementAdapter extends RecyclerView.Adapter<OrderManagement
     private String formatCurrency(double amount) {
         return NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(amount);
     }
+
+
 }

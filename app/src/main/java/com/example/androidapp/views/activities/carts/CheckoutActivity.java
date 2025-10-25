@@ -18,9 +18,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.androidapp.R;
 import com.example.androidapp.models.CartItem;
+import com.example.androidapp.models.Notification;
 import com.example.androidapp.models.Order;
 import com.example.androidapp.models.OrderItem;
 import com.example.androidapp.repositories.CartRepository;
+import com.example.androidapp.repositories.NotificationRepository;
 import com.example.androidapp.views.adapters.cartAdt.CheckoutAdapter;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,6 +50,7 @@ public class CheckoutActivity extends AppCompatActivity {
     private com.example.androidapp.models.PaymentMethod selectedPaymentMethod;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
+    private NotificationRepository notificationRepository;
 
     // Repository
     private CartRepository cartRepository;
@@ -67,6 +70,7 @@ public class CheckoutActivity extends AppCompatActivity {
         cartRepository = new CartRepository();
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
+        notificationRepository = new NotificationRepository();
 
 
         initViews();
@@ -329,7 +333,7 @@ public class CheckoutActivity extends AppCompatActivity {
             orderItems.add(item);
             total += cartItem.getTotalPrice();
         }
-
+        final double finalTotal = total;
         // 3. Tạo ID cho đơn hàng mới
         String newOrderId = db.collection("orders").document().getId();
 
@@ -340,21 +344,10 @@ public class CheckoutActivity extends AppCompatActivity {
         newOrder.setCustomerName(receiverName);
         newOrder.setPhone(receiverPhone);
         newOrder.setAddress(receiverAddress);
-        newOrder.setTotal(total);
+        newOrder.setTotal(finalTotal);
         newOrder.setStatus("pending_confirmation");
         newOrder.setCreatedAt(Timestamp.now());
         newOrder.setItems(orderItems);
-
-        // 5. Lưu đơn hàng
-//        db.collection("orders").document(newOrderId).set(newOrder)
-//                .addOnSuccessListener(aVoid -> {
-//                    // ✅ SAU KHI ĐẶT HÀNG THÀNH CÔNG -> XÓA KHỎI GIỎ HÀNG
-//                    removeItemsFromCart(currentUid);
-//                })
-//                .addOnFailureListener(e -> {
-//                    Toast.makeText(this, "Lỗi khi đặt hàng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                    btnCheckout.setEnabled(true);
-//                });
         //6. lưu đơn hàng bằng Map, HashMap
         Map<String, Object> orderMap = new HashMap<>();
         orderMap.put("orderId", newOrder.getOrderId());
@@ -387,6 +380,7 @@ public class CheckoutActivity extends AppCompatActivity {
         db.collection("orders").document(newOrderId).set(orderMap)
                 .addOnSuccessListener(aVoid -> {
                     Log.d("CheckoutDebug", "Lưu bằng Map thành công! Kiểm tra Firestore.");
+                    createOrderNotification(currentUid, newOrderId,finalTotal);
                     removeItemsFromCart(currentUid); //gọi hàm xóa giỏ hàng
                 })
                 .addOnFailureListener(e -> {
@@ -491,5 +485,38 @@ public class CheckoutActivity extends AppCompatActivity {
 
     private String formatCurrency(double amount) {
         return String.format("%,.0fđ", amount);
+    }
+
+    //tao thong bao dat hang thanh cong
+
+    /**
+     * Tạo thông báo đặt hàng thành công
+     */
+    private void createOrderNotification(String userId, String orderId, double totalAmount) {
+        Notification notification = new Notification(
+                userId,
+                "Đặt hàng thành công! ⚡",
+                "Đơn hàng #" + orderId.substring(0, 8) + " trị giá " +
+                        formatCurrency(totalAmount) + " đang được xử lý",
+                "order"
+        );
+
+        // Set actionUrl để khi click vào notification sẽ mở OrderDetailActivity
+        notification.setActionUrl("order/" + orderId);
+
+        // Lưu thông báo
+        notificationRepository.createNotification(userId, notification,
+                new NotificationRepository.OnOperationListener() {
+                    @Override
+                    public void onSuccess(String message) {
+                        Log.d("CheckoutDebug", "Notification created successfully");
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("CheckoutDebug", "Failed to create notification", e);
+                        // Silent fail - không hiển thị lỗi cho user
+                    }
+                });
     }
 }

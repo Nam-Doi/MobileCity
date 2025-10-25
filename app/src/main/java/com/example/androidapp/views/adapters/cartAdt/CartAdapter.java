@@ -51,6 +51,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public void onBindViewHolder(@NonNull CartAdapter.CartViewHolder holder, int position) {
         CartItemDisplay display = cartList.get(position);
         CartItem item = display.getCartItem();
+        Product producttotal = display.getProduct();
 
         // Load ảnh sản phẩm
         String imageUrl = display.getImageUrl();
@@ -96,8 +97,30 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             }
         });
 
-        // Increase quantity - Cập nhật total khi tăng số lượng
+        // Increase quantity - Kiểm tra stock trước khi tăng
         holder.tvPlus.setOnClickListener(v -> {
+            Product product = display.getProduct();
+            if (product == null) {
+                Toast.makeText(v.getContext(), "Đang tải thông tin sản phẩm...", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // ✅ LẤY STOCK CỦA VARIANT HOẶC PRODUCT
+            int availableStock = getAvailableStock(product, item.getVariantId());
+
+            if (availableStock < 1) {
+                Toast.makeText(v.getContext(), "Sản phẩm đã hết hàng", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int currentQty = display.getQuantity();
+            if (currentQty >= availableStock) {
+                Toast.makeText(v.getContext(), "Chỉ còn " + availableStock + " sản phẩm trong kho",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Tăng số lượng
             item.setQuantity(item.getQuantity() + 1);
             holder.tvQuantity.setText(String.valueOf(display.getQuantity()));
 
@@ -117,6 +140,61 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         // Đảm bảo TextView có thể click
         holder.tvVariant.setClickable(true);
         holder.tvVariant.setFocusable(true);
+        if (producttotal != null) {
+            int availableStock = getAvailableStock(producttotal, item.getVariantId());
+
+            if (availableStock < 1) {
+                // Hết hàng - Hiển thị cảnh báo và disable các nút
+                holder.tvVariant.setText(display.getVariantName() + " - HẾT HÀNG");
+                holder.tvVariant.setTextColor(holder.itemView.getContext().getColor(android.R.color.holo_red_dark));
+                holder.tvPlus.setEnabled(false);
+                holder.tvPlus.setAlpha(0.5f);
+
+                // Tự động bỏ chọn item hết hàng
+                holder.cbSelectItem.setChecked(false);
+                holder.cbSelectItem.setEnabled(false);
+
+            } else if (availableStock < 5) {
+                // Sắp hết hàng - Hiển thị cảnh báo nhẹ
+                holder.tvVariant.setText(display.getVariantName() + " - Còn " + availableStock);
+                holder.tvVariant.setTextColor(holder.itemView.getContext().getColor(android.R.color.holo_orange_dark));
+                holder.tvPlus.setEnabled(true);
+                holder.tvPlus.setAlpha(1.0f);
+                holder.cbSelectItem.setEnabled(true);
+
+            } else {
+                // Còn hàng đủ
+                holder.tvVariant.setText(display.getVariantName() != null ? display.getVariantName() : "Mặc định");
+                holder.tvVariant.setTextColor(holder.itemView.getContext().getColor(android.R.color.black));
+                holder.tvPlus.setEnabled(true);
+                holder.tvPlus.setAlpha(1.0f);
+                holder.cbSelectItem.setEnabled(true);
+            }
+
+            // Kiểm tra số lượng trong giỏ có vượt quá stock không
+            if (item.getQuantity() > availableStock) {
+                Toast.makeText(holder.itemView.getContext(),
+                        display.getProductName() + " chỉ còn " + availableStock + " sản phẩm",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+    //lay stock
+    private int getAvailableStock(Product product, String variantId) {
+        if (product == null) return 0;
+
+        // Nếu có variantId, lấy stock từ variant
+        if (variantId != null && product.getVariants() != null) {
+            for (ProductVariant variant : product.getVariants()) {
+                if (variantId.equals(variant.getId())) {
+                    return variant.getStock();
+                }
+            }
+        }
+
+        // Fallback: lấy stock từ product-level
+        return product.getStock();
     }
 
     @Override
@@ -270,13 +348,24 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(context);
         builder.setTitle("Chọn biến thể");
 
-        // Tạo danh sách các variant
         List<ProductVariant> variants = product.getVariants();
         String[] variantNames = new String[variants.size()];
+        boolean[] enabledItems = new boolean[variants.size()]; // Theo dõi variant còn hàng
+
         for (int i = 0; i < variants.size(); i++) {
             ProductVariant variant = variants.get(i);
-            variantNames[i] = variant.getColor() + " - " + variant.getRam() + " - " + variant.getStorage() +
-                    " (" + String.format("%,.0fđ", variant.getPrice()) + ")";
+            int stock = variant.getStock();
+
+            // HIỂN thị stock và disable nếu hết hàng
+            if (stock < 1) {
+                variantNames[i] = variant.getColor() + " - " + variant.getRam() + " - " + variant.getStorage() +
+                        " (" + String.format("%,.0fđ", variant.getPrice()) + ") - Hết hàng";
+                enabledItems[i] = false;
+            } else {
+                variantNames[i] = variant.getColor() + " - " + variant.getRam() + " - " + variant.getStorage() +
+                        " (" + String.format("%,.0fđ", variant.getPrice()) + ") - Còn " + stock;
+                enabledItems[i] = true;
+            }
         }
 
         // Tìm variant hiện tại
@@ -290,6 +379,23 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         builder.setSingleChoiceItems(variantNames, currentSelection, (dialog, which) -> {
             ProductVariant selectedVariant = variants.get(which);
+
+            // KIỂM TRA STOCK TRƯỚC KHI CHO CHỌN
+            if (selectedVariant.getStock() < 1) {
+                Toast.makeText(context, "Biến thể này đã hết hàng", Toast.LENGTH_SHORT).show();
+                return; // Không cho chọn
+            }
+
+            // KIỂM TRA SỐ LƯỢNG TRONG GIỎ SO VỚI STOCK
+            int currentQty = item.getQuantity();
+            if (currentQty > selectedVariant.getStock()) {
+                Toast.makeText(context,
+                        "Biến thể này chỉ còn " + selectedVariant.getStock() + " sản phẩm. " +
+                                "Số lượng trong giỏ sẽ được điều chỉnh.",
+                        Toast.LENGTH_LONG).show();
+                // Điều chỉnh số lượng về tối đa có thể
+                item.setQuantity(selectedVariant.getStock());
+            }
 
             // Lưu oldVariantId trước khi thay đổi item
             String oldVariantId = item.getVariantId();
@@ -307,8 +413,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
             // Cập nhật CartItemDisplay
             CartItemDisplay display = cartList.get(position);
-            display.setProduct(product); // Cập nhật product với variant mới
-            // Cập nhật CartItem trong display
+            display.setProduct(product);
             display.getCartItem().setVariantId(selectedVariant.getId());
             display.getCartItem().setVariantName(selectedVariant.getColor() + " - " + selectedVariant.getRam() + " - "
                     + selectedVariant.getStorage());
@@ -330,7 +435,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                         new CartRepository.OnCartOperationListener() {
                             @Override
                             public void onSuccess(String message) {
-                                // Cập nhật UI
                                 notifyItemChanged(position);
                                 if (listener != null) {
                                     listener.onCartUpdated();
@@ -350,7 +454,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
         builder.show();
     }
-
     public static class CartViewHolder extends RecyclerView.ViewHolder {
         CheckBox cbSelectItem;
         ImageView imgProduct;

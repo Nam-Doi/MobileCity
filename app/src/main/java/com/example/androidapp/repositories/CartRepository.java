@@ -371,9 +371,9 @@ public class CartRepository {
      * Cập nhật variant của một item trong giỏ hàng
      */
     public void updateVariant(@NonNull String userId, @NonNull String productId,
-            @NonNull String oldVariantId, @NonNull String newVariantId,
-            @NonNull String variantName, double price, String imageUrl,
-            OnCartOperationListener listener) {
+                              @NonNull String oldVariantId, @NonNull String newVariantId,
+                              @NonNull String variantName, double price, String imageUrl,
+                              OnCartOperationListener listener) {
         String oldCartItemId = productId + "_" + oldVariantId;
         String newCartItemId = productId + "_" + newVariantId;
 
@@ -394,7 +394,7 @@ public class CartRepository {
             return;
         }
 
-        // Nếu variant thay đổi, cần xóa item cũ và tạo item mới
+        // Nếu variant thay đổi, sử dụng WriteBatch để đảm bảo atomic operation
         DocumentReference oldRef = getCartItemRef(userId, oldCartItemId);
         DocumentReference newRef = getCartItemRef(userId, newCartItemId);
 
@@ -406,10 +406,13 @@ public class CartRepository {
             }
 
             // Lấy thông tin từ item cũ
-            int quantity = documentSnapshot.getLong("quantity").intValue();
+            Long quantityLong = documentSnapshot.getLong("quantity");
+            int quantity = quantityLong != null ? quantityLong.intValue() : 1;
             boolean isSelected = Boolean.TRUE.equals(documentSnapshot.getBoolean("isSelected"));
             String cachedName = documentSnapshot.getString("cachedName");
-            long addedAt = documentSnapshot.getLong("addedAt");
+            String cachedBrand = documentSnapshot.getString("cachedBrand");
+            Long addedAtLong = documentSnapshot.getLong("addedAt");
+            long addedAt = addedAtLong != null ? addedAtLong : System.currentTimeMillis();
 
             // Tạo dữ liệu cho item mới
             Map<String, Object> newItemData = new HashMap<>();
@@ -420,6 +423,9 @@ public class CartRepository {
             newItemData.put("quantity", quantity);
             newItemData.put("isSelected", isSelected);
             newItemData.put("cachedName", cachedName);
+            if (cachedBrand != null) {
+                newItemData.put("cachedBrand", cachedBrand);
+            }
             newItemData.put("cachedPrice", price);
             if (imageUrl != null) {
                 newItemData.put("cachedImageUrl", imageUrl);
@@ -427,15 +433,20 @@ public class CartRepository {
             newItemData.put("addedAt", addedAt);
             newItemData.put("updatedAt", System.currentTimeMillis());
 
-            // Tạo item mới
-            newRef.set(newItemData)
-                    .addOnSuccessListener(aVoid -> {
-                        // Xóa item cũ
-                        oldRef.delete()
-                                .addOnSuccessListener(aVoid1 -> listener.onSuccess("Đã cập nhật biến thể"))
-                                .addOnFailureListener(listener::onFailure);
-                    })
-                    .addOnFailureListener(listener::onFailure);
+            // ✅ SỬ DỤNG WRITEBATCH ĐỂ XÓA VÀ TẠO ĐỒNG THỜI
+            db.runBatch(batch -> {
+                // Xóa item cũ
+                batch.delete(oldRef);
+                // Tạo item mới
+                batch.set(newRef, newItemData);
+            }).addOnSuccessListener(aVoid -> {
+                Log.d("CartRepository", "Successfully updated variant from " + oldVariantId + " to " + newVariantId);
+                listener.onSuccess("Đã cập nhật biến thể");
+            }).addOnFailureListener(e -> {
+                Log.e("CartRepository", "Failed to update variant", e);
+                listener.onFailure(e);
+            });
+
         }).addOnFailureListener(listener::onFailure);
     }
 
