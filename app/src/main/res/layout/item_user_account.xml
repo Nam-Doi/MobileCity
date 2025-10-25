@@ -35,7 +35,7 @@
         app:layout_constraintStart_toEndOf="@+id/userAvatar"
         app:layout_constraintTop_toTopOf="@+id/userAvatar"
         app:layout_constraintEnd_toStartOf="@+id/textRole"
-        tools:text="Phạm Thanh Tùng" />
+        tools:text="Tài khoản" />
 
         <TextView
             android:id="@+id/textEmail"
@@ -44,7 +44,7 @@
             app:layout_constraintStart_toStartOf="@+id/textFullName"
             app:layout_constraintTop_toBottomOf="@+id/textFullName"
             app:layout_constraintEnd_toEndOf="@+id/textFullName"
-            tools:text="phamthanhtung@gmail.com" />
+            tools:text="Email" />
 
         <TextView
             android:id="@+id/textRole"

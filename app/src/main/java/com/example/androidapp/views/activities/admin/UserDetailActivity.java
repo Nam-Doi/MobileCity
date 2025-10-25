@@ -1,6 +1,8 @@
 package com.example.androidapp.views.activities.admin; // Thay đổi package cho đúng với dự án của bạn
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -123,31 +125,42 @@ public class UserDetailActivity extends AppCompatActivity {
             if (documentSnapshot.exists()) {
                 currentUser = documentSnapshot.toObject(users.class);
                 if (currentUser != null) {
-                    // Hiển thị thông tin lên UI
+                    // Hiển thị thông tin lên UI (giữ nguyên)
                     editUserFullName.setText(currentUser.getFullName());
                     editUserEmail.setText(currentUser.getEmail());
                     editUserRole.setText(currentUser.getRole());
 
-                    // Cập nhật nút dựa trên trạng thái active
-                    updateButtonStatus();
+                    // ===============================================
+                    // THÊM ĐOẠN CODE KIỂM TRA ROLE VÀO ĐÂY
+                    // ===============================================
+                    if ("admin".equals(currentUser.getRole())) {
+                        // Nếu là admin, ẩn nút Vô hiệu hóa/Kích hoạt
+                        buttonToggleActive.setVisibility(View.GONE);
+                    } else {
+                        // Nếu không phải admin, hiển thị nút và cập nhật trạng thái
+                        buttonToggleActive.setVisibility(View.VISIBLE);
+                        updateButtonStatus(); // Chỉ gọi hàm này cho user thường
+                    }
+                    // ===============================================
+
                 }
             } else {
                 Log.d(TAG, "Không tìm thấy user");
+                // Có thể thêm Toast báo lỗi ở đây
             }
         }).addOnFailureListener(e -> {
             Log.e(TAG, "Lỗi khi tải dữ liệu user", e);
+            // Có thể thêm Toast báo lỗi ở đây
         });
     }
 
     private void updateButtonStatus() {
         if (currentUser.isActive()) {
             buttonToggleActive.setText("Vô hiệu hóa tài khoản");
-            // Đặt màu nút thành màu cảnh báo (ví dụ màu đỏ)
-            // buttonToggleActive.setBackgroundColor(...);
+            buttonToggleActive.setBackgroundColor(Color.parseColor("FF0000"));
         } else {
             buttonToggleActive.setText("Kích hoạt tài khoản");
-            // Đặt màu nút thành màu tích cực (ví dụ màu xanh)
-            // buttonToggleActive.setBackgroundColor(...);
+            buttonToggleActive.setBackgroundColor(Color.parseColor("#00FF00"));
         }
     }
 

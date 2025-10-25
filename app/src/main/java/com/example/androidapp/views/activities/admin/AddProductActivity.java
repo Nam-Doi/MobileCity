@@ -9,7 +9,6 @@ package com.example.androidapp.views.activities.admin;
 // import com.google.firebase.storage.FirebaseStorage;
 // import com.google.firebase.storage.StorageReference;
 import android.os.Bundle;
-import android.util.Log; // Giữ lại Log nếu cần
 import android.webkit.URLUtil; // Thêm để kiểm tra URL
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -59,7 +58,7 @@ public class AddProductActivity extends AppCompatActivity /* implements ProductV
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_product_activity);
+        setContentView(R.layout.activity_add_product);
 
         db = FirebaseFirestore.getInstance();
         // storageReference = FirebaseStorage.getInstance().getReference("product_images"); // Xóa

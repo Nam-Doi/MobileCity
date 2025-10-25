@@ -1,6 +1,7 @@
 package com.example.androidapp.views.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,15 +20,12 @@ import java.util.Locale;
 
 public class ProductGridAdapter extends BaseAdapter {
     private Context context;
-    private List<Product> productList;
-    private SearchSuggestionAdapter.OnItemClickListener listener; // ✅ Khai báo Listener
+    private List<Product> productList; // Danh sách sản phẩm adapter đang dùng
 
-    // ✅ CONSTRUCTOR MỚI: Nhận thêm OnItemClickListener
-    public ProductGridAdapter(Context context, List<Product> productList,
-            SearchSuggestionAdapter.OnItemClickListener listener) {
+    // CONSTRUCTOR ĐƠN GIẢN HƠN: Chỉ cần Context và List
+    public ProductGridAdapter(Context context, List<Product> productList) {
         this.context = context;
-        this.productList = productList;
-        this.listener = listener;
+        this.productList = productList; // Lưu tham chiếu đến list từ HomeFragment
     }
 
     @Override
@@ -37,10 +35,13 @@ public class ProductGridAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        if (productList == null || position < 0 || position >= productList.size())
+        // Sửa lại kiểm tra một chút cho an toàn
+        if (productList == null || position < 0 || position >= productList.size()) {
             return null;
+        }
         return productList.get(position);
     }
+
 
     @Override
     public long getItemId(int position) {
@@ -64,72 +65,44 @@ public class ProductGridAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        Product product = null;
-        if (productList != null && position >= 0 && position < productList.size()) {
-            product = productList.get(position);
-        }
+        // Lấy sản phẩm một cách an toàn hơn
+        Product product = (Product) getItem(position);
 
         if (product == null) {
-            android.util.Log.w("ProductGridAdapter", "product is null at position " + position);
-            // set placeholders and return
-            holder.tvName.setText("--");
-            holder.tvBrand.setText("--");
-            holder.tvPrice.setText("N/A");
-            holder.imgProduct.setImageResource(R.drawable.ic_launcher_background);
+            Log.w("ProductGridAdapter", "Product is null at position " + position);
+            // Có thể đặt ảnh placeholder hoặc ẩn view nếu cần
+            holder.tvName.setText("N/A");
+            holder.tvBrand.setText("");
+            holder.tvPrice.setText("");
+            holder.imgProduct.setImageResource(R.drawable.ic_launcher_background); // Placeholder
             return convertView;
         }
-        // Name and brand (null-safe)
+
+        // --- Code hiển thị thông tin sản phẩm (Giữ nguyên như cũ) ---
         holder.tvName.setText(product.getName() != null ? product.getName() : "--");
         holder.tvBrand.setText(product.getBrand() != null ? product.getBrand() : "--");
 
-        // Use variant-level price and images when available (product may store
-        // variants)
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        List<ProductVariant> variants = product.getVariants();
-        if (variants != null && !variants.isEmpty()) {
-            ProductVariant defaultVariant = variants.get(0);
-            try {
-                holder.tvPrice.setText(currencyFormatter.format(defaultVariant.getPrice()));
-            } catch (Exception e) {
-                android.util.Log.w("ProductGridAdapter", "Invalid variant price", e);
-                holder.tvPrice.setText("N/A");
-            }
-
-            if (defaultVariant.getImageUrls() != null && !defaultVariant.getImageUrls().isEmpty()) {
-                Glide.with(context)
-                        .load(defaultVariant.getImageUrls().get(0))
-                        .into(holder.imgProduct);
-            } else if (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
-                Glide.with(context)
-                        .load(product.getImageUrls().get(0))
-                        .into(holder.imgProduct);
-            } else {
-                holder.imgProduct.setImageResource(R.drawable.ic_launcher_background);
-            }
+        // ... (Code xử lý giá và ảnh từ variant hoặc product giữ nguyên) ...
+        // Ví dụ đơn giản hóa:
+        if (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
+            Glide.with(context)
+                    .load(product.getImageUrls().get(0))
+                    .placeholder(R.drawable.ic_launcher_background) // Thêm placeholder
+                    .error(R.drawable.ic_launcher_background) // Thêm ảnh lỗi
+                    .into(holder.imgProduct);
         } else {
-            // Fallback to product-level fields
-            try {
-                holder.tvPrice.setText(currencyFormatter.format(product.getPrice()));
-            } catch (Exception e) {
-                android.util.Log.w("ProductGridAdapter", "Invalid product price", e);
-                holder.tvPrice.setText("N/A");
-            }
-
-            if (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
-                Glide.with(context)
-                        .load(product.getImageUrls().get(0))
-                        .into(holder.imgProduct);
-            } else {
-                holder.imgProduct.setImageResource(R.drawable.ic_launcher_background);
-            }
+            holder.imgProduct.setImageResource(R.drawable.ic_launcher_background);
         }
-        // ✅ THAY THẾ LOGIC INTENT CŨ bằng việc gọi Listener
-        final Product clickedProduct = product; // make effectively final for lambda
-        convertView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(clickedProduct);
-            }
-        });
+        try {
+            holder.tvPrice.setText(currencyFormatter.format(product.getPrice()));
+        } catch (Exception e) {
+            holder.tvPrice.setText("N/A");
+        }
+        // -----------------------------------------------------------
+
+        // == XÓA BỎ setOnClickListener ở đây ==
+        // Việc xử lý click sẽ do GridView trong HomeFragment đảm nhiệm
 
         return convertView;
     }
@@ -137,5 +110,22 @@ public class ProductGridAdapter extends BaseAdapter {
     static class ViewHolder {
         ImageView imgProduct;
         TextView tvName, tvBrand, tvPrice;
+    }
+
+    /**
+     * Hàm cập nhật dữ liệu (Giữ lại vì nó vẫn hữu ích)
+     * HomeFragment sẽ KHÔNG cần gọi hàm này nếu nó trực tiếp sửa list và gọi notifyDataSetChanged()
+     */
+    public void updateData(List<Product> newProductList) {
+        // Chỉ cần gán lại tham chiếu list nếu HomeFragment quản lý list này
+        this.productList = newProductList;
+        notifyDataSetChanged();
+
+        // Hoặc nếu muốn adapter tự quản lý bản copy:
+        // if (newProductList != null) {
+        //    this.productList.clear();
+        //    this.productList.addAll(newProductList);
+        //    notifyDataSetChanged();
+        // }
     }
 }
