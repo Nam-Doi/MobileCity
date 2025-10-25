@@ -20,7 +20,6 @@ public class OrdersManagementActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Gắn layout "activity_orders_management.xml" mới
         setContentView(R.layout.activity_orders_management);
 
         // 1. Ánh xạ các view

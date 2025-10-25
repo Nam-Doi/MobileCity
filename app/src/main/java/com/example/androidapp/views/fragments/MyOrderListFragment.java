@@ -27,7 +27,7 @@ public class MyOrderListFragment extends Fragment {
     private String currentUid;
 
     private RecyclerView recyclerView;
-    private MyOrdersAdapter adapter; // Adapter MỚI
+    private MyOrdersAdapter adapter;
     private ArrayList<Order> orderList;
     private FirebaseFirestore db;
     private ListenerRegistration orderListener;
@@ -61,7 +61,7 @@ public class MyOrderListFragment extends Fragment {
         recyclerView = view.findViewById(R.id.rv_order_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new MyOrdersAdapter(orderList, getContext()); // Dùng Adapter MỚI
+        adapter = new MyOrdersAdapter(orderList, getContext());
         recyclerView.setAdapter(adapter);
 
         return view;

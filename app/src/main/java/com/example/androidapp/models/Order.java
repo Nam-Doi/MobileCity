@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import com.google.firebase.Timestamp;
 import java.util.List;
-import com.google.firebase.firestore.IgnoreExtraProperties;
+import com.google.firebase.firestore.IgnoreExtraProperties;//Dùng để tránh lưu các biến không mong muốn
 @IgnoreExtraProperties
 public class Order implements Parcelable {
 
@@ -19,7 +19,7 @@ public class Order implements Parcelable {
     private String status;
     private Timestamp createdAt;
     private List<OrderItem> items;
-    private boolean cancellationRequested = false; // <-- TRƯỜNG MỚI
+    private boolean cancellationRequested = false;
 
     // Constructor rỗng
     public Order() {}
@@ -43,7 +43,6 @@ public class Order implements Parcelable {
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
-    // Getter/Setter cho trường mới
     public boolean isCancellationRequested() { return cancellationRequested; }
     public void setCancellationRequested(boolean cancellationRequested) { this.cancellationRequested = cancellationRequested; }
 
@@ -58,7 +57,7 @@ public class Order implements Parcelable {
         status = in.readString();
         createdAt = in.readParcelable(Timestamp.class.getClassLoader());
         items = in.createTypedArrayList(OrderItem.CREATOR);
-        cancellationRequested = in.readByte() != 0; // <-- Đọc boolean
+        cancellationRequested = in.readByte() != 0;
     }
 
     public static final Creator<Order> CREATOR = new Creator<Order>() {
@@ -88,6 +87,6 @@ public class Order implements Parcelable {
         dest.writeString(status);
         dest.writeParcelable(createdAt, flags);
         dest.writeTypedList(items);
-        dest.writeByte((byte) (cancellationRequested ? 1 : 0)); // <-- Ghi boolean
+        dest.writeByte((byte) (cancellationRequested ? 1 : 0));
     }
 }

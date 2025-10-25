@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.androidapp.R;
 import com.example.androidapp.views.activities.Auths.ProfileActivity;
+import com.example.androidapp.views.activities.Order.MyOrdersActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -26,7 +27,7 @@ public class UserFragment extends Fragment {
     private ImageView avatar;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
+    private TextView tv_myorders;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -39,6 +40,7 @@ public class UserFragment extends Fragment {
         // *** LƯU Ý: Đảm bảo trong file fragment_home.xml của bạn có một TextView với id là "tvUserName" ***
         tvUserName = view.findViewById(R.id.tvNameUser);
         avatar = view.findViewById(R.id.avatarMedium);
+        tv_myorders = view.findViewById(R.id.tv_my_orders);
         // Khởi tạo Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -61,6 +63,10 @@ public class UserFragment extends Fragment {
 
         // Gọi hàm để tải và hiển thị thông tin người dùng
         loadUserInfo();
+        tv_myorders.setOnClickListener(v ->{
+            Intent intent = new Intent(getActivity(), MyOrdersActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void loadUserInfo() {

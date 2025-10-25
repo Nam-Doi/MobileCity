@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
-import com.example.androidapp.views.fragments.MyOrderListFragment; // Fragment MỚI
+import com.example.androidapp.views.fragments.MyOrderListFragment;
 
 public class MyOrdersPagerAdapter extends FragmentStateAdapter {
 
@@ -18,7 +18,6 @@ public class MyOrdersPagerAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        // Tạo Fragment MỚI của User
         return MyOrderListFragment.newInstance(statusValues[position]);
     }
 

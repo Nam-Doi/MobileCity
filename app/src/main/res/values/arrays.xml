@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="order_status_titles">
-        <item>Chờ xử lý</item>
+        <item>Chờ xác nhận</item>
+        <item>Đã xác nhận</item>
         <item>Đang giao</item>
-        <item>Hoàn thành</item>
+        <item>Đã giao</item>
         <item>Đã hủy</item>
     </string-array>
 
     <string-array name="order_status_values">
-        <item>pending</item>
-        <item>shipped</item>
-        <item>completed</item>
+        <item>pending_confirmation</item>
+        <item>confirmed</item>
+        <item>shipping</item>
+        <item>delivered</item>
         <item>cancelled</item>
     </string-array>
 </resources>
