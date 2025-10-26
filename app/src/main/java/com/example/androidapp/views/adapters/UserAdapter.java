@@ -9,10 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.androidapp.R;
-import com.example.androidapp.models.users; // Import model users
+import com.example.androidapp.models.users;
 import com.google.android.material.imageview.ShapeableImageView;
 import java.util.List;
-// import com.bumptech.glide.Glide; // Sẽ cần cho việc tải ảnh từ URL
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
@@ -57,13 +56,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             holder.textStatus.setText("Disabled");
             holder.textStatus.setTextColor(ContextCompat.getColor(context, R.color.red)); // Và màu red
         }
-
-        // Tải ảnh đại diện (avatar)
-        // Lưu ý: Cần dùng thư viện như Glide để tải ảnh từ URL
-        // Glide.with(context)
-        //     .load(currentUser.getAvatarUrl()) // Giả sử model User có getAvatarUrl()
-        //     .placeholder(R.drawable.ic_user) // Ảnh hiển thị trong lúc tải
-        //     .into(holder.userAvatar);
 
         // Bắt sự kiện click vào toàn bộ item
         holder.itemView.setOnClickListener(v -> {
