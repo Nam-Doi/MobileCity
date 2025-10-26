@@ -59,12 +59,11 @@ public class CreateUserActivity extends AppCompatActivity {
             return;
         }
 
-        // Bước 1: Tạo user trong Firebase Authentication
+        // Tạo user trong Firebase Authentication
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         // Tạo tài khoản Auth thành công
-                        Log.d(TAG, "createUserWithEmail:success");
                         FirebaseUser firebaseUser = mAuth.getCurrentUser();
                         String uid = firebaseUser.getUid();
 
@@ -72,16 +71,15 @@ public class CreateUserActivity extends AppCompatActivity {
                         int selectedRoleId = radioGroupRole.getCheckedRadioButtonId();
                         String role = (selectedRoleId == R.id.radioButtonAdmin) ? "admin" : "user";
 
+                        //Gửi email xác thực
                         sendVerificationEmail(firebaseUser);
 
-                        // Bước 2: Tạo document trong Firestore
+                        // Tạo document trong Firestore
                         createUserDocumentInFirestore(uid, fullName, email, role);
 
                     } else {
                         // Nếu tạo tài khoản Auth thất bại, kiểm tra nguyên nhân cụ thể
-                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
                         String errorMessage = "Tạo tài khoản thất bại."; // Thông báo mặc định
-
                         try {
                             throw task.getException();
                         } catch (FirebaseAuthWeakPasswordException e) {
@@ -96,7 +94,6 @@ public class CreateUserActivity extends AppCompatActivity {
                                 errorMessage = e.getMessage();
                             }
                         }
-
                         Toast.makeText(CreateUserActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                     }
                 });
@@ -115,7 +112,6 @@ public class CreateUserActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Log.w(TAG, "Lỗi khi tạo document trên Firestore", e);
-                    // (Nâng cao) Có thể thêm code để xóa tài khoản Auth vừa tạo nếu bước này thất bại
                 });
     }
 

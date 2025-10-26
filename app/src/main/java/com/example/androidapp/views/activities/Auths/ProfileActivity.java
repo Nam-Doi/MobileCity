@@ -31,7 +31,7 @@ public class ProfileActivity extends AppCompatActivity {
     // Các Views
     private TextInputEditText editTextFullName, editTextEmail;
     private Button buttonEditSave, buttonLogout, buttonDeleteAccount;
-    private ProgressBar progressBarProfile; // Giữ lại nếu layout có
+    private ProgressBar progressBarProfile;
 
     // Firebase
     private FirebaseAuth mAuth;
@@ -39,6 +39,7 @@ public class ProfileActivity extends AppCompatActivity {
     private DocumentReference userDocRef;
     private FirebaseUser currentUser;
     private users userProfile; // Lưu thông tin user
+    private Button buttonChangePassword;
 
     // Trạng thái
     private boolean isEditMode = false;
@@ -57,6 +58,7 @@ public class ProfileActivity extends AppCompatActivity {
         editTextFullName = findViewById(R.id.editTextFullName);
         editTextEmail = findViewById(R.id.editTextEmail);
         buttonEditSave = findViewById(R.id.buttonEditSave);
+        buttonChangePassword = findViewById(R.id.buttonChangePassword);
         buttonLogout = findViewById(R.id.buttonLogout);
         buttonDeleteAccount = findViewById(R.id.buttonDeleteAccount);
         progressBarProfile = findViewById(R.id.progressBarProfile); // Nếu layout có
@@ -103,6 +105,11 @@ public class ProfileActivity extends AppCompatActivity {
             } else {
                 toggleEditMode(true);
             }
+        });
+
+        buttonChangePassword.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, ChangePasswordActivity.class);
+            startActivity(intent);
         });
 
         buttonLogout.setOnClickListener(v -> logoutUser());

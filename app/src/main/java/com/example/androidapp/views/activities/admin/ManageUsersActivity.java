@@ -30,7 +30,6 @@ public class ManageUsersActivity extends AppCompatActivity {
     private UserAdapter userAdapter;
     private List<users> userList;
     private FirebaseFirestore db;
-
     private SearchView searchViewEmail;
     private Spinner spinnerRole;
     private FloatingActionButton fabCreateUser;
@@ -47,17 +46,17 @@ public class ManageUsersActivity extends AppCompatActivity {
         searchViewEmail = findViewById(R.id.searchViewEmail);
         spinnerRole = findViewById(R.id.spinnerRole);
         fabCreateUser = findViewById(R.id.fabCreateUser);
+
+        // Màn hình tạo tài khoản
         fabCreateUser.setOnClickListener(view -> {
-            // Mở một màn hình mới để tạo user
             Intent intent = new Intent(ManageUsersActivity.this, CreateUserActivity.class);
             startActivity(intent);
-
         });
 
-        // Chỉ tạo Adapter một lần duy nhất ở đây
+        // Tạo Adapter
         setupRecyclerView();
 
-        // Các hàm sau chỉ lọc dữ liệu, không tạo lại adapter
+        // Các hàm sau chỉ lọc dữ liệu
         setupRoleSpinner();
         setupSearchView();
 
@@ -68,7 +67,6 @@ public class ManageUsersActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         // Adapter được tạo với userList và listener
         userAdapter = new UserAdapter(this, userList, user -> {
-            Log.d(TAG, "Đã click vào user. UID sắp gửi đi là: " + user.getUid());
             Intent intent = new Intent(ManageUsersActivity.this, UserDetailActivity.class);
             intent.putExtra("USER_ID", user.getUid());
             startActivity(intent);
