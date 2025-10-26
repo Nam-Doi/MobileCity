@@ -65,6 +65,16 @@ public class MyOrdersAdapter extends RecyclerView.Adapter<MyOrdersAdapter.ViewHo
         if (order.getItems() != null && !order.getItems().isEmpty()) {
             OrderItem firstItem = order.getItems().get(0);
             holder.tvProductName.setText(firstItem.getName());
+
+
+            if (firstItem.getVariantName() != null && !firstItem.getVariantName().isEmpty()) {
+                holder.tvVariantName.setText("Phân loại: " + firstItem.getVariantName());
+                holder.tvVariantName.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvVariantName.setVisibility(View.GONE);
+            }
+
+
             if (firstItem.getCachedImageUrl() != null && !firstItem.getCachedImageUrl().isEmpty()) {
                 Glide.with(context)
                         .load(firstItem.getCachedImageUrl())
@@ -85,6 +95,7 @@ public class MyOrdersAdapter extends RecyclerView.Adapter<MyOrdersAdapter.ViewHo
             holder.tvProductName.setText("Không có sản phẩm");
             holder.ivProduct.setImageResource(R.drawable.ic_launcher_background);
             holder.tvExtraCount.setVisibility(View.GONE);
+            holder.tvVariantName.setVisibility(View.GONE); // --- THÊM DÒNG NÀY ---
         }
 
         // --- HIỂN THỊ NÚT HỦY/CHỈ BÁO CHO USER ---
@@ -176,10 +187,11 @@ public class MyOrdersAdapter extends RecyclerView.Adapter<MyOrdersAdapter.ViewHo
         return orders != null ? orders.size() : 0; // Thêm kiểm tra null
     }
 
-    // ViewHolder (Thêm tvCancelRequestedIndicator)
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivProduct;
         TextView tvProductName, tvExtraCount, tvStatus, tvTotal;
+        TextView tvVariantName;
         Button btnCancel;
         TextView tvCancelRequestedIndicator;
 
@@ -187,6 +199,7 @@ public class MyOrdersAdapter extends RecyclerView.Adapter<MyOrdersAdapter.ViewHo
             super(itemView);
             ivProduct = itemView.findViewById(R.id.iv_item_product_image);
             tvProductName = itemView.findViewById(R.id.tv_item_product_name);
+            tvVariantName = itemView.findViewById(R.id.tv_item_variant_name);
             tvExtraCount = itemView.findViewById(R.id.tv_item_extra_count);
             tvStatus = itemView.findViewById(R.id.tv_item_status_user);
             tvTotal = itemView.findViewById(R.id.tv_item_total_user);
@@ -194,6 +207,7 @@ public class MyOrdersAdapter extends RecyclerView.Adapter<MyOrdersAdapter.ViewHo
             tvCancelRequestedIndicator = itemView.findViewById(R.id.tv_item_cancel_requested_indicator);
         }
     }
+
 
     // Hàm định dạng tiền tệ
     private String formatCurrency(double amount) {

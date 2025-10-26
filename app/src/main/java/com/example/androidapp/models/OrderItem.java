@@ -12,17 +12,22 @@ public class OrderItem implements Parcelable {
     private double price;
     private String cachedImageUrl;
     private int qty;
+    private String variantId;
+    private String variantName;
 
     // Bắt buộc phải có constructor rỗng để Firestore đọc dữ liệu
     public OrderItem() {}
 
-    public OrderItem(String productId, String name, double price, int qty,String cachedImageUrl) {
+    public OrderItem(String productId, String name, double price, String cachedImageUrl, int qty, String variantId, String variantName) {
         this.productId = productId;
         this.name = name;
         this.price = price;
-        this.qty = qty;
         this.cachedImageUrl = cachedImageUrl;
+        this.qty = qty;
+        this.variantId = variantId;
+        this.variantName = variantName;
     }
+
 
     // --- Getters and Setters ---
 
@@ -40,6 +45,14 @@ public class OrderItem implements Parcelable {
 
     public String getCachedImageUrl() {return cachedImageUrl;}
 
+    public String getVariantId() {return variantId;}
+
+    public void setVariantId(String variantId) {this.variantId = variantId;}
+
+    public String getVariantName() {return variantName;}
+
+    public void setVariantName(String variantName) {this.variantName = variantName;}
+
     public void setCachedImageUrl(String cachedImageUrl) {this.cachedImageUrl = cachedImageUrl;}
     // --- Parcelable Implementation (Code đóng gói) ---
 
@@ -49,6 +62,8 @@ public class OrderItem implements Parcelable {
         price = in.readDouble();
         qty = in.readInt();
         cachedImageUrl = in.readString();
+        variantId = in.readString();
+        variantName = in.readString();
     }
 
     public static final Creator<OrderItem> CREATOR = new Creator<OrderItem>() {
@@ -75,5 +90,7 @@ public class OrderItem implements Parcelable {
         dest.writeDouble(price);
         dest.writeInt(qty);
         dest.writeString(cachedImageUrl);
+        dest.writeString(variantId);
+        dest.writeString(variantName);
     }
 }

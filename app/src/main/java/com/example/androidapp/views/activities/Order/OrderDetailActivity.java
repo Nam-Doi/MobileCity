@@ -27,6 +27,12 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Transaction;
+import java.util.List;
+
 
 public class OrderDetailActivity extends AppCompatActivity {
 
@@ -281,34 +287,190 @@ public class OrderDetailActivity extends AppCompatActivity {
                 .setNegativeButton("Không", null)
                 .show();
     }
-    //cập nhật trạng thái
+
+    // ---CẬP NHẬT KHO HÀNG---
+    /**
+     * Cập nhật kho hàng cho các sản phẩm trong đơn hàng bằng Transaction.
+     * @param order Đơn hàng chứa các item
+     * @param operation "decrease" (giảm kho) hoặc "increase" (hoàn kho)
+     */
+    private void updateStockForOrder(Order order, String operation) {
+        if (order == null || order.getItems() == null) {
+            Log.e("StockUpdate", "BỎ QUA: Order hoặc items là null, không thể cập nhật kho.");
+            return;
+        }
+
+        Log.i("StockUpdate", "--- BẮT ĐẦU TÁC VỤ KHO: " + operation + " ---");
+
+        for (com.example.androidapp.models.OrderItem item : order.getItems()) {
+            // KIỂM TRA DỮ LIỆU ITEM
+            if (item.getProductId() == null || item.getProductId().isEmpty() ||
+                    item.getVariantId() == null || item.getVariantId().isEmpty() ||
+                    item.getQty() <= 0) {
+
+                Log.e("StockUpdate", "BỎ QUA ITEM: Dữ liệu không hợp lệ. " +
+                        "ProductID: " + item.getProductId() + ", " +
+                        "VariantID: " + item.getVariantId() + ", " +
+                        "Qty: " + item.getQty());
+                continue; // Bỏ qua item này nếu thiếu thông tin
+            }
+
+
+            String logicalProductId = item.getProductId();
+            String variantId = item.getVariantId();
+            int quantity = item.getQty();
+
+            Log.d("StockUpdate", "Đang xử lý item: " + item.getName() +
+                    " | LogicalPID: " + logicalProductId +
+                    " | VariantID: " + variantId);
+
+
+
+            db.collection("phones")
+                    .whereEqualTo("id", logicalProductId) // Query vào trường 'id'
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (queryDocumentSnapshots.isEmpty()) {
+                            // Không tìm thấy sản phẩm nào có TRƯỜNG 'id' khớp
+                            Log.e("StockUpdate", "LỖI QUERY: Không tìm thấy sản phẩm nào có TRƯỜNG 'id' == " + logicalProductId);
+                            Toast.makeText(OrderDetailActivity.this, "Lỗi kho: Không tìm thấy SP " + item.getName(), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+
+                        DocumentSnapshot productDoc = queryDocumentSnapshots.getDocuments().get(0);
+                        DocumentReference productRef = productDoc.getReference();
+
+                        Log.d("StockUpdate", "Query thành công: Tìm thấy Document ID thật: " + productRef.getId() + ". Bắt đầu Transaction...");
+
+                        db.runTransaction((Transaction.Function<Void>) transaction -> {
+                            DocumentSnapshot snapshot = transaction.get(productRef);
+
+                            Log.d("StockUpdate", "Transaction: Đã get() snapshot cho " + snapshot.getId());
+
+                            List<Map<String, Object>> variants = (List<Map<String, Object>>) snapshot.get("variants");
+                            if (variants == null || variants.isEmpty()) {
+                                Log.e("StockUpdate", "Transaction Thất bại: Sản phẩm " + snapshot.getId() + " không có mảng 'variants'");
+                                throw new FirebaseFirestoreException("Sản phẩm " + item.getName() + " không có biến thể.",
+                                        FirebaseFirestoreException.Code.ABORTED);
+                            }
+
+                            boolean variantFound = false;
+                            for (Map<String, Object> variant : variants) {
+                                String id = (String) variant.get("id");
+
+                                if (variantId.equals(id)) {
+                                    variantFound = true;
+                                    Log.d("StockUpdate", "Transaction: Đã tìm thấy VariantID khớp: " + variantId);
+
+                                    Object stockObj = variant.get("stock");
+                                    long currentStock = 0;
+                                    if (stockObj instanceof Number) {
+                                        currentStock = ((Number) stockObj).longValue();
+                                    } else {
+                                        Log.e("StockUpdate", "Transaction Thất bại: Trường 'stock' ("+stockObj+") không phải là số hoặc bị null: " + variantId);
+                                        throw new FirebaseFirestoreException("Lỗi dữ liệu kho của sản phẩm " + item.getName(),
+                                                FirebaseFirestoreException.Code.ABORTED);
+                                    }
+                                    Log.d("StockUpdate", "Transaction: Kho hiện tại: " + currentStock);
+
+                                    long newStock;
+                                    if ("decrease".equals(operation)) {
+                                        newStock = currentStock - quantity;
+                                        Log.d("StockUpdate", "Transaction: Giảm kho: " + currentStock + " - " + quantity + " = " + newStock);
+                                        if (newStock < 0) {
+                                            Log.w("StockUpdate", "Cảnh báo: Kho bị âm cho " + variantId + ": " + newStock);
+                                        }
+                                    } else { // "increase"
+                                        newStock = currentStock + quantity;
+                                        Log.d("StockUpdate", "Transaction: Tăng kho: " + currentStock + " + " + quantity + " = " + newStock);
+                                    }
+
+                                    variant.put("stock", newStock);
+                                    break; // Thoát vòng lặp for
+                                }
+                            }
+
+                            if (variantFound) {
+                                Log.i("StockUpdate", "Transaction: Sắp cập nhật 'variants' lên Firestore.");
+                                transaction.update(productRef, "variants", variants);
+                            } else {
+                                Log.e("StockUpdate", "Transaction Thất bại: Không tìm thấy Variant ID " + variantId + " trong mảng 'variants'");
+                                throw new FirebaseFirestoreException("Không tìm thấy biến thể " + item.getVariantName() + " của sản phẩm " + item.getName(),
+                                        FirebaseFirestoreException.Code.ABORTED);
+                            }
+                            return null;
+                        }).addOnSuccessListener(aVoid -> {
+                            Log.i("StockUpdate", "--- TRANSACTION THÀNH CÔNG cho LogicalPID: " + logicalProductId + " (DocID: " + productRef.getId() + ") ---");
+                        }).addOnFailureListener(e -> {
+                            Log.e("StockUpdate", "--- TRANSACTION THẤT BẠI cho LogicalPID: " + logicalProductId + " ---", e);
+                            Toast.makeText(OrderDetailActivity.this, "Lỗi cập nhật kho: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        });
+
+                    })
+                    .addOnFailureListener(e -> {
+                        // Lỗi khi Query (mất mạng, không có quyền, index...)
+                        Log.e("StockUpdate", "LỖI QUERY: Thất bại khi query 'id' == " + logicalProductId, e);
+                        Toast.makeText(OrderDetailActivity.this, "Lỗi mạng khi tìm SP: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        }
+    }
+
+
     private void updateOrderStatusByAdmin(String newStatus) {
         if (order == null || order.getOrderId() == null) return;
         // Vô hiệu hóa nút tạm thời
         if (btnNextStatusAdmin != null) btnNextStatusAdmin.setEnabled(false);
         if (btnCancelOrderDetail != null) btnCancelOrderDetail.setEnabled(false);
 
+        String oldStatus = order.getStatus(); // Lấy trạng thái CŨ
+
+        Log.d("StockUpdate", "Attempting status update. OldStatus: '" + oldStatus + "', NewStatus: '" + newStatus + "'");
+
+        // Chuẩn bị cập nhật status cho Order
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", newStatus);
-        updates.put("cancellationRequested", false); // Reset cờ yêu cầu
+        updates.put("cancellationRequested", false);
 
+        // BƯỚC 1: Cập nhật trạng thái của Order LÊN FIRESTORE TRƯỚC
         db.collection("orders").document(order.getOrderId())
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
+                    // BƯỚC 2: CHỈ KHI BƯỚC 1 THÀNH CÔNG, MỚI CẬP NHẬT KHO
+                    Log.d("StockUpdate", "Cập nhật status Order thành công. Bắt đầu cập nhật kho.");
+
+
+
+                    // 1. Logic giảm kho khi Admin XÁC NHẬN
+                    if (newStatus.equals("confirmed") && oldStatus.equals("pending_confirmation")) {
+                        Log.i("StockUpdate", "LOGIC TRỪ KHO ĐƯỢC KÍCH HOẠT.");
+                        updateStockForOrder(order, "decrease");
+                    }
+                    // 2. Logic hoàn kho khi Admin HỦY
+                    else if (newStatus.equals("cancelled") && (oldStatus.equals("confirmed") || oldStatus.equals("shipping"))) {
+                        Log.i("StockUpdate", "LOGIC HOÀN KHO ĐƯỢC KÍCH HOẠT.");
+                        updateStockForOrder(order, "increase");
+                    }
+                    else {
+                        Log.w("StockUpdate", "Không thực hiện hành động kho. (Điều kiện if/else if không được đáp ứng)");
+                    }
+
+
+                    // BƯỚC 3: Cập nhật UI và biến local
                     Toast.makeText(this, "Cập nhật trạng thái thành công!", Toast.LENGTH_SHORT).show();
-                    //gui ho cai thong bao
                     sendOrderStatusNotification(order.getUserId(), order.getOrderId(), newStatus, order.getTotal());
-                    // Cập nhật dữ liệu local
-                    order.setStatus(newStatus);
+
+                    order.setStatus(newStatus); // Cập nhật biến local
                     order.setCancellationRequested(false);
-                    // Cập nhật UI
                     updateStatusTracker(newStatus);
-                    setupActionButtons(newStatus); // <-- GỌI LẠI HÀM NÀY ĐỂ CẬP NHẬT NÚT (ĐÃ CÓ setEnabled(true))
+                    setupActionButtons(newStatus);
                 })
                 .addOnFailureListener(e -> {
+
+                    Log.e("StockUpdate", "Cập nhật status Order thất bại. KHÔNG cập nhật kho.", e);
                     Toast.makeText(this, "Cập nhật thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    // Kích hoạt lại nút nếu lỗi, SỬ DỤNG TRẠNG THÁI CŨ CỦA ORDER
-                    setupActionButtons(order.getStatus()); // <-- GỌI LẠI HÀM NÀY ĐỂ KÍCH HOẠT LẠI NÚT ĐÚNG
+                    setupActionButtons(order.getStatus());
                 });
     }
 
@@ -316,6 +478,8 @@ public class OrderDetailActivity extends AppCompatActivity {
         if (!"cancelled".equals(newStatus)) return;
         if (order == null || order.getOrderId() == null) return;
         if (btnCancelOrderDetail != null) btnCancelOrderDetail.setEnabled(false);
+
+
 
         db.collection("orders").document(order.getOrderId())
                 .update("status", newStatus)

@@ -42,6 +42,15 @@ public class OrderItemDetailAdapter extends RecyclerView.Adapter<OrderItemDetail
         holder.tvPrice.setText(formatCurrency(item.getPrice()));
         holder.tvQuantity.setText("x" + item.getQty());
 
+
+        if (item.getVariantName() != null && !item.getVariantName().isEmpty()) {
+            holder.tvVariantName.setText("Phân loại: " + item.getVariantName());
+            holder.tvVariantName.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvVariantName.setVisibility(View.GONE);
+        }
+
+
         // --- TẢI ẢNH BẰNG GLIDE ---
         if (item.getCachedImageUrl() != null && !item.getCachedImageUrl().isEmpty()) {
             Glide.with(context) // Sử dụng context đã lưu
@@ -60,9 +69,11 @@ public class OrderItemDetailAdapter extends RecyclerView.Adapter<OrderItemDetail
         return items != null ? items.size() : 0;
     }
 
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct;
         TextView tvName, tvPrice, tvQuantity;
+        TextView tvVariantName;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -70,8 +81,10 @@ public class OrderItemDetailAdapter extends RecyclerView.Adapter<OrderItemDetail
             tvName = itemView.findViewById(R.id.tvName);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvQuantity = itemView.findViewById(R.id.tvQuantity);
+            tvVariantName = itemView.findViewById(R.id.tvVariantName);
         }
     }
+
 
     private String formatCurrency(double amount) {
         return NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(amount);
