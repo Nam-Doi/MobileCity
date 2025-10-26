@@ -16,9 +16,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.androidapp.R;
 import com.example.androidapp.models.Notification;
 import com.example.androidapp.models.Order;
+import com.example.androidapp.models.OrderItem;
 import com.example.androidapp.repositories.NotificationRepository;
 import com.example.androidapp.views.activities.Order.OrderDetailActivity;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Transaction;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,14 +37,12 @@ public class OrderManagementAdapter extends RecyclerView.Adapter<OrderManagement
     private Context context;
     private FirebaseFirestore db;
     private final String[] statusTitles; // Tên Tiếng Việt
-    private final String[] statusValues; // Giá trị Tiếng Anh chat gpt han hanh tai tro chuong trinh :>
-
+    private final String[] statusValues; // Giá trị Tiếng Anh
 
     public OrderManagementAdapter(List<Order> orders, Context context) {
         this.orders = orders;
         this.context = context;
         this.db = FirebaseFirestore.getInstance();
-        // Lấy mảng từ resources
         this.statusTitles = context.getResources().getStringArray(R.array.order_status_titles);
         this.statusValues = context.getResources().getStringArray(R.array.order_status_values);
     }
@@ -54,11 +57,10 @@ public class OrderManagementAdapter extends RecyclerView.Adapter<OrderManagement
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Order order = orders.get(position);
-        if (order == null) return; // Thêm kiểm tra null cho order
+        if (order == null) return;
 
         holder.tvCustomerName.setText(order.getCustomerName());
 
-        // Kiểm tra null và độ dài orderId
         if (order.getOrderId() != null && order.getOrderId().length() >= 8) {
             holder.tvOrderId.setText("Mã đơn: #" + order.getOrderId().substring(0, 8));
         } else if (order.getOrderId() != null) {
@@ -68,66 +70,59 @@ public class OrderManagementAdapter extends RecyclerView.Adapter<OrderManagement
         }
         holder.tvTotal.setText("Tổng: " + formatCurrency(order.getTotal()));
 
-        // --- Hiển thị dấu hiệu Yêu cầu hủy và Status Text ---
-        String statusText = getStatusTitle(order.getStatus()); // Lấy tên Tiếng Việt
+        String statusText = getStatusTitle(order.getStatus());
         if (order.isCancellationRequested() && !"cancelled".equals(order.getStatus())) {
             holder.itemView.setBackgroundColor(Color.parseColor("#FFF9C4")); // Vàng nhạt
             holder.tvStatus.setText(statusText + " (Y/C HỦY)");
         } else {
-            holder.itemView.setBackgroundColor(Color.WHITE); // Màu mặc định
-            holder.tvStatus.setText(statusText); // Hiển thị tên Tiếng Việt
+            holder.itemView.setBackgroundColor(Color.WHITE);
+            holder.tvStatus.setText(statusText);
         }
-        setStatusColor(holder.tvStatus, order.getStatus()); // Đặt màu nền chữ status
+        setStatusColor(holder.tvStatus, order.getStatus());
 
-        // --- Sự kiện click ---
         holder.btnDetail.setOnClickListener(v -> {
             Intent intent = new Intent(context, OrderDetailActivity.class);
-            intent.putExtra("order", order); // Gửi Parcelable
+            intent.putExtra("order", order);
             context.startActivity(intent);
         });
 
-        // Vô hiệu hóa nút nếu là pending_confirmation hoặc trạng thái cuối
         if ("pending_confirmation".equals(order.getStatus()) || "delivered".equals(order.getStatus()) || "cancelled".equals(order.getStatus())) {
             holder.btnUpdate.setEnabled(false);
-            // Thay đổi text nút tùy ý
             if("pending_confirmation".equals(order.getStatus())) {
                 holder.btnUpdate.setText("Xem chi tiết");
             } else {
-                holder.btnUpdate.setText("Cập nhật"); // Giữ nguyên cho delivered/cancelled
+                holder.btnUpdate.setText("Cập nhật");
             }
         } else {
             holder.btnUpdate.setEnabled(true);
             holder.btnUpdate.setText("Cập nhật");
-            // Chỉ gán listener khi nút được kích hoạt
             holder.btnUpdate.setOnClickListener(v -> {
                 showStatusDialog(order);
             });
         }
     }
 
+
     private void showStatusDialog(Order order) {
         String currentStatus = order.getStatus();
         if (currentStatus == null) return;
 
-        final List<String> availableActionsList = new ArrayList<>(); // Dùng List để linh hoạt
+        final List<String> availableActionsList = new ArrayList<>();
         final List<String> nextStatusValuesList = new ArrayList<>();
 
-        // Xác định các hành động tiếp theo hợp lệ
         switch (currentStatus) {
-            // Trường hợp pending_confirmation đã bị chặn ở onBindViewHolder
             case "confirmed":
-                availableActionsList.add(getStatusTitle("shipping")); // Bắt đầu giao hàng
+                availableActionsList.add(getStatusTitle("shipping"));
                 nextStatusValuesList.add("shipping");
-                availableActionsList.add(getStatusTitle("cancelled")); // Hủy đơn
+                availableActionsList.add(getStatusTitle("cancelled"));
                 nextStatusValuesList.add("cancelled");
                 break;
             case "shipping":
-                availableActionsList.add(getStatusTitle("delivered")); // Xác nhận đã giao
+                availableActionsList.add(getStatusTitle("delivered"));
                 nextStatusValuesList.add("delivered");
-                availableActionsList.add(getStatusTitle("cancelled")); // Hủy đơn (Tùy chọn)
+                availableActionsList.add(getStatusTitle("cancelled"));
                 nextStatusValuesList.add("cancelled");
                 break;
-            // Không có hành động cho delivered và cancelled từ danh sách
             case "delivered":
             case "cancelled":
             default:
@@ -135,35 +130,81 @@ public class OrderManagementAdapter extends RecyclerView.Adapter<OrderManagement
                 return;
         }
 
-        // Chuyển List thành Array để dùng trong setItem
         final String[] availableActions = availableActionsList.toArray(new String[0]);
         final String[] nextStatusValues = nextStatusValuesList.toArray(new String[0]);
 
-        // Hiển thị dialog với các hành động hợp lệ
+
         new AlertDialog.Builder(context)
                 .setTitle("Cập nhật trạng thái")
                 .setItems(availableActions, (dialog, which) -> {
-                    String nextStatus = nextStatusValues[which];
-                    updateOrderStatus(order, nextStatus);
+                    // 1. Lấy trạng thái được chọn
+                    String selectedStatusValue = nextStatusValues[which];
+                    String selectedStatusText = availableActions[which]; // Tên Tiếng Việt
+
+                    // 2. Gọi dialog xác nhận THỨ HAI
+                    showAdminConfirmationDialog(order, selectedStatusValue, selectedStatusText);
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton("Hủy", null) // Nút Hủy cho dialog chọn trạng thái
                 .show();
     }
+
+
+    private void showAdminConfirmationDialog(Order order, String newStatus, String newStatusText) {
+        String title;
+        String message;
+        String positiveText;
+
+        // Tùy chỉnh thông báo cho hành động Hủy đơn
+        if ("cancelled".equals(newStatus)) {
+            title = "Xác nhận hủy đơn?";
+            message = "Bạn có chắc chắn muốn hủy đơn hàng #" + order.getOrderId().substring(0, 8) +
+                    "? Hàng sẽ được hoàn kho (nếu có).";
+            positiveText = "Xác nhận hủy";
+        } else {
+            // Thông báo chung cho các hành động khác (vd: Giao hàng)
+            title = "Xác nhận cập nhật?";
+            message = "Bạn có muốn chuyển đơn hàng sang trạng thái \"" + newStatusText + "\"?";
+            positiveText = "Đồng ý";
+        }
+
+        new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(positiveText, (dialog, which) -> {
+                    // 3. Chỉ khi nhấn "Đồng ý" ở đây thì mới THỰC SỰ cập nhật
+                    updateOrderStatus(order, newStatus);
+                })
+                .setNegativeButton("Không", null) // Nút "Không" cho dialog xác nhận
+                .show();
+    }
+
 
     private void updateOrderStatus(Order order, String newStatus) {
         if (order.getOrderId() == null) {
             Toast.makeText(context, "Lỗi: Không tìm thấy ID đơn hàng.", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        final String oldStatus = order.getStatus();
+
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", newStatus);
-        updates.put("cancellationRequested", false); // Reset cờ yêu cầu
+        updates.put("cancellationRequested", false);
 
         db.collection("orders").document(order.getOrderId())
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
+                    Log.d("StockUpdate", "Cập nhật status (từ Adapter) thành công. Old: " + oldStatus + ", New: " + newStatus);
+
+                    if (newStatus.equals("cancelled") && (oldStatus.equals("confirmed") || oldStatus.equals("shipping"))) {
+                        Log.i("StockUpdate", "LOGIC HOÀN KHO (TỪ ADAPTER) ĐƯỢC KÍCH HOẠT.");
+                        updateStockForOrder(order, "increase");
+                    }
+                    else {
+                        Log.w("StockUpdate", "Không thực hiện hành động kho (từ Adapter).");
+                    }
+
                     Toast.makeText(context, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
-                    // Listener trong Fragment sẽ tự cập nhật UI
                 })
                 .addOnFailureListener(e -> {
                     Log.e("FirestoreUpdate", "Lỗi khi cập nhật order ID: " + order.getOrderId(), e);
@@ -182,29 +223,24 @@ public class OrderManagementAdapter extends RecyclerView.Adapter<OrderManagement
             case "cancelled":            color = Color.parseColor("#EF5350"); break; // Đỏ
             default:                     color = Color.parseColor("#BDBDBD"); break; // Xám
         }
-        // TODO: Nên dùng background drawable để bo góc thay vì màu nền trực tiếp
         tv.setBackgroundColor(color);
-        tv.setTextColor(Color.WHITE); // chữ trắng
+        tv.setTextColor(Color.WHITE);
     }
 
-    // Hàm tiện ích để lấy tên trạng thái Tiếng Việt (Thêm kiểm tra null/rỗng)
     private String getStatusTitle(String statusValue) {
         if (statusValue == null || statusValue.isEmpty()) {
             return "N/A";
         }
         for (int i = 0; i < statusValues.length; i++) {
-            // So sánh an toàn với null
             if (statusValue.equals(statusValues[i])) {
-                // Đảm bảo index không vượt quá mảng titles
                 if (i < statusTitles.length) {
                     return statusTitles[i];
                 } else {
                     Log.w("OrderManagementAdapter", "Mismatch between statusValues and statusTitles arrays for value: " + statusValue);
-                    break; // Thoát vòng lặp nếu có lỗi
+                    break;
                 }
             }
         }
-        // Trả về giá trị gốc nếu không tìm thấy
         Log.w("OrderManagementAdapter", "Status value not found in arrays: " + statusValue);
         return statusValue.toUpperCase();
     }
@@ -212,10 +248,9 @@ public class OrderManagementAdapter extends RecyclerView.Adapter<OrderManagement
 
     @Override
     public int getItemCount() {
-        return orders != null ? orders.size() : 0; // Thêm kiểm tra null
+        return orders != null ? orders.size() : 0;
     }
 
-    // ViewHolder
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvCustomerName, tvOrderId, tvTotal, tvStatus;
         Button btnDetail, btnUpdate;
@@ -235,5 +270,138 @@ public class OrderManagementAdapter extends RecyclerView.Adapter<OrderManagement
         return NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(amount);
     }
 
+    private void updateStockForOrder(Order order, String operation) {
+        if (order == null || order.getItems() == null) {
+            Log.e("StockUpdate", "BỎ QUA: Order hoặc items là null, không thể cập nhật kho.");
+            return;
+        }
 
+        Log.i("StockUpdate", "--- BẮT ĐẦU TÁC VỤ KHO (TỪ ADAPTER): " + operation + " ---");
+
+        for (com.example.androidapp.models.OrderItem item : order.getItems()) {
+            if (item.getProductId() == null || item.getProductId().isEmpty() ||
+                    item.getQty() <= 0) {
+
+                Log.e("StockUpdate", "BỎ QUA ITEM: Dữ liệu cơ bản không hợp lệ. " +
+                        "ProductID: " + item.getProductId() + ", " +
+                        "Qty: " + item.getQty());
+                continue;
+            }
+
+            String logicalProductId = item.getProductId();
+            String variantId = item.getVariantId();
+            int quantity = item.getQty();
+
+            Log.d("StockUpdate", "Đang xử lý item: " + item.getName() +
+                    " | LogicalPID: " + logicalProductId +
+                    " | VariantID: " + variantId);
+
+            db.collection("phones")
+                    .whereEqualTo("id", logicalProductId)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (queryDocumentSnapshots.isEmpty()) {
+                            Log.e("StockUpdate", "LỖI QUERY: Không tìm thấy sản phẩm nào có TRƯỜNG 'id' == " + logicalProductId);
+                            Toast.makeText(context, "Lỗi kho: Không tìm thấy SP " + item.getName(), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        DocumentSnapshot productDoc = queryDocumentSnapshots.getDocuments().get(0);
+                        DocumentReference productRef = productDoc.getReference();
+
+                        Log.d("StockUpdate", "Query thành công: Tìm thấy Document ID thật: " + productRef.getId() + ". Bắt đầu Transaction...");
+
+                        db.runTransaction((Transaction.Function<Void>) transaction -> {
+                            DocumentSnapshot snapshot = transaction.get(productRef);
+                            Log.d("StockUpdate", "Transaction: Đã get() snapshot cho " + snapshot.getId());
+
+                            if (variantId != null && !variantId.isEmpty()) {
+
+                                Log.d("StockUpdate", "Transaction: Đang xử lý sản phẩm có biến thể. VariantID: " + variantId);
+
+                                List<Map<String, Object>> variants = (List<Map<String, Object>>) snapshot.get("variants");
+                                if (variants == null || variants.isEmpty()) {
+                                    throw new FirebaseFirestoreException("Sản phẩm " + item.getName() + " không có biến thể.",
+                                            FirebaseFirestoreException.Code.ABORTED);
+                                }
+
+                                boolean variantFound = false;
+                                for (Map<String, Object> variant : variants) {
+                                    String id = (String) variant.get("id");
+
+                                    if (variantId.equals(id)) {
+                                        variantFound = true;
+                                        Log.d("StockUpdate", "Transaction: Đã tìm thấy VariantID khớp: " + variantId);
+
+                                        Object stockObj = variant.get("stock");
+                                        long currentStock = 0;
+                                        if (stockObj instanceof Number) {
+                                            currentStock = ((Number) stockObj).longValue();
+                                        } else {
+                                            throw new FirebaseFirestoreException("Lỗi dữ liệu kho của biến thể " + item.getName(),
+                                                    FirebaseFirestoreException.Code.ABORTED);
+                                        }
+
+                                        long newStock;
+                                        if ("decrease".equals(operation)) {
+                                            newStock = currentStock - quantity;
+                                        } else { // "increase"
+                                            newStock = currentStock + quantity;
+                                        }
+                                        Log.d("StockUpdate", "Transaction: Cập nhật kho biến thể = " + newStock);
+                                        variant.put("stock", newStock);
+                                        break;
+                                    }
+                                }
+
+                                if (variantFound) {
+                                    Log.i("StockUpdate", "Transaction: Sắp cập nhật 'variants' lên Firestore.");
+                                    transaction.update(productRef, "variants", variants);
+                                } else {
+                                    throw new FirebaseFirestoreException("Không tìm thấy biến thể " + item.getVariantName(),
+                                            FirebaseFirestoreException.Code.ABORTED);
+                                }
+
+                            } else {
+
+                                Log.d("StockUpdate", "Transaction: Đang xử lý sản phẩm đơn.");
+
+                                Object stockObj = snapshot.get("stock");
+                                long currentStock = 0;
+                                if (stockObj instanceof Number) {
+                                    currentStock = ((Number) stockObj).longValue();
+                                } else {
+                                    throw new FirebaseFirestoreException("Lỗi dữ liệu kho của sản phẩm " + item.getName(),
+                                            FirebaseFirestoreException.Code.ABORTED);
+                                }
+                                Log.d("StockUpdate", "Transaction: Kho gốc hiện tại: " + currentStock);
+
+                                long newStock;
+                                if ("decrease".equals(operation)) {
+                                    newStock = currentStock - quantity;
+                                } else { // "increase"
+                                    newStock = currentStock + quantity;
+                                }
+                                Log.d("StockUpdate", "Transaction: Cập nhật kho gốc = " + newStock);
+
+                                Log.i("StockUpdate", "Transaction: Sắp cập nhật 'stock' (gốc) lên Firestore.");
+                                transaction.update(productRef, "stock", newStock);
+                            }
+
+                            return null;
+                        }).addOnSuccessListener(aVoid -> {
+                            Log.i("StockUpdate", "--- TRANSACTION THÀNH CÔNG (TỪ ADAPTER) cho LogicalPID: " + logicalProductId + " ---");
+                        }).addOnFailureListener(e -> {
+                            Log.e("StockUpdate", "--- TRANSACTION THẤT BẠI (TỪ ADAPTER) cho LogicalPID: " + logicalProductId + " ---", e);
+                            Toast.makeText(context, "Lỗi cập nhật kho: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        });
+
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("StockUpdate", "LỖI QUERY: Thất bại khi query 'id' == " + logicalProductId, e);
+                        Toast.makeText(context, "Lỗi mạng khi tìm SP: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        }
+    }
 }
