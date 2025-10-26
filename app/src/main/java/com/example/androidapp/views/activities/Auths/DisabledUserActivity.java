@@ -35,10 +35,6 @@ public class DisabledUserActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Hàm này tạo một Intent để mở ứng dụng email
-     * và soạn sẵn nội dung gửi cho Admin.
-     */
     private void sendReactivationEmail() {
         FirebaseUser user = mAuth.getCurrentUser();
 
@@ -48,10 +44,9 @@ public class DisabledUserActivity extends AppCompatActivity {
             return;
         }
 
-        // =================================================================
+
         // QUAN TRỌNG: Thay đổi email này thành email của Admin
         String adminEmail = "phamthanhtung108049@gmail.com";
-        // =================================================================
 
         String subject = "Yêu cầu kích hoạt lại tài khoản - " + user.getEmail();
         String body = "Kính gửi quản trị viên,\n\n"

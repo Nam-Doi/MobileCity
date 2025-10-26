@@ -1,19 +1,19 @@
 package com.example.androidapp.views.activities.Auths;
 
-// Import cần thiết
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar; // Giữ lại ProgressBar nếu layout có
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.androidapp.R;
-import com.example.androidapp.models.users; // Đảm bảo model users có các getter/setter cần thiết
+import com.example.androidapp.models.users;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,7 +38,7 @@ public class ProfileActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private DocumentReference userDocRef;
     private FirebaseUser currentUser;
-    private users userProfile; // Lưu thông tin user
+    private users userProfile;
     private Button buttonChangePassword;
 
     // Trạng thái
@@ -47,7 +47,7 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile); // Đảm bảo layout này không có ImageView avatar nữa
+        setContentView(R.layout.activity_profile);
 
         // Khởi tạo Firebase
         mAuth = FirebaseAuth.getInstance();
@@ -85,7 +85,6 @@ public class ProfileActivity extends AppCompatActivity {
                 if (userProfile != null) {
                     editTextFullName.setText(userProfile.getFullName());
                     editTextEmail.setText(userProfile.getEmail());
-                    // Không cần load ảnh nữa
                 }
             } else {
                 Log.w(TAG, "Không tìm thấy document của user");
@@ -163,7 +162,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
-    // Hàm xử lý lỗi đổi email (giữ nguyên)
+    // Hàm xử lý lỗi đổi email
     private void handleEmailUpdateError(Exception exception) {
         if (exception instanceof FirebaseAuthUserCollisionException) {
             Toast.makeText(this, "Email mới này đã được sử dụng.", Toast.LENGTH_LONG).show();
@@ -201,7 +200,7 @@ public class ProfileActivity extends AppCompatActivity {
                 });
     }
 
-    // Hàm đăng xuất (giữ nguyên)
+    // Hàm đăng xuất
     private void logoutUser() {
         mAuth.signOut();
         Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
@@ -211,7 +210,7 @@ public class ProfileActivity extends AppCompatActivity {
         finish();
     }
 
-    // Hàm hiển thị xác nhận xóa (giữ nguyên)
+    // Hàm hiển thị xác nhận xóa
     private void showDeleteAccountConfirmation() {
         new AlertDialog.Builder(this)
                 .setTitle("Xóa tài khoản")
@@ -224,7 +223,7 @@ public class ProfileActivity extends AppCompatActivity {
                 .show();
     }
 
-    // Hàm xóa tài khoản (giữ nguyên)
+    // Hàm xóa tài khoản
     private void deleteAccount() {
         userDocRef.delete()
                 .addOnSuccessListener(aVoid -> currentUser.delete()
@@ -246,7 +245,7 @@ public class ProfileActivity extends AppCompatActivity {
                 });
     }
 
-    // Hàm bật/tắt ProgressBar (giữ nguyên)
+    // Hàm bật/tắt ProgressBar
     private void setLoading(boolean isLoading) {
         if (progressBarProfile != null) {
             progressBarProfile.setVisibility(isLoading ? View.VISIBLE : View.GONE);

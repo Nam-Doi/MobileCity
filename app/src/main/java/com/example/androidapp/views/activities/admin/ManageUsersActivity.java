@@ -52,11 +52,10 @@ public class ManageUsersActivity extends AppCompatActivity {
             Intent intent = new Intent(ManageUsersActivity.this, CreateUserActivity.class);
             startActivity(intent);
         });
-
-        // Tạo Adapter
+        //Tạo danh sách tài khoản
         setupRecyclerView();
 
-        // Các hàm sau chỉ lọc dữ liệu
+        // Lọc dữ liệu
         setupRoleSpinner();
         setupSearchView();
 
@@ -65,14 +64,12 @@ public class ManageUsersActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        // Adapter được tạo với userList và listener
         userAdapter = new UserAdapter(this, userList, user -> {
             Intent intent = new Intent(ManageUsersActivity.this, UserDetailActivity.class);
             intent.putExtra("USER_ID", user.getUid());
             startActivity(intent);
         });
         recyclerViewUsers.setLayoutManager(new LinearLayoutManager(this));
-        // Gán adapter cho RecyclerView
         recyclerViewUsers.setAdapter(userAdapter);
     }
 
@@ -111,7 +108,6 @@ public class ManageUsersActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText == null || newText.isEmpty()) {
-                    // Khi xóa hết chữ, tải lại danh sách theo bộ lọc role hiện tại
                     String selectedRole = spinnerRole.getSelectedItem().toString();
                     Query query;
                     if (selectedRole.equals("Tất cả")) {

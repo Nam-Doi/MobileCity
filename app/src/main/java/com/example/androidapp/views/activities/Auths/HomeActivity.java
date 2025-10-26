@@ -80,30 +80,4 @@ public class HomeActivity extends AppCompatActivity {
                     .commit();
         }
     }
-
-    private void showPopupMenu(View v) {
-        PopupMenu popup = new PopupMenu(this, v);
-        MenuInflater inflater = popup.getMenuInflater();
-        inflater.inflate(R.menu.top_menu, popup.getMenu());
-
-        popup.setOnMenuItemClickListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.menu_home) {
-                Toast.makeText(this, "Trang chủ", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (id == R.id.menu_phone) {
-                Toast.makeText(this, "Điện thoại", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (id == R.id.menu_accessory) {
-                Toast.makeText(this, "Phụ kiện", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (id == R.id.menu_tablet) {
-                Toast.makeText(this, "Khác", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            return false;
-        });
-
-        popup.show();
-    }
 }
