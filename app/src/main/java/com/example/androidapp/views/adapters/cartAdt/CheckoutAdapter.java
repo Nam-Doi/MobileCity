@@ -1,6 +1,9 @@
 package com.example.androidapp.views.adapters.cartAdt;
 
+import static android.content.ContentValues.TAG;
+
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +46,24 @@ public class CheckoutAdapter extends RecyclerView.Adapter<CheckoutAdapter.Checko
         }
         
         holder.tvName.setText(item.getCachedName());
-        
+        // variant oke
+        if (holder.tvVariant != null) {
+            String variantName = item.getVariantName();
+            Log.d(TAG, "tvVariant found. VariantName value: " + variantName);
+
+            if (variantName != null && !variantName.trim().isEmpty() && !variantName.equals("null")) {
+                holder.tvVariant.setVisibility(View.VISIBLE);
+                holder.tvVariant.setText(variantName);
+                Log.d(TAG, "Variant displayed: " + variantName);
+            } else {
+                // Nếu không có variant, hiển thị "Mặc định"
+                holder.tvVariant.setVisibility(View.VISIBLE);
+                holder.tvVariant.setText("Phiên bản: Mặc định");
+                Log.d(TAG, "Default variant displayed");
+            }
+        } else {
+            Log.e(TAG, "✗ tvVariant is NULL! Check your layout file.");
+        }
         // Giá hiện tại (không có giá gốc trong CartItem)
         holder.tvPrice.setText(String.format("%,.0fđ", item.getCachedPrice()));
         
@@ -65,12 +85,13 @@ public class CheckoutAdapter extends RecyclerView.Adapter<CheckoutAdapter.Checko
     }
     public static class CheckoutViewHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct;
-        TextView tvName, tvPriceOriginal, tvPrice, tvQuantity,tvItemCount, tvItemTotal;
+        TextView tvName, tvPriceOriginal, tvPrice, tvQuantity,tvItemCount, tvItemTotal, tvVariant;
         public CheckoutViewHolder(@NonNull View itemView) {
             super(itemView);
             imgProduct = itemView.findViewById(R.id.imgProduct);
             tvName= itemView.findViewById(R.id.tvName);
             tvPriceOriginal = itemView.findViewById(R.id.tvPriceOriginal);
+            tvVariant = itemView.findViewById(R.id.tvVariant);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvQuantity = itemView.findViewById(R.id.tvQuantity);
             tvItemCount = itemView.findViewById(R.id.tvItemCount);
