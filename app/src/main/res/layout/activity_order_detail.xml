@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#F4F6F9"
-    android:fitsSystemWindows="true"
     tools:context=".views.activities.Order.OrderDetailActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -32,31 +31,132 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="4dp">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:padding="16dp"
                     android:baselineAligned="false">
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                        <TextView android:id="@+id/tv_tracker_icon_pending" android:layout_width="32dp" android:layout_height="32dp" android:text="1" android:gravity="center" android:textColor="@color/white" android:textStyle="bold" android:background="@drawable/bg_circle_mask"/>
-                        <TextView android:id="@+id/tv_tracker_text_pending" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chờ xác nhận" android:textSize="12sp" android:layout_marginTop="4dp"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:id="@+id/tv_tracker_icon_pending"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:text="1"
+                            android:gravity="center"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            android:background="@drawable/bg_circle_mask"/>
+                        <TextView
+                            android:id="@+id/tv_tracker_text_pending"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Chờ xác nhận"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"/>
                     </LinearLayout>
-                    <View android:id="@+id/line1" android:layout_width="0dp" android:layout_height="2dp" android:layout_weight="1" android:layout_gravity="top" android:layout_marginTop="15dp" android:background="#E0E0E0"/>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                        <TextView android:id="@+id/tv_tracker_icon_confirmed" android:layout_width="32dp" android:layout_height="32dp" android:text="2" android:gravity="center" android:textColor="@color/white" android:textStyle="bold" android:background="@drawable/bg_circle_mask"/>
-                        <TextView android:id="@+id/tv_tracker_text_confirmed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Đã xác nhận" android:textSize="12sp" android:layout_marginTop="4dp"/>
+
+                    <View
+                        android:id="@+id/line1"
+                        android:layout_width="0dp"
+                        android:layout_height="2dp"
+                        android:layout_weight="1"
+                        android:layout_gravity="top"
+                        android:layout_marginTop="15dp"
+                        android:background="#E0E0E0"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:id="@+id/tv_tracker_icon_confirmed"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:text="2"
+                            android:gravity="center"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            android:background="@drawable/bg_circle_mask"/>
+                        <TextView
+                            android:id="@+id/tv_tracker_text_confirmed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Đã xác nhận"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"/>
                     </LinearLayout>
-                    <View android:id="@+id/line2" android:layout_width="0dp" android:layout_height="2dp" android:layout_weight="1" android:layout_gravity="top" android:layout_marginTop="15dp" android:background="#E0E0E0"/>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                        <TextView android:id="@+id/tv_tracker_icon_shipping" android:layout_width="32dp" android:layout_height="32dp" android:text="3" android:gravity="center" android:textColor="@color/white" android:textStyle="bold" android:background="@drawable/bg_circle_mask"/>
-                        <TextView android:id="@+id/tv_tracker_text_shipping" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Đang giao" android:textSize="12sp" android:layout_marginTop="4dp"/>
+
+                    <View
+                        android:id="@+id/line2"
+                        android:layout_width="0dp"
+                        android:layout_height="2dp"
+                        android:layout_weight="1"
+                        android:layout_gravity="top"
+                        android:layout_marginTop="15dp"
+                        android:background="#E0E0E0"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:id="@+id/tv_tracker_icon_shipping" android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:text="3"
+                            android:gravity="center"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            android:background="@drawable/bg_circle_mask"/>
+                        <TextView
+                            android:id="@+id/tv_tracker_text_shipping" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Đang giao"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"/>
                     </LinearLayout>
-                    <View android:id="@+id/line3" android:layout_width="0dp" android:layout_height="2dp" android:layout_weight="1" android:layout_gravity="top" android:layout_marginTop="15dp" android:background="#E0E0E0"/>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                        <TextView android:id="@+id/tv_tracker_icon_delivered" android:layout_width="32dp" android:layout_height="32dp" android:text="4" android:gravity="center" android:textColor="@color/white" android:textStyle="bold" android:background="@drawable/bg_circle_mask"/>
-                        <TextView android:id="@+id/tv_tracker_text_delivered" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Đã giao" android:textSize="12sp" android:layout_marginTop="4dp"/>
+
+                    <View
+                        android:id="@+id/line3" android:layout_width="0dp"
+                        android:layout_height="2dp"
+                        android:layout_weight="1"
+                        android:layout_gravity="top"
+                        android:layout_marginTop="15dp"
+                        android:background="#E0E0E0"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:id="@+id/tv_tracker_icon_delivered" android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:text="4"
+                            android:gravity="center"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            android:background="@drawable/bg_circle_mask"/>
+                        <TextView
+                            android:id="@+id/tv_tracker_text_delivered" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Đã giao"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"/>
                     </LinearLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -88,8 +188,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" android:layout_marginTop="16dp"
                 android:visibility="gone"> <TextView
-                android:id="@+id/tv_cancel_requested_indicator_detail"
-                android:layout_width="match_parent"
+                android:id="@+id/tv_cancel_requested_indicator_detail" android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="* Khách hàng đang yêu cầu hủy đơn hàng này"
                 android:textColor="@color/purple_700"
@@ -102,8 +201,7 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_cancel_order_detail"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:id="@+id/btn_cancel_order_detail" style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -118,7 +216,6 @@
                 android:text="Xác nhận đơn" android:layout_marginStart="8dp"
                 android:visibility="gone"/> </LinearLayout>
             </LinearLayout>
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>
