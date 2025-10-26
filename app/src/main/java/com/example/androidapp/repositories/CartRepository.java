@@ -27,6 +27,7 @@ public class CartRepository {
     /**
      * Lấy reference đến cart subcollection của user
      */
+    // truy vấn dữ liệu collection đại diện cho 1 cái đường dẫn đến document đó
     private DocumentReference getCartItemRef(@NonNull String userId, @NonNull String cartItemId) {
         return db.collection(COLLECTION_USERS)
                 .document(userId)
@@ -35,10 +36,9 @@ public class CartRepository {
     }
 
      //Thêm sản phẩm vào giỏ hàng
-
     public void addToCart(@NonNull String userId, @NonNull Product product,
             int quantity, String variantId, String variantName,
-            OnCartOperationListener listener) {
+            OnCartOperationListener listener ) { // oncartoperationlítener callback
 
         Log.d("CartRepository", "addToCart called for user: " + userId + ", product: " + product.getName());
 
@@ -46,6 +46,7 @@ public class CartRepository {
         String cartItemId = variantId != null ? product.getId() + "_" + variantId : product.getId();
 
         Log.d("CartRepository", "Cart item ID: " + cartItemId);
+        // kiểm tra lấy sản phẩm
         DocumentReference cartRef = getCartItemRef(userId, cartItemId);
 
         // Kiểm tra sản phẩm đã tồn tại chưa
@@ -129,6 +130,7 @@ public class CartRepository {
 
     /**
      * Lấy tất cả items trong giỏ hàng (JOIN với Product để lấy thông tin mới nhất)
+     * add snapshot listener là realtime listener
      */
     public void getCartItems(@NonNull String userId, OnCartItemsLoadedListener listener) {
         db.collection(COLLECTION_USERS)
@@ -185,9 +187,7 @@ public class CartRepository {
                 });
     }
 
-    /**
-     * Lấy số lượng items trong giỏ hàng
-     */
+    //lay so luong item trong gio
     public void getCartItemCount(@NonNull String userId, OnCartCountListener listener) {
         db.collection(COLLECTION_USERS)
                 .document(userId)
@@ -203,9 +203,7 @@ public class CartRepository {
                 });
     }
 
-    /**
-     * Cập nhật số lượng sản phẩm
-     */
+    // update so luong san pham trong gioi
     public void updateQuantity(@NonNull String userId, @NonNull String productId,
             String variantId, int newQuantity,
             OnCartOperationListener listener) {
@@ -221,9 +219,7 @@ public class CartRepository {
                 .addOnFailureListener(listener::onFailure);
     }
 
-    /**
-     * Xóa một item khỏi giỏ hàng
-     */
+    // remove 1 item
     public void removeItem(@NonNull String userId, @NonNull String productId,
             String variantId, OnCartOperationListener listener) {
         String cartItemId = variantId != null ? productId + "_" + variantId : productId;
@@ -234,9 +230,7 @@ public class CartRepository {
                 .addOnFailureListener(listener::onFailure);
     }
 
-    /**
-     * Xóa nhiều items cùng lúc
-     */
+    //xoa nhieu item cung 1 luc
     public void removeMultipleItems(@NonNull String userId, @NonNull List<String> cartItemIds,
             OnCartOperationListener listener) {
         int[] counter = { 0 };
@@ -332,9 +326,7 @@ public class CartRepository {
                 .addOnFailureListener(listener::onFailure);
     }
 
-    /**
-     * Xóa các items đã chọn (sau khi đặt hàng thành công)
-     */
+    // delete item sau khi dat hang thanh cong
     public void removeSelectedItems(@NonNull String userId, OnCartOperationListener listener) {
         db.collection(COLLECTION_USERS)
                 .document(userId)

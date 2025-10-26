@@ -123,6 +123,7 @@ public class CheckoutActivity extends AppCompatActivity {
             finish();
             return;
         }
+        //it xay ra vì đã có logic kiển tra không select bên giỏ rồi
     }
     // Receiver address from sharedreferences
     private boolean receiveAddressFromIntent(){

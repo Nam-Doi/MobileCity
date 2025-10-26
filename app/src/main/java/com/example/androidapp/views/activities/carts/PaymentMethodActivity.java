@@ -48,9 +48,7 @@ public class PaymentMethodActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     list.clear();
-                    Log.d("PAYMENT", "Tổng số document: " + querySnapshot.size());
                     for (DocumentSnapshot doc : querySnapshot) {
-                        Log.d("PAYMENT", "Doc ID: " + doc.getId() + " => " + doc.getData());
                         PaymentMethod method = doc.toObject(PaymentMethod.class);
                         if (method != null) {
                             method.setId(doc.getId());

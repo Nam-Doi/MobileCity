@@ -151,7 +151,6 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
                         .beginTransaction()
                         .replace(R.id.main_container, new HomeFragment())
                         .commit();
-                // ... (cập nhật BottomNav) ...
             } catch (Exception ex) {
                 if (isAdded()) { // Kiểm tra lại trước khi pop
                     requireActivity().getSupportFragmentManager().popBackStack();

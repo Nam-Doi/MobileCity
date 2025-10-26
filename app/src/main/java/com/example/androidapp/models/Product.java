@@ -7,7 +7,7 @@ import java.util.Map;
 public class Product implements Serializable {
     private String id;
     private String name;
-    private String brand;
+    private String brand; // thương hiệu
     private String category; // Thêm
     private String description; // Thêm
     private Map<String, String> specifications;

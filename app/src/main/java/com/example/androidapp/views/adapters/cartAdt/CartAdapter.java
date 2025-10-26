@@ -145,7 +145,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
             if (availableStock < 1) {
                 // Hết hàng - Hiển thị cảnh báo và disable các nút
-                holder.tvVariant.setText(display.getVariantName() + " - HẾT HÀNG");
+                holder.tvVariant.setText(display.getVariantName() + " - Hết hàng");
                 holder.tvVariant.setTextColor(holder.itemView.getContext().getColor(android.R.color.holo_red_dark));
                 holder.tvPlus.setEnabled(false);
                 holder.tvPlus.setAlpha(0.5f);
