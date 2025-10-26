@@ -73,8 +73,8 @@ public class DetailProductActivity extends AppCompatActivity {
         cartRepository = new CartRepository();
 
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
+        setSupportActionBar(toolbar);//coi toolbar như action bar
+        if (getSupportActionBar() != null) {//kiểm tra lệnh trên được thực hiện chưa
             getSupportActionBar().setTitle("Thông tin chi tiết");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             toolbar.getNavigationIcon().setTint(Color.WHITE);
@@ -118,34 +118,6 @@ public class DetailProductActivity extends AppCompatActivity {
             }
         });
         rv_suggestItem.setAdapter(suggestionAdapter);
-        // Tạo một GestureDetector để nhận diện cử chỉ "chạm một lần"
-        GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                // Khi người dùng chạm vào ScrollView
-
-                // Ẩn bàn phím ⌨️
-                hideKeyboard();
-
-                // Ẩn danh sách gợi ý 👇
-                rv_suggestItem.setVisibility(View.GONE);
-
-                // Bỏ focus khỏi thanh tìm kiếm
-                if (searchView != null) {
-                    searchView.clearFocus();
-                }
-
-                return true;
-            }
-        });
-
-        // Gắn Listener vào ScrollView
-        sv_detail.setOnTouchListener((v, event) -> {
-            // Chuyển sự kiện chạm cho GestureDetector xử lý
-            gestureDetector.onTouchEvent(event);
-            // Trả về false để không làm ảnh hưởng đến sự kiện cuộn
-            return false;
-        });
 
         btn_write_review.setOnClickListener(v -> {
             Intent intent = new Intent(this, ReviewActivity.class );
@@ -362,16 +334,11 @@ public class DetailProductActivity extends AppCompatActivity {
         if (specs == null)
             return;
         LayoutInflater inflater = LayoutInflater.from(this);
-        Map<String, String> labelMapping = Map.of(
-                "display", "Màn hình:", "os", "Hệ điều hành:", "mainCamera", "Camera sau:",
-                "frontCamera", "Camera trước:", "cpu", "CPU:", "ram", "RAM:",
-                "storage", "Bộ nhớ trong:", "battery", "Dung lượng pin:");
         for (Map.Entry<String, String> entry : specs.entrySet()) {
             TableRow row = (TableRow) inflater.inflate(R.layout.item_row_specification, tableLayout, false);
             TextView tvLabel = row.findViewById(R.id.tvLabel);
             TextView tvValue = row.findViewById(R.id.tvValue);
-            String label = labelMapping.getOrDefault(entry.getKey(), entry.getKey());
-            tvLabel.setText(label);
+            tvLabel.setText(entry.getKey());
             tvValue.setText(String.valueOf(entry.getValue()));
             tableLayout.addView(row);
         }
@@ -428,10 +395,11 @@ public class DetailProductActivity extends AppCompatActivity {
         return true;
     }
 
+    //sự kiện nhấn vào item trên toolbar(back, cart)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == android.R.id.home) {
+        if (id == android.R.id.home) {//nút back về home
             finish();
             return true;
         } else if (id == R.id.menu_cart) {
@@ -448,16 +416,7 @@ public class DetailProductActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        // Tìm view đang có focus để ẩn bàn phím từ nó
-        View view = getCurrentFocus();
-        if (view == null) {
-            view = new View(this);
-        }
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
+    //cập nhật giao diện khi chọn option khác
     private void updateUIForVariant(ProductVariant variant) {
         if (variant == null)
             return;
@@ -489,7 +448,7 @@ public class DetailProductActivity extends AppCompatActivity {
                     .into(iv_product);
         }
     }
-
+    //hàm khởi tạo, lấy danh sách màu, bộ nhớ hiển thi thông tin mặc định, khi chọn option gọi findAndDisplayMatchingVariant
     private void setupVariantSelectors(List<ProductVariant> variants) {
         // Lấy variant mặc định (cái đầu tiên)
         ProductVariant defaultVariant = variants.get(0);
@@ -525,7 +484,7 @@ public class DetailProductActivity extends AppCompatActivity {
         });
         rvMemoryOption.setAdapter(memoryAdapter);
     }
-
+    //kiểm tra option chọn, gọi hàm cập nật giao diện
     private void findAndDisplayMatchingVariant() {
         if (currentProduct == null || currentProduct.getVariants() == null)
             return;
