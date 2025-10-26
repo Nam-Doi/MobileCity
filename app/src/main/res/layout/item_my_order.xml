@@ -51,6 +51,17 @@
                     android:ellipsize="end"/>
 
                 <TextView
+                    android:id="@+id/tv_item_variant_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="Phân loại: Titan tự nhiên, 256GB"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_marginTop="2dp"
+                    android:visibility="gone"
+                    android:maxLines="1"
+                    android:ellipsize="end"/>
+                <TextView
                     android:id="@+id/tv_item_extra_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -119,15 +130,18 @@
                 android:layout_gravity="end"
                 android:text="Hủy đơn"
                 android:textColor="#EF5350"
-                android:visibility="gone" /> <TextView
-            android:id="@+id/tv_item_cancel_requested_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|center_vertical"
-            android:text="Đang yêu cầu hủy..."
-            android:textColor="@color/purple_700"
-            android:textSize="12sp"
-            android:textStyle="italic"
-            android:visibility="gone" /> </FrameLayout>
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_item_cancel_requested_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:text="Đang yêu cầu hủy..."
+                android:textColor="@color/purple_700"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
