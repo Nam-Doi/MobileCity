@@ -408,77 +408,6 @@ public class OrderDetailActivity extends AppCompatActivity {
     private String formatCurrency(double amount) {
         return NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(amount);
     }
-
-    //thong bao cua co nam than cam xoa
-//    private void sendOrderStatusNotification(String userId, String orderId, String newStatus, double total) {
-//        if (userId == null || orderId == null) {
-//            Log.w("OrderDetailActivity", "Cannot send notification: userId or orderId is null");
-//            return;
-//        }
-//
-//        Log.d("OrderDetailActivity", "Attempting to send notification - userId: " + userId +
-//                ", orderId: " + orderId + ", status: " + newStatus);
-//
-//        // Tạo shortOrderId an toàn
-//        String shortOrderId = orderId.length() >= 8 ? orderId.substring(0, 8) : orderId;
-//
-//        String title = "";
-//        String message = "";
-//
-//        switch (newStatus) {
-//            case "confirmed":
-//                title = "Đơn hàng đã được xác nhận ✅";
-//                message = "Đơn hàng #" + shortOrderId + " đã được xác nhận và đang chuẩn bị";
-//                break;
-//
-//            case "shipping":
-//                title = "Đơn hàng đang được giao 🚚";
-//                message = "Đơn hàng #" + shortOrderId + " đang trên đường giao đến bạn";
-//                break;
-//
-//            case "delivered":
-//                title = "Đơn hàng đã giao thành công 🎉";
-//                message = "Đơn hàng #" + shortOrderId + " đã được giao thành công. Cảm ơn bạn đã mua hàng!";
-//                break;
-//
-//            case "cancelled":
-//                title = "Đơn hàng đã bị hủy ❌";
-//                message = "Đơn hàng #" + shortOrderId + " đã bị hủy. Số tiền " +
-//                        formatCurrency(total) + " sẽ được hoàn lại (nếu đã thanh toán)";
-//                break;
-//
-//            default:
-//                title = "Cập nhật đơn hàng";
-//                message = "Đơn hàng #" + shortOrderId + " đã được cập nhật trạng thái";
-//                break;
-//        }
-//
-//        Log.d("OrderDetailActivity", "Creating notification - title: " + title + ", message: " + message);
-//
-//        // Tạo notification
-//        com.example.androidapp.models.Notification notification =
-//                new com.example.androidapp.models.Notification(userId, title, message, "order");
-//
-//        notification.setActionUrl("order/" + orderId);
-//
-//        Log.d("OrderDetailActivity", "Calling createNotification...");
-//
-//        // Lưu thông báo
-//        notificationRepository.createNotification(userId, notification,
-//                new com.example.androidapp.repositories.NotificationRepository.OnOperationListener() {
-//                    @Override
-//                    public void onSuccess(String msg) {
-//                        Log.d("OrderDetailActivity", "Notification sent successfully for order: " + orderId);
-//                        Toast.makeText(OrderDetailActivity.this, "Đã gửi thông báo đến khách hàng", Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Exception e) {
-//                        Log.e("OrderDetailActivity", "Failed to send notification for order: " + orderId, e);
-//                        Toast.makeText(OrderDetailActivity.this, "Lỗi gửi thông báo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//    }
     private void sendOrderStatusNotification(String userId, String orderId, String newStatus, double total) {
         if (userId == null || orderId == null) {
             Log.w("OrderDetailActivity", "Cannot send notification: userId or orderId is null");
@@ -488,7 +417,6 @@ public class OrderDetailActivity extends AppCompatActivity {
         Log.d("OrderDetailActivity", "Attempting to send notification - userId: " + userId +
                 ", orderId: " + orderId + ", status: " + newStatus);
 
-        // Tạo shortOrderId an toàn
         String shortOrderId = orderId.length() >= 8 ? orderId.substring(0, 8) : orderId;
 
         // Lấy tên sản phẩm đầu tiên (hoặc nhiều sản phẩm)
@@ -540,23 +468,19 @@ public class OrderDetailActivity extends AppCompatActivity {
                 new com.example.androidapp.repositories.NotificationRepository.OnOperationListener() {
                     @Override
                     public void onSuccess(String msg) {
-                        Log.d("OrderDetailActivity", "✅ Notification sent successfully for order: " + orderId);
+                        Log.d("OrderDetailActivity", "Notification sent successfully for order: " + orderId);
                         Toast.makeText(OrderDetailActivity.this, "Đã gửi thông báo đến khách hàng", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onFailure(Exception e) {
-                        Log.e("OrderDetailActivity", "❌ Failed to send notification for order: " + orderId, e);
+                        Log.e("OrderDetailActivity", "Failed to send notification for order: " + orderId, e);
                         Toast.makeText(OrderDetailActivity.this, "Lỗi gửi thông báo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
-
-    /**
-     * Lấy thông tin sản phẩm để hiển thị trong notification
-     * - Nếu có 1 sản phẩm: hiển thị tên sản phẩm
-     * - Nếu có nhiều sản phẩm: hiển thị "tên sản phẩm đầu và X sản phẩm khác"
-     */
+    // if có 1 sản phẩm thì hiển thị tên của sản phâm
+    // if > 1 sản phẩm sẽ gọi hàm này để lấy tên sản phẩm đầu tiên
     private String getProductInfoForNotification() {
         if (order == null || order.getItems() == null || order.getItems().isEmpty()) {
             return "sản phẩm";

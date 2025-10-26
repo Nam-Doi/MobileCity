@@ -27,7 +27,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_back"
-                app:tint="#6dfffc"
+                app:tint="#3F51B5"
                 android:contentDescription="Quay lại" />
 
             <TextView

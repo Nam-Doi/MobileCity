@@ -49,8 +49,6 @@ public class SignUpActivity extends AppCompatActivity {
 
         // Kết nối các View từ XML với biến Java
         initViews();
-
-        // Thiết lập các sự kiện click cho button
         setupListeners();
         setupPasswordToggle();
         setupLogin(); // quay lai trang login
@@ -152,11 +150,9 @@ public class SignUpActivity extends AppCompatActivity {
             String password) {
         // Gọi Firebase Auth để tạo tài khoản mới
         mAuth.createUserWithEmailAndPassword(email, password)
-                // addOnCompleteListener: Lắng nghe kết quả khi hoàn thành
                 .addOnCompleteListener(this, task -> {
                     // Kiểm tra xem việc tạo tài khoản có thành công không
                     if (task.isSuccessful()) {
-                        // Thành công - Log ra để debug
                         Log.d(TAG, "createUserWithEmail:success");
 
                         // Lấy thông tin user vừa tạo từ Firebase Auth
@@ -251,57 +247,4 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 });
     }
-    // private void getUserInfo(String uid) {
-    // // Truy cập collection "users", document có ID = uid
-    // db.collection("users")
-    // .document(uid)
-    // .get() // Lấy dữ liệu
-    // // addOnSuccessListener: Khi lấy dữ liệu thành công
-    // .addOnSuccessListener(documentSnapshot -> {
-    // // Kiểm tra document có tồn tại không
-    // if (documentSnapshot.exists()) {
-    // // Chuyển đổi document thành object User
-    // users user = documentSnapshot.toObject(users.class);
-    //
-    // // Kiểm tra user không null
-    // if (user != null) {
-    // // Sử dụng thông tin user
-    // Log.d(TAG, "User name: " + user.getFullName());
-    // Log.d(TAG, "Email: " + user.getEmail());
-    // Log.d(TAG, "Role: " + user.getRole());
-    //
-    // // Có thể hiển thị lên UI
-    // // tvUserName.setText(user.getFullName());
-    // // tvEmail.setText(user.getEmail());
-    // }
-    // } else {
-    // // Document không tồn tại
-    // Log.d(TAG, "No such document");
-    // }
-    // })
-    // // addOnFailureListener: Khi có lỗi
-    // .addOnFailureListener(e -> {
-    // Log.e(TAG, "Error getting user info", e);
-    // Toast.makeText(SignUpActivity.this,
-    // "Không thể tải thông tin người dùng",
-    // Toast.LENGTH_SHORT).show();
-    // });
-    // }
-    // //update users
-    // private void updateUserAddress(String uid, String newAddress) {
-    // // Cập nhật chỉ 1 field cụ thể
-    // db.collection("users")
-    // .document(uid)
-    // .update("address", newAddress) // Chỉ cập nhật field "address"
-    // .addOnSuccessListener(aVoid -> {
-    // Log.d(TAG, "Address updated successfully");
-    // Toast.makeText(SignUpActivity.this,
-    // "Cập nhật địa chỉ thành công",
-    // Toast.LENGTH_SHORT).show();
-    // })
-    // .addOnFailureListener(e -> {
-    // Log.e(TAG, "Error updating address", e);
-    // });
-    // }
-    // }
 }

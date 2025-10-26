@@ -10,10 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_alignParentTop="true"
-        android:background="@android:color/white"
         android:elevation="4dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:background="@drawable/bg_gradient_background"
         android:padding="12dp">
 
         <ImageView
@@ -21,7 +21,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_back"
-            app:tint="#00BCD4"
+            app:tint="#3F51B5"
             android:contentDescription="Quay lại" />
 
         <TextView
@@ -70,7 +70,7 @@
             android:layout_width="0dp"
             android:layout_weight="1.15"
             android:layout_height="match_parent"
-            android:text="Payment"
+            android:text="Thanh toán"
             android:textAllCaps="false"
             android:backgroundTint="#FFE607"/>
 

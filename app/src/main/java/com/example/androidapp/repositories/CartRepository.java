@@ -34,11 +34,8 @@ public class CartRepository {
                 .document(cartItemId);
     }
 
-    /**
-     * Thêm sản phẩm vào giỏ hàng
-     * Cấu trúc: users/{userId}/carts/{productId} hoặc
-     * users/{userId}/carts/{productId_variantId}
-     */
+     //Thêm sản phẩm vào giỏ hàng
+
     public void addToCart(@NonNull String userId, @NonNull Product product,
             int quantity, String variantId, String variantName,
             OnCartOperationListener listener) {

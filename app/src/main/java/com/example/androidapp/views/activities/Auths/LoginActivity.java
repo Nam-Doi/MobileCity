@@ -71,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
         imgPasswordToggle = findViewById(R.id.ivPasswordToggle);
         progressBar = findViewById(R.id.progressBar);
     }
-
+    //kiem tra email va password hop le
     private boolean validateInput(String email, String password) {
         if (email.isEmpty()) {
             etEmail.setError("Vui lòng nhập email");
@@ -266,7 +266,6 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // HÀM navigateToRole() ĐÃ BỊ XÓA VÌ LOGIC CỦA NÓ ĐÃ ĐƯỢC TÍCH HỢP VÀO CheckUserStatusAndRole
 
     // hiện pass
     private void setupPasswordToggle() {
