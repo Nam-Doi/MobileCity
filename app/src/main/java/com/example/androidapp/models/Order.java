@@ -9,7 +9,6 @@ import com.google.firebase.firestore.IgnoreExtraProperties;//Dùng để tránh 
 @IgnoreExtraProperties
 public class Order implements Parcelable {
 
-    // --- Fields ---
     private String orderId;
     private String userId;
     private String customerName;

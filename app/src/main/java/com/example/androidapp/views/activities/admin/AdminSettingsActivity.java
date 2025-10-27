@@ -14,7 +14,7 @@ import com.example.androidapp.views.activities.Auths.LoginActivity;
 
 public class AdminSettingsActivity extends AppCompatActivity {
 
-    private Button btnLogout, btnChangePassword;
+    private Button btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,7 +22,6 @@ public class AdminSettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_admin_settings);
 
         btnLogout = findViewById(R.id.btnLogout);
-        btnChangePassword = findViewById(R.id.btnChangePassword);
 
         btnLogout.setOnClickListener(v -> showLogoutConfirmDialog());
     }

@@ -115,7 +115,7 @@ public class LoginActivity extends AppCompatActivity {
                     onContinue.run();
                 })
                 .setNegativeButton("Không", (dialog, which) -> {
-                    saveLoginCredentials("","");
+                    saveLoginCredentials("", "");
                     onContinue.run();
                 })
                 .setCancelable(false)

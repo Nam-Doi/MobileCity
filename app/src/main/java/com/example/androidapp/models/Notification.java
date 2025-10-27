@@ -11,7 +11,7 @@ public class Notification {
     private boolean isRead;
     private long createdAt;
     private String imageUrl; // optional
-    private String actionUrl; // optional - link đến màn hình chi tiết
+    private String actionUrl;
 
     // Constructors
     public Notification() {

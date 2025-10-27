@@ -29,13 +29,13 @@ public class users {
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
 
-    public String getEmail() { return email; } // <-- Thêm cái này
+    public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    public String getRole() { return role; } // <-- Thêm cái này
+    public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
-    public String getUid() { return uid; } // <-- Đảm bảo có cái này
+    public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
 
     public boolean isActive() { return isActive; }

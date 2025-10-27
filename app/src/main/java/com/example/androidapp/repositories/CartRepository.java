@@ -203,7 +203,7 @@ public class CartRepository {
                 });
     }
 
-    // update so luong san pham trong gioi
+    // update so luong san pham trong gio
     public void updateQuantity(@NonNull String userId, @NonNull String productId,
             String variantId, int newQuantity,
             OnCartOperationListener listener) {

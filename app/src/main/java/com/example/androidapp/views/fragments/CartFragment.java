@@ -145,7 +145,7 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
             // Kiểm tra isAdded bên trong listener nếu cần
             if (!isAdded()) return;
             try {
-                // Code chuyển Fragment giữ nguyên
+                // Code chuyển Fragment
                 requireActivity()
                         .getSupportFragmentManager()
                         .beginTransaction()

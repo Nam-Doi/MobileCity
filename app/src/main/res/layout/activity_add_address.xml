@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#FAFAFA"
-    android:padding="0dp">
+    android:padding="0dp"
+    android:fitsSystemWindows="true">
 
     <!-- Top Bar -->
     <LinearLayout
@@ -32,9 +33,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="New Address"
+            android:text="Thêm địa chỉ"
             android:textColor="#212121"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
         <View
@@ -59,7 +60,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Receiver Information"
+                android:text="Thông tin chi tiết"
                 android:textColor="#424242"
                 android:textStyle="bold"
                 android:textSize="16sp"
@@ -70,7 +71,7 @@
                 android:id="@+id/edtName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Full Name"
+                android:hint="Tên người nhận"
                 android:background="@drawable/bg_edittext"
                 android:padding="12dp"
                 android:textColor="#212121"
@@ -81,7 +82,7 @@
                 android:id="@+id/edtPhone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Phone Number"
+                android:hint="Số điện thoại"
                 android:inputType="phone"
                 android:background="@drawable/bg_edittext"
                 android:padding="12dp"
@@ -93,7 +94,7 @@
                 android:id="@+id/edtAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Delivery Address"
+                android:hint="Địa chỉ nhận hàng"
                 android:inputType="textPostalAddress"
                 android:background="@drawable/bg_edittext"
                 android:padding="12dp"
@@ -119,7 +120,7 @@
             android:layout_width="0dp"
             android:layout_weight="1.15"
             android:layout_height="match_parent"
-            android:text="Save"
+            android:text="Lưu địa chỉ"
             android:textAllCaps="false"
             android:backgroundTint="#FFE607"/>
 

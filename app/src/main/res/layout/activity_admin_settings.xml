@@ -21,18 +21,6 @@
             android:layout_marginBottom="24dp" />
 
         <Button
-            android:id="@+id/btnChangePassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Đổi tên"
-            android:textAllCaps="false"
-            android:backgroundTint="#000000"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="12dp"
-            android:padding="12dp"
-            android:background="@drawable/btn_black_rounded" />
-
-        <Button
             android:id="@+id/btnLogout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,5 +29,15 @@
             android:background="@drawable/btn_white_border"
             android:textColor="#FFFFFF"
             android:padding="12dp" />
+
+        <TextView
+            android:id="@+id/tvAppVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phiên bản 10.0.0"
+            android:textColor="#3F51B5"
+            android:textSize="15sp"
+            android:layout_marginTop="32dp" />
+
     </LinearLayout>
 </ScrollView>
