@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-// HomeFragment triển khai Interface click của SearchSuggestionAdapter (cho thanh tìm kiếm)
 public class HomeFragment extends Fragment implements SearchSuggestionAdapter.OnItemClickListener {
 
     // Views
@@ -49,11 +48,11 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
     private SearchSuggestionAdapter searchAdapter; // Adapter cho RecyclerView thả xuống
 
     // Data Lists
-    private List<Product> productList; // Danh sách hiển thị trên GridView (có thể thay đổi)
+    private List<Product> productList; // Danh sách hiển thị trên GridView
     private List<Product> originalProductList; // Danh sách gốc chứa TẤT CẢ sản phẩm
     private List<Product> searchList; // Danh sách cho kết quả tìm kiếm
 
-    private static final String TAG = "HomeFragment"; // Thêm TAG để Log
+    private static final String TAG = "HomeFragment";
 
     @Nullable
     @Override
@@ -82,8 +81,6 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
             productAdapter = new ProductGridAdapter(requireContext(), productList); // Chỉ cần context và list
             if (gridViewProducts != null)
                 gridViewProducts.setAdapter(productAdapter);
-
-            // Click handler cho GridView (ĐÃ CÓ SẴN VÀ ĐÚNG)
             if (gridViewProducts != null) {
                 gridViewProducts.setOnItemClickListener((parent, itemView, position, id) -> {
                     try {
@@ -150,14 +147,12 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
             productAdapter.notifyDataSetChanged();
         }
 
-        // (Tùy chọn) Cuộn lên đầu GridView
+        // Cuộn lên đầu GridView
         if (gridViewProducts != null) {
             gridViewProducts.smoothScrollToPosition(0);
         }
     }
-    // ===============================================
 
-    // ========== HÀM LOAD ĐÃ ĐƯỢC CẬP NHẬT ==========
     private void loadProductsFromFirebase() {
         Log.d(TAG, "Loading products from Firebase...");
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -196,9 +191,7 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
                         Toast.makeText(getContext(), "Không thể tải sản phẩm", Toast.LENGTH_SHORT).show();
                 });
     }
-    // ===============================================
 
-    // ========== HÀM HIỂN THỊ MENU ĐÃ ĐƯỢC CẬP NHẬT ==========
     private void showPopupMenu(View v) {
         PopupMenu popup = new PopupMenu(requireContext(), v);
         MenuInflater inflater = popup.getMenuInflater();
@@ -234,12 +227,10 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
             }
             return false;
         });
-
         popup.show();
     }
-    // ===============================================
 
-    // Hàm onItemClick cho SearchSuggestionAdapter (giữ nguyên)
+    // Hàm onItemClick cho SearchSuggestionAdapter
     @Override
     public void onItemClick(Product product) {
         if (product == null || product.getId() == null) {
@@ -253,7 +244,7 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
         startActivity(intent);
     }
 
-    // Hàm setupSearchListener (giữ nguyên)
+    // Hàm setupSearchListener
     private void setupSearchListener() {
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -266,7 +257,7 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
                     recyclerViewSearchResults.setVisibility(View.GONE);
                 } else {
                     recyclerViewSearchResults.setVisibility(View.VISIBLE);
-                    filterProductsForSearch(query); // Đổi tên hàm này cho rõ
+                    filterProductsForSearch(query);
                 }
             }
             @Override
@@ -274,7 +265,7 @@ public class HomeFragment extends Fragment implements SearchSuggestionAdapter.On
         });
     }
 
-    // Hàm filterProducts (đổi tên thành filterProductsForSearch để phân biệt)
+    // Hàm filterProducts
     private void filterProductsForSearch(String query) {
         String lowerCaseQuery = query.toLowerCase(Locale.getDefault());
         searchList.clear(); // Clear danh sách KẾT QUẢ TÌM KIẾM

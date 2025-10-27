@@ -71,12 +71,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     // Lớp ViewHolder để giữ các tham chiếu đến view của mỗi item
     public static class UserViewHolder extends RecyclerView.ViewHolder {
-        ShapeableImageView userAvatar;
         TextView textFullName, textEmail, textRole, textStatus;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
-            userAvatar = itemView.findViewById(R.id.userAvatar);
             textFullName = itemView.findViewById(R.id.textFullName);
             textEmail = itemView.findViewById(R.id.textEmail);
             textRole = itemView.findViewById(R.id.textRole);

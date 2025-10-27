@@ -25,7 +25,6 @@ public class CreateUserActivity extends AppCompatActivity {
     private EditText editTextFullName, editTextEmail, editTextPassword;
     private RadioGroup radioGroupRole;
     private Button buttonCreateAccount;
-
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
