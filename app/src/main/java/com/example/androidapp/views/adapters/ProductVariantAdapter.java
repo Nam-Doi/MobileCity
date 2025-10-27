@@ -28,17 +28,10 @@ public class ProductVariantAdapter extends RecyclerView.Adapter<ProductVariantAd
 
     private Context context;
     private List<ProductVariant> variantList;
-    // --- XÓA LISTENER ---
-    // private OnImageSelectListener imageSelectListener;
 
-    // --- XÓA INTERFACE ---
-    // public interface OnImageSelectListener { ... }
-
-    // --- SỬA CONSTRUCTOR (Xóa listener) ---
-    public ProductVariantAdapter(Context context, List<ProductVariant> variantList /*, OnImageSelectListener listener*/) {
+    public ProductVariantAdapter(Context context, List<ProductVariant> variantList) {
         this.context = context;
         this.variantList = variantList;
-        // this.imageSelectListener = listener; // Xóa dòng này
     }
 
     @NonNull
@@ -77,8 +70,6 @@ public class ProductVariantAdapter extends RecyclerView.Adapter<ProductVariantAd
                 notifyItemRangeChanged(currentPosition, variantList.size());
             }
         });
-
-        // --- XÓA CODE XỬ LÝ NÚT CHỌN ẢNH VÀ RECYCLERVIEW ---
     }
 
     @Override
@@ -91,9 +82,7 @@ public class ProductVariantAdapter extends RecyclerView.Adapter<ProductVariantAd
 
         TextInputEditText editColor, editRam, editStorage, editPrice, editStock;
         ImageButton btnDelete;
-        // Xóa Button btnSelectImages;
-        // Xóa RecyclerView recyclerVariantImages;
-        TextInputEditText editImageUrl; // THÊM: EditText cho URL
+        TextInputEditText editImageUrl;
 
         public VariantViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -104,7 +93,6 @@ public class ProductVariantAdapter extends RecyclerView.Adapter<ProductVariantAd
             editPrice = itemView.findViewById(R.id.editVariantPrice);
             editStock = itemView.findViewById(R.id.editVariantStock);
             btnDelete = itemView.findViewById(R.id.btnDeleteVariant);
-            // Xóa ánh xạ Button và RecyclerView ảnh
             editImageUrl = itemView.findViewById(R.id.editVariantImageUrl); // THÊM: Ánh xạ EditText URL
 
             // TextWatcher (Thêm cho editImageUrl)

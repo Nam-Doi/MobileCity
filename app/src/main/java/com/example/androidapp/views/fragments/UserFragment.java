@@ -33,14 +33,14 @@ public class UserFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
         // Gắn layout cho fragment
         View view = inflater.inflate(R.layout.fragment_user, container, false);
+
         // Ánh xạ TextView từ layout
-        // *** LƯU Ý: Đảm bảo trong file fragment_home.xml của bạn có một TextView với id là "tvUserName" ***
         tvUserName = view.findViewById(R.id.tvNameUser);
         avatar = view.findViewById(R.id.avatarMedium);
         tv_myorders = view.findViewById(R.id.tv_my_orders);
+
         // Khởi tạo Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();

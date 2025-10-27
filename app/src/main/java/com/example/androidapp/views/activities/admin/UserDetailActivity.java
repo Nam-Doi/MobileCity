@@ -1,9 +1,7 @@
-package com.example.androidapp.views.activities.admin; // Thay đổi package cho đúng với dự án của bạn
+package com.example.androidapp.views.activities.admin;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,11 +20,11 @@ public class UserDetailActivity extends AppCompatActivity {
 
     private EditText editUserFullName, editUserEmail, editUserRole;
     private Button buttonToggleActive, buttonSaveChanges, buttonEdit;
-    private boolean isEditMode = false; // Biến để theo dõi trạng thái sửa
+    private boolean isEditMode = false;
 
     private FirebaseFirestore db;
     private DocumentReference userDocRef;
-    private users currentUser; // Biến để lưu thông tin user hiện tại
+    private users currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +66,7 @@ public class UserDetailActivity extends AppCompatActivity {
             toggleEditMode(true);
         });
 
-// Thiết lập Listener cho nút Lưu
+        // Thiết lập Listener cho nút Lưu
         buttonSaveChanges.setOnClickListener(v -> {
             saveChanges();
         });
@@ -77,12 +75,8 @@ public class UserDetailActivity extends AppCompatActivity {
     private void toggleEditMode(boolean enable) {
         isEditMode = enable;
 
-        // Cho phép/không cho phép sửa EditText
         editUserFullName.setEnabled(enable);
         editUserRole.setEnabled(enable);
-        // Email thường không nên cho sửa
-        // editUserEmail.setEnabled(enable);
-
         if (enable) {
             // Chuyển sang chế độ SỬA
             buttonEdit.setVisibility(View.GONE);
@@ -104,6 +98,10 @@ public class UserDetailActivity extends AppCompatActivity {
 
         if (newFullName.isEmpty() || newRole.isEmpty()) {
             Toast.makeText(this, "Tên và vai trò không được để trống", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if(!newRole.equals("user")&&!newRole.equals("admin")){
+            Toast.makeText(this, "Vai trò chỉ có thể là user hoặc admin", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -131,18 +129,14 @@ public class UserDetailActivity extends AppCompatActivity {
                     editUserEmail.setText(currentUser.getEmail());
                     editUserRole.setText(currentUser.getRole());
 
-                    // ===============================================
-                    // THÊM ĐOẠN CODE KIỂM TRA ROLE VÀO ĐÂY
-                    // ===============================================
                     if ("admin".equals(currentUser.getRole())) {
                         // Nếu là admin, ẩn nút Vô hiệu hóa/Kích hoạt
                         buttonToggleActive.setVisibility(View.GONE);
                     } else {
                         // Nếu không phải admin, hiển thị nút và cập nhật trạng thái
                         buttonToggleActive.setVisibility(View.VISIBLE);
-                        updateButtonStatus(); // Chỉ gọi hàm này cho user thường
+                        updateButtonStatus();
                     }
-                    // ===============================================
 
                 }
             } else {

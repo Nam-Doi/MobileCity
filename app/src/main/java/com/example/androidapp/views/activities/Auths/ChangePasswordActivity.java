@@ -58,7 +58,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
         String newPassword = editTextNewPassword.getText().toString();
         String confirmPassword = editTextConfirmPassword.getText().toString();
 
-        // --- 1. Validate Input ---
         if (TextUtils.isEmpty(currentPassword)) {
             editTextCurrentPassword.setError("Vui lòng nhập mật khẩu hiện tại"); return;
         }
@@ -77,7 +76,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        // --- 2. Re-authenticate User ---
         // Hành động đổi mật khẩu yêu cầu người dùng phải xác thực lại gần đây
         AuthCredential credential = EmailAuthProvider.getCredential(currentUser.getEmail(), currentPassword);
 
@@ -96,7 +94,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 });
     }
 
-    // --- 3. Update Password ---
+    // Cập nhật mật khẩu
     private void updatePassword(String newPassword) {
         currentUser.updatePassword(newPassword)
                 .addOnCompleteListener(updateTask -> {

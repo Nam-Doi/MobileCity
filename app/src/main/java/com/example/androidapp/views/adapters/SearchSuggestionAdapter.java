@@ -74,7 +74,6 @@ public class SearchSuggestionAdapter extends RecyclerView.Adapter<SearchSuggesti
             }
         } else {
             // Nếu không có ảnh, hiển thị ảnh mặc định
-            // Nếu không có variant, hiển thị giá trị mặc định
             holder.tvPrice.setText("N/A");
             holder.imgProduct.setImageResource(R.drawable.ic_launcher_background);
         }
