@@ -3,10 +3,7 @@ package com.example.androidapp.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * Model hiển thị Cart - JOIN giữa CartItem và Product
- * Sử dụng khi hiển thị trong RecyclerView
- */
+ //Model hiển thị Cart - JOIN giữa CartItem và Product
 public class CartItemDisplay implements Parcelable {
     // Thông tin từ CartItem
     private CartItem cartItem;

@@ -105,7 +105,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 return;
             }
 
-            // ✅ LẤY STOCK CỦA VARIANT HOẶC PRODUCT
+            // LẤY STOCK CỦA VARIANT HOẶC PRODUCT
             int availableStock = getAvailableStock(product, item.getVariantId());
 
             if (availableStock < 1) {
@@ -308,11 +308,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     // Hiển thị dialog chọn variant
     private void showVariantSelectionDialog(android.content.Context context, CartItem item, int position) {
-        android.util.Log.d("CartAdapter", "showVariantSelectionDialog called for position: " + position);
         CartItemDisplay display = cartList.get(position);
         Product product = display.getProduct();
 
-        android.util.Log.d("CartAdapter", "Product: " + (product != null ? "not null" : "null"));
         if (product != null) {
             android.util.Log.d("CartAdapter",
                     "Variants: " + (product.getVariants() != null ? product.getVariants().size() : "null"));

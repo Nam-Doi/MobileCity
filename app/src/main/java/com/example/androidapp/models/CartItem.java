@@ -47,6 +47,7 @@ public class CartItem implements Parcelable {
         this.updatedAt = System.currentTimeMillis();
     }
     // Parcelable implementation
+    // đọc dữ liệu ra từ parcel
     protected CartItem(Parcel in) {
         productId = in.readString();
         userId = in.readString();
@@ -165,7 +166,7 @@ public class CartItem implements Parcelable {
     public int describeContents() {
         return 0;
     }
-
+    // object ghi vào parcel
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(productId);

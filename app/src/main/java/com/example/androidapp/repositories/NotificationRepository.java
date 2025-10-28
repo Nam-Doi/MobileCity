@@ -15,9 +15,7 @@ public class NotificationRepository {
         this.db = FirebaseFirestore.getInstance();
     }
 
-    /**
-     * Lấy danh sách thông báo của user (realtime)
-     */
+//  Lấy danh sách thông báo của user (realtime)
     public void getNotifications(@NonNull String userId, OnNotificationsLoadedListener listener) {
         android.util.Log.d("NotificationRepo", "Start listening notifications for user: " + userId);
         db.collection(COLLECTION_USERS)
@@ -43,10 +41,7 @@ public class NotificationRepository {
                     }
                 });
     }
-
-    /**
-     * Đếm số thông báo chưa đọc
-     */
+    //dem thong bao chua doc
     public void getUnreadCount(@NonNull String userId, OnUnreadCountListener listener) {
         db.collection(COLLECTION_USERS)
                 .document(userId)
@@ -62,10 +57,7 @@ public class NotificationRepository {
                     listener.onCountLoaded(count);
                 });
     }
-
-    /**
-     * Đánh dấu đã đọc
-     */
+    //đánh dấu đã đọc
     public void markAsRead(@NonNull String userId, @NonNull String notificationId,
             OnOperationListener listener) {
         db.collection(COLLECTION_USERS)
@@ -77,9 +69,7 @@ public class NotificationRepository {
                 .addOnFailureListener(listener::onFailure);
     }
 
-    /**
-     * Đánh dấu tất cả đã đọc
-     */
+//đánh dấu tất cả đã đọc
     public void markAllAsRead(@NonNull String userId, OnOperationListener listener) {
         db.collection(COLLECTION_USERS)
                 .document(userId)
@@ -108,9 +98,7 @@ public class NotificationRepository {
                 .addOnFailureListener(listener::onFailure);
     }
 
-    /**
-     * Xóa thông báo
-     */
+    //xoa thong bao
     public void deleteNotification(@NonNull String userId, @NonNull String notificationId,
             OnOperationListener listener) {
         db.collection(COLLECTION_USERS)
@@ -122,9 +110,7 @@ public class NotificationRepository {
                 .addOnFailureListener(listener::onFailure);
     }
 
-    /**
-     * Tạo thông báo mới (dùng cho admin hoặc system)
-     */
+    //tao thong bao moi
     public void createNotification(@NonNull String userId, @NonNull Notification notification,
             OnOperationListener listener) {
         db.collection(COLLECTION_USERS)

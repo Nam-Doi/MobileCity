@@ -10,7 +10,7 @@ public class Notification {
     private String type; // "order", "promotion", "system"
     private boolean isRead;
     private long createdAt;
-    private String imageUrl; // optional
+    private String imageUrl; //Khong bat buoc optional
     private String actionUrl;
 
     // Constructors

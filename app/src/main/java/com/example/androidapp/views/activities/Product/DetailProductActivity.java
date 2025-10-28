@@ -126,6 +126,31 @@ public class DetailProductActivity extends AppCompatActivity {
         });
     }
 
+    // Hàm lấy dữ liệu và loadform
+    private void loadProductFromFirestore(String docId) {
+        db.collection("phones")
+                .document(docId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        currentProduct = documentSnapshot.toObject(Product.class);
+                        if (currentProduct == null)
+                            return;
+
+                        // Hiển thị thông tin chung
+                        tv_name_product.setText(currentProduct.getName());
+                        if (currentProduct.getSpecifications() != null && !currentProduct.getCategory().equals("Phụ kiện")) {
+                            displaySpecs(currentProduct.getSpecifications());
+                        }
+
+                        // Cài đặt và hiển thị các lựa chọn biến thể
+                        if (currentProduct.getVariants() != null && !currentProduct.getVariants().isEmpty()) {
+                            setupVariantSelectors(currentProduct.getVariants());
+                        }
+                    }
+                });
+    }
+
     // them san pham vao gio hang
     private void addToCart() {
         Log.d("DetailProduct", "addToCart called");
@@ -163,7 +188,7 @@ public class DetailProductActivity extends AppCompatActivity {
         // Disable button để tránh click nhiều lần
         btn_add_to_cart.setEnabled(false);
 
-        // Tạo variant name từ thông tin đã chọn
+        // Tạo variant name từ thông tin đã chọn ví dụ mình có sản phẩm cùng nhưng màu khac thì tên này có thể phân biệt điều đâys
         String variantName = selectedVariant.getColor() + " - " + selectedVariant.getRam() + " - "
                 + selectedVariant.getStorage();
 
@@ -303,30 +328,7 @@ public class DetailProductActivity extends AppCompatActivity {
         });
     }
 
-    // Hàm lấy dữ liệu và loadform
-    private void loadProductFromFirestore(String docId) {
-        db.collection("phones")
-                .document(docId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        currentProduct = documentSnapshot.toObject(Product.class);
-                        if (currentProduct == null)
-                            return;
 
-                        // Hiển thị thông tin chung
-                        tv_name_product.setText(currentProduct.getName());
-                        if (currentProduct.getSpecifications() != null && !currentProduct.getCategory().equals("Phụ kiện")) {
-                            displaySpecs(currentProduct.getSpecifications());
-                        }
-
-                        // Cài đặt và hiển thị các lựa chọn biến thể
-                        if (currentProduct.getVariants() != null && !currentProduct.getVariants().isEmpty()) {
-                            setupVariantSelectors(currentProduct.getVariants());
-                        }
-                    }
-                });
-    }
 
     // Hàm này tạo bảng thông số chi tiết
     private void displaySpecs(Map<String, String> specs) {

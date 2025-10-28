@@ -9,7 +9,7 @@ public class PaymentMethod {
         this.name = name;
         this.iconUrl = iconUrl;
     }
-    public PaymentMethod(){}
+    public PaymentMethod(){}//
 
     public String getId() {
         return id;

@@ -193,12 +193,6 @@ public class CartFragment extends Fragment implements CartAdapter.OnCartChangeLi
             cartAdapter.selectAll(isChecked);
         });
     }
-    private void updatetotalcart(){
-        if (!isAdded() || getContext() == null || cartAdapter == null) return;
-
-
-
-    }
 
     private void updateTotalPrice() {
         if (!isAdded() || getContext() == null || cartAdapter == null) return;

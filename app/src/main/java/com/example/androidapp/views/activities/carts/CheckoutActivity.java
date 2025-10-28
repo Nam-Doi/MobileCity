@@ -417,10 +417,7 @@ public class CheckoutActivity extends AppCompatActivity {
                     btnCheckout.setEnabled(true); // Kích hoạt lại nút thanh toán
                 });
     }
-
-    /**
-     * Xóa các sản phẩm đã mua khỏi giỏ hàng
-     */
+    //Xóa các item đã mua khỏi giỏ hàng
     private void removeItemsFromCart(String userId) {
         // Tạo danh sách cartItemId cần xóa
         List<String> cartItemIds = new ArrayList<>();
@@ -515,10 +512,6 @@ public class CheckoutActivity extends AppCompatActivity {
     }
 
     //tao thong bao dat hang thanh cong
-
-    /**
-     * Tạo thông báo đặt hàng thành công
-     */
     private void createOrderNotification(String userId, String orderId, double totalAmount) {
         Notification notification = new Notification(
                 userId,

@@ -24,9 +24,7 @@ public class CartRepository {
         this.db = FirebaseFirestore.getInstance();
     }
 
-    /**
-     * Lấy reference đến cart subcollection của user
-     */
+
     // truy vấn dữ liệu collection đại diện cho 1 cái đường dẫn đến document đó
     private DocumentReference getCartItemRef(@NonNull String userId, @NonNull String cartItemId) {
         return db.collection(COLLECTION_USERS)
@@ -39,8 +37,6 @@ public class CartRepository {
     public void addToCart(@NonNull String userId, @NonNull Product product,
             int quantity, String variantId, String variantName,
             OnCartOperationListener listener ) { // oncartoperationlítener callback
-
-        Log.d("CartRepository", "addToCart called for user: " + userId + ", product: " + product.getName());
 
         // Tạo cartItemId: nếu có variant thì thêm vào
         String cartItemId = variantId != null ? product.getId() + "_" + variantId : product.getId();
@@ -127,11 +123,8 @@ public class CartRepository {
             }
         }).addOnFailureListener(listener::onFailure);
     }
-
-    /**
-     * Lấy tất cả items trong giỏ hàng (JOIN với Product để lấy thông tin mới nhất)
-     * add snapshot listener là realtime listener
-     */
+//     Lấy tất cả items trong giỏ hàng (JOIN với Product để lấy thông tin mới nhất)
+//     add snapshot listener là realtime listener
     public void getCartItems(@NonNull String userId, OnCartItemsLoadedListener listener) {
         db.collection(COLLECTION_USERS)
                 .document(userId)
@@ -249,9 +242,7 @@ public class CartRepository {
         }
     }
 
-    /**
-     * Cập nhật trạng thái checkbox (selected)
-     */
+     //Cập nhật trạng thái checkbox (selected)
     public void updateSelection(@NonNull String userId, @NonNull String productId,
             String variantId, boolean isSelected,
             OnCartOperationListener listener) {
@@ -263,9 +254,7 @@ public class CartRepository {
                 .addOnFailureListener(listener::onFailure);
     }
 
-    /**
-     * Chọn/bỏ chọn tất cả items
-     */
+//     Chọn/bỏ chọn tất cả items
     public void selectAll(@NonNull String userId, boolean isSelected,
             OnCartOperationListener listener) {
         db.collection(COLLECTION_USERS)
@@ -295,9 +284,7 @@ public class CartRepository {
                 .addOnFailureListener(listener::onFailure);
     }
 
-    /**
-     * Xóa toàn bộ giỏ hàng
-     */
+//   Xóa toàn bộ giỏ hàng
     public void clearCart(@NonNull String userId, OnCartOperationListener listener) {
         db.collection(COLLECTION_USERS)
                 .document(userId)
@@ -356,9 +343,7 @@ public class CartRepository {
                 .addOnFailureListener(listener::onFailure);
     }
 
-    /**
-     * Cập nhật variant của một item trong giỏ hàng
-     */
+    //Cập nhật variant của một item trong giỏ hàng
     public void updateVariant(@NonNull String userId, @NonNull String productId,
                               @NonNull String oldVariantId, @NonNull String newVariantId,
                               @NonNull String variantName, double price, String imageUrl,
@@ -422,7 +407,7 @@ public class CartRepository {
             newItemData.put("addedAt", addedAt);
             newItemData.put("updatedAt", System.currentTimeMillis());
 
-            // ✅ SỬ DỤNG WRITEBATCH ĐỂ XÓA VÀ TẠO ĐỒNG THỜI
+            // SỬ DỤNG WRITEBATCH ĐỂ XÓA VÀ TẠO ĐỒNG THỜI
             db.runBatch(batch -> {
                 // Xóa item cũ
                 batch.delete(oldRef);
