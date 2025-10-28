@@ -488,6 +488,8 @@ public class OrderDetailActivity extends AppCompatActivity {
                     order.setStatus(newStatus);
                     updateStatusTracker(newStatus);
                     setupActionButtons(newStatus);
+                    sendOrderStatusNotification(order.getUserId(), order.getOrderId(),newStatus, order.getTotal());
+
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Hủy đơn thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -505,6 +507,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                     Toast.makeText(this, "Đã gửi yêu cầu hủy đơn.", Toast.LENGTH_SHORT).show();
                     order.setCancellationRequested(true);
                     setupActionButtons(order.getStatus());
+
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Gửi yêu cầu thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
